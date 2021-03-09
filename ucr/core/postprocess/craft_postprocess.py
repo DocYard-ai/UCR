@@ -5,8 +5,6 @@ from __future__ import print_function
 import numpy as np
 import torch
 import cv2
-from shapely.geometry import Polygon
-import pyclipper
 import math
 class CRAFTPostProcess(object):
 
@@ -195,6 +193,8 @@ class CRAFTPostProcess(object):
         return boxes, scores
 
     def unclip(self, box):
+        from shapely.geometry import Polygon        
+        import pyclipper
         unclip_ratio = self.unclip_ratio
         poly = Polygon(box)
         distance = poly.area * unclip_ratio / poly.length
