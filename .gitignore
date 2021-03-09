@@ -1,0 +1,42 @@
+# input dir 
+test
+
+# output dir
+inference_results
+inference_results1
+# model dir
+models
+
+# training dirs/files (since wip)
+ucr/core/loss/
+ucr/core/metric/
+ucr/core/solver/
+ucr/train.py
+inference/onnx/
+ucr/utils/stats.py
+ucr/utils/program.py
+ucr/utils/gen_label.py
+conf
+
+# compilation and distribution
+__pycache__
+_ext
+*.vscode
+*.pyc
+*.pyd
+*.so
+*.dll
+*.egg-info/
+build/
+dist/
+wheels/
+
+# pytorch/python/numpy formats
+*.pth
+*.pkl
+*.npy
+*.ts
+
+# ipython/jupyter notebooks
+*.ipynb
+**/.ipynb_checkpoints/

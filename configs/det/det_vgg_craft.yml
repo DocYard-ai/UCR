@@ -1,0 +1,59 @@
+General:
+  device: 'cuda'
+  epoch_num: 10000
+  log_smooth_window: 20
+  print_batch_step: 2
+  save_model_dir: ./output/craft_mv3/
+  save_epoch_step: 1000
+  # evaluation is run every 5000 iterations after the 4000th iteration
+  eval_batch_step: [4000, 5000]
+  # if pretrained_model is saved in static mode, load_static_weights must set to True
+  load_static_weights: True
+  cal_metric_during_train: False
+  pretrained_model: 
+  checkpoints: 
+  save_inference_dir:
+  use_visualdl: False
+  infer_img: 
+  save_res_path: ./output/det_craft/predicts_craft.txt
+
+Architecture:
+  model_type: det
+  algorithm: CRAFT
+  Transform:
+  Backbone:
+    name: VGG16_BN
+  Neck:
+    name: CRAFTFPN
+  Head:
+    name: CRAFTHead
+
+Loss:
+  name: 
+  
+Optimizer:
+  name: Adam
+  beta1: 0.9
+  beta2: 0.999
+  lr:
+  #  name: Cosine
+    learning_rate: 0.001
+  #  warmup_epoch: 0
+  regularizer:
+    name: 'L2'
+    factor: 0
+
+Postprocess:
+  name: CRAFTPostProcess
+  text_thresh: 0.35
+  link_thresh: 0.1
+  min_size: 0.35
+  use_dilate: False
+  xdilate: 9
+  ydilate: 3
+  unclip_ratio: 1.6
+  rotated_box: True
+
+Metric:
+  name: DetMetric
+  main_indicator: hmean
