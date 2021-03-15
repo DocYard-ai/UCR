@@ -64,7 +64,7 @@ class TextRecognizer(object):
         
         # Todo: Implement whitelist and blacklist in postprocessing step.
         
-        char_dict_location = hydra.utils.to_absolute_path(config['char_dict_location'])
+        char_dict_location = config['char_dict_location']
         self.char_ops = BaseRecLabelEncode(config['max_text_length'], char_dict_location, config['lang'], config['use_space_char'])
             
         global_keys = ['lang', 'use_space_char', 'max_text_length']
@@ -88,7 +88,7 @@ class TextRecognizer(object):
         else:
             logger.info("wrong device selected! Choose eiter 'cuda' or 'cpu'")
             sys.exit(0)
-        self.predictor.load_state_dict(torch.load(hydra.utils.to_absolute_path(config['model_location']), map_location=self.device))
+        self.predictor.load_state_dict(torch.load(config['model_location'], map_location=self.device))
         self.predictor.eval()
 
     def __call__(self, img_list):
@@ -190,6 +190,11 @@ def main(cfg):
     config = OmegaConf.to_container(cfg)
     
     input_location = hydra.utils.to_absolute_path(config['input_location'])
+    model_location = hydra.utils.to_absolute_path(config['model_location'])
+    config['model_location'] = model_location
+    char_dict_location = hydra.utils.to_absolute_path(config['char_dict_location'])
+    config['char_dict_location'] = char_dict_location
+    
     image_file_list = get_image_file_list(input_location)
     text_recognizer = TextRecognizer(config)
     valid_image_file_list = []

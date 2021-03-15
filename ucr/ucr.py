@@ -22,7 +22,6 @@ import requests
 from tqdm import tqdm
 import shutil
 
-import hydra
 from omegaconf import OmegaConf
 from hydra.experimental import compose, initialize_config_dir
 
@@ -113,24 +112,26 @@ class UCR(infer_system.TextSystem):
             config_det['model_location'] = os.path.join(det_path, 'model.pt')
             model_type = backend + '_' + type
         else:
-            config_det['model_location'] = hydra.utils.to_absolute_path(config_det['model_location']) 
+            config_det['model_location'] = config_det['model_location'] # add abs path in parser args. 
         
         if not config_rec['model_location']:
             model_type = 'torch_mobile' if lang != 'ch_sim' else model_type
             rec_path = maybe_download(os.path.join(BASE_DIR, '{}/rec/{}'.format(VERSION, lang)), model_urls[model_type]['rec'][lang]['url'], force_download)
             config_rec['model_location'] = os.path.join(rec_path, 'model.pt')   
-            config_rec['font_path'] = hydra.utils.to_absolute_path(config_rec['font_path'])  # TODO: Zip both font_path and char_dict_location in model_url
-            config_rec['char_dict_location'] = hydra.utils.to_absolute_path(config_rec['char_dict_location'])   
+            
+            __dir__ = os.path.dirname(__file__)
+            config_rec['font_path'] = os.path.join(__dir__, config_rec['font_path'])  # TODO: Zip both font_path and char_dict_location in model_url
+            config_rec['char_dict_location'] = os.path.join(__dir__, config_rec['char_dict_location'])   
         else:
-            config_rec['model_location'] = hydra.utils.to_absolute_path(config_rec['model_location'])  
-            config_rec['font_path'] = hydra.utils.to_absolute_path(config_rec['font_path'])  
-            config_rec['char_dict_location'] = hydra.utils.to_absolute_path(config_rec['char_dict_location'])       
+            config_rec['model_location'] = config_rec['model_location'] # add abs path in parser args. 
+            config_rec['font_path'] = config_rec['font_path'] # add abs path in .yaml file  
+            config_rec['char_dict_location'] = config_rec['char_dict_location'] # add abs path in .yaml file       
             
         if not config_cls['model_location']:
             cls_path = maybe_download(os.path.join(BASE_DIR, '{}/cls'.format(VERSION)), model_urls['torch_mobile']['cls']['url'], force_download)
             config_cls['model_location'] = os.path.join(cls_path, 'model.pt')  
         else:
-            config_cls['model_location'] = hydra.utils.to_absolute_path(config_cls['model_location']) 
+            config_cls['model_location'] = config_cls['model_location'] # add abs path in parser args.
 
         config['Detection'] = config_det
         config['Recognition'] = config_rec
@@ -151,6 +152,8 @@ class UCR(infer_system.TextSystem):
             logger.error('When input a list of images, det must be false')
             exit(0)
 
+        img_list = []
+        
         if isinstance(img, str):
             # download net image
             if img.startswith('http') and img.endswith('.jpg'):
@@ -186,7 +189,6 @@ class UCR(infer_system.TextSystem):
             return rec_res
    
 def main():
-    
     args = parse_args(mMain=True)
     input_location = args.input_location
     if input_location.startswith('http') and input_location.endswith('.jpg'):
@@ -352,8 +354,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_server',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/simfang.ttf',
-                'char_dict_location': 'ucr/utils/dict/ench_dict.txt',
+                'font_path': 'utils/fonts/simfang.ttf',
+                'char_dict_location': 'utils/dict/ench_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_server/rec_ench_ppocr_server.zip',                
             }
@@ -375,8 +377,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/simfang.ttf',
-                'char_dict_location': 'ucr/utils/dict/ench_dict.txt',
+                'font_path': 'utils/fonts/simfang.ttf',
+                'char_dict_location': 'utils/dict/ench_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ench_ppocr_mobile.zip',                
             },
@@ -384,8 +386,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/only_en.ttf',
-                'char_dict_location': 'ucr/utils/dict/en_dict.txt',
+                'font_path': 'utils/fonts/only_en.ttf',
+                'char_dict_location': 'utils/dict/en_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_en_number_mobile.zip',                
             },
@@ -393,8 +395,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/french.ttf',
-                'char_dict_location': 'ucr/utils/dict/french_dict.txt',
+                'font_path': 'utils/fonts/french.ttf',
+                'char_dict_location': 'utils/dict/french_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_french_mobile.zip',                
             },
@@ -402,8 +404,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/german.ttf',
-                'char_dict_location': 'ucr/utils/dict/german_dict.txt',
+                'font_path': 'utils/fonts/german.ttf',
+                'char_dict_location': 'utils/dict/german_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_german_mobile.zip',                
             },
@@ -411,8 +413,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/korean.ttf',
-                'char_dict_location': 'ucr/utils/dict/korean_dict.txt',
+                'font_path': 'utils/fonts/korean.ttf',
+                'char_dict_location': 'utils/dict/korean_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_korean_mobile.zip',                
             },
@@ -420,8 +422,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/japan.ttc',
-                'char_dict_location': 'ucr/utils/dict/japan_dict.txt',
+                'font_path': 'utils/fonts/japan.ttc',
+                'char_dict_location': 'utils/dict/japan_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_japan_mobile.zip',                
             },
@@ -429,8 +431,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/chinese_cht.ttf',
-                'char_dict_location': 'ucr/utils/dict/chinese_cht_dict.txt',
+                'font_path': 'utils/fonts/chinese_cht.ttf',
+                'char_dict_location': 'utils/dict/chinese_cht_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_chinese_cht_mobile.zip',                
             },
@@ -438,8 +440,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/italian.ttf',
-                'char_dict_location': 'ucr/utils/dict/it_dict.txt',
+                'font_path': 'utils/fonts/italian.ttf',
+                'char_dict_location': 'utils/dict/it_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_it_mobile.zip',                
             },
@@ -447,8 +449,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/xi.ttf',
-                'char_dict_location': 'ucr/utils/dict/spanish_dict.txt',
+                'font_path': 'utils/fonts/xi.ttf',
+                'char_dict_location': 'utils/dict/spanish_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_xi_mobile.zip',                
             },
@@ -456,8 +458,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/portugese.ttf',
-                'char_dict_location': 'ucr/utils/dict/pu_dict.txt',
+                'font_path': 'utils/fonts/portugese.ttf',
+                'char_dict_location': 'utils/dict/pu_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_pu_mobile.zip',                
             },
@@ -465,8 +467,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/russian.ttf',
-                'char_dict_location': 'ucr/utils/dict/ru_dict.txt',
+                'font_path': 'utils/fonts/russian.ttf',
+                'char_dict_location': 'utils/dict/ru_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ru_mobile.zip',                
             },
@@ -474,8 +476,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/arabic.ttf',
-                'char_dict_location': 'ucr/utils/dict/ar_dict.txt',
+                'font_path': 'utils/fonts/arabic.ttf',
+                'char_dict_location': 'utils/dict/ar_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ar_mobile.zip',                
             },
@@ -483,8 +485,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/hindi.ttf',
-                'char_dict_location': 'ucr/utils/dict/hi_dict.txt',
+                'font_path': 'utils/fonts/hindi.ttf',
+                'char_dict_location': 'utils/dict/hi_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_hi_mobile.zip',                
             },
@@ -492,8 +494,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/uyghur.ttf',
-                'char_dict_location': 'ucr/utils/dict/ug_dict.txt',
+                'font_path': 'utils/fonts/uyghur.ttf',
+                'char_dict_location': 'utils/dict/ug_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ug_mobile.zip',                
             },
@@ -501,8 +503,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/persian.ttf',
-                'char_dict_location': 'ucr/utils/dict/fa_dict.txt',
+                'font_path': 'utils/fonts/persian.ttf',
+                'char_dict_location': 'utils/dict/fa_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_fa_mobile.zip',                
             },
@@ -510,8 +512,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/urdu.ttf',
-                'char_dict_location': 'ucr/utils/dict/ur_dict.txt',
+                'font_path': 'utils/fonts/urdu.ttf',
+                'char_dict_location': 'utils/dict/ur_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ur_mobile.zip',                
             },
@@ -519,8 +521,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/serbian.ttf',
-                'char_dict_location': 'ucr/utils/dict/rs_dict.txt',
+                'font_path': 'utils/fonts/serbian.ttf',
+                'char_dict_location': 'utils/dict/rs_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_rs_mobile.zip',                
             },
@@ -528,8 +530,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/serbian.ttf',
-                'char_dict_location': 'ucr/utils/dict/oc_dict.txt',
+                'font_path': 'utils/fonts/serbian.ttf',
+                'char_dict_location': 'utils/dict/oc_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_oc_mobile.zip',                
             },
@@ -537,8 +539,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/marathi.ttf',
-                'char_dict_location': 'ucr/utils/dict/mr_dict.txt',
+                'font_path': 'utils/fonts/marathi.ttf',
+                'char_dict_location': 'utils/dict/mr_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_mr_mobile.zip',                
             },
@@ -546,8 +548,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/nepali.ttf',
-                'char_dict_location': 'ucr/utils/dict/ne_dict.txt',
+                'font_path': 'utils/fonts/nepali.ttf',
+                'char_dict_location': 'utils/dict/ne_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ne_mobile.zip',                
             },
@@ -555,8 +557,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/serbian.ttf',
-                'char_dict_location': 'ucr/utils/dict/rsc_dict.txt',
+                'font_path': 'utils/fonts/serbian.ttf',
+                'char_dict_location': 'utils/dict/rsc_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_rsc_mobile.zip',                
             },
@@ -564,8 +566,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/serbian.ttf',
-                'char_dict_location': 'ucr/utils/dict/bg_dict.txt',
+                'font_path': 'utils/fonts/serbian.ttf',
+                'char_dict_location': 'utils/dict/bg_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_bg_mobile.zip',                
             },
@@ -573,8 +575,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/serbian.ttf',
-                'char_dict_location': 'ucr/utils/dict/uk_dict.txt',
+                'font_path': 'utils/fonts/serbian.ttf',
+                'char_dict_location': 'utils/dict/uk_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_uk_mobile.zip',                
             },
@@ -582,8 +584,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/serbian.ttf',
-                'char_dict_location': 'ucr/utils/dict/be_dict.txt',
+                'font_path': 'utils/fonts/serbian.ttf',
+                'char_dict_location': 'utils/dict/be_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_be_mobile.zip',                
             },
@@ -591,8 +593,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/telugu.ttf',
-                'char_dict_location': 'ucr/utils/dict/te_dict.txt',
+                'font_path': 'utils/fonts/telugu.ttf',
+                'char_dict_location': 'utils/dict/te_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_te_mobile.zip',                
             },
@@ -600,8 +602,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/kannada.ttf',
-                'char_dict_location': 'ucr/utils/dict/ka_dict.txt',
+                'font_path': 'utils/fonts/kannada.ttf',
+                'char_dict_location': 'utils/dict/ka_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ka_mobile.zip',                
             },
@@ -609,8 +611,8 @@ model_urls = {
                 'preprocess': 'rec_ctc',
                 'architecture': 'rec_ppocr_mobile',
                 'postprocess': 'rec_ctc',
-                'font_path': 'ucr/utils/fonts/tamil.ttf',
-                'char_dict_location': 'ucr/utils/dict/ta_dict.txt',
+                'font_path': 'utils/fonts/tamil.ttf',
+                'char_dict_location': 'utils/dict/ta_dict.txt',
                 'url':
                 'https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ta_mobile.zip',                
             }

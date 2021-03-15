@@ -1,0 +1,33 @@
+batch_size: 8
+device: cuda
+lang: ch_sim
+max_text_length: 25
+use_space_char: true
+whitelist: null
+blacklist: null
+input_location: test/
+model_location: models/rec/multi_language/rec_ench_ppocr_server.pt
+font_path: ucr/utils/fonts/only_en.ttf
+char_dict_location: ucr/utils/dict/ench_dict.txt
+Preprocess:
+- RecResizeImg:
+    image_shape:
+    - 3
+    - 32
+    - 100
+Architecture:
+  model_type: rec
+  algorithm: CRNN
+  Transform: null
+  Backbone:
+    name: ResNet
+    layers: 34
+  Neck:
+    name: SequenceEncoder
+    encoder_type: rnn
+    hidden_size: 256
+  Head:
+    name: CTCHead
+    fc_decay: 4.0e-05
+Postprocess:
+  name: CTCLabelDecode
