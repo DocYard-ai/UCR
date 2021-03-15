@@ -2,8 +2,7 @@
 test
 
 # output dir
-inference_results
-inference_results1
+test_output
 # model dir
 models
 
@@ -16,7 +15,6 @@ inference/onnx/
 ucr/utils/stats.py
 ucr/utils/program.py
 ucr/utils/gen_label.py
-conf
 
 # compilation and distribution
 __pycache__

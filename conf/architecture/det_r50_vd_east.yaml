@@ -1,0 +1,14 @@
+Architecture:
+  model_type: det
+  algorithm: EAST
+  Transform:
+  Backbone:
+    name: ResNet
+    layers: 50
+  Neck:
+    name: EASTFPN
+    model_name: large
+  Head:
+    name: EASTHead
+    model_name: large
+

@@ -1,0 +1,13 @@
+Architecture:
+  model_type: cls
+  algorithm: CLS
+  Transform:
+  Backbone:
+    name: MobileNetV3
+    scale: 0.35
+    model_name: small
+  Neck:
+  Head:
+    name: ClsHead
+    class_dim: 2
+

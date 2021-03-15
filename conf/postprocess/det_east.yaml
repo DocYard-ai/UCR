@@ -1,0 +1,5 @@
+Postprocess:
+  name: EASTPostProcess
+  score_thresh: 0.8
+  cover_thresh: 0.1
+  nms_thresh: 0.2

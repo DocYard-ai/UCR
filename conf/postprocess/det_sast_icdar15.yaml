@@ -1,0 +1,7 @@
+Postprocess:
+  name: SASTPostProcess
+  score_thresh: 0.5
+  sample_pts_num: 2
+  nms_thresh: 0.2
+  expand_scale: 1.0
+  shrink_ratio_of_width: 0.3

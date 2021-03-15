@@ -1,0 +1,13 @@
+Architecture:
+  model_type: det
+  algorithm: SAST
+  Transform:
+  Backbone:
+    name: ResNet_SAST
+    layers: 50
+  Neck:
+    name: SASTFPN
+    with_cab: True
+  Head:
+    name: SASTHead
+

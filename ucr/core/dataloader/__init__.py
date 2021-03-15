@@ -21,9 +21,8 @@ from __future__ import unicode_literals
 
 import copy
 from torch.utils.data import DataLoader
-from ucr.core.dataloader.simple_dataset import transform
 
-__all__ = ['build_dataloader', 'transform']
+__all__ = ['build_dataloader']
 
 
 def build_dataloader(config, mode, logger):

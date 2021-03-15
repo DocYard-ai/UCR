@@ -18,17 +18,7 @@ import numpy as np
 import os
 import random
 from torch.utils.data import Dataset
-
-
-def transform(data, ops=None):
-    """ transform """
-    if ops is None:
-        ops = []
-    for op in ops:
-        data = op(data)
-        if data is None:
-            return None
-    return data
+from ucr.core.preprocess import preprocess
 
 
 class SimpleDataSet(Dataset):
@@ -83,7 +73,7 @@ class SimpleDataSet(Dataset):
             with open(data['img_path'], 'rb') as f:
                 img = f.read()
                 data['image'] = img
-            outs = transform(data, self.ops)
+            outs = preprocess(data, self.ops)
             
         except Exception as e:
             self.logger.error(

@@ -1,0 +1,3 @@
+Preprocess:
+  - RecResizeImg:
+      image_shape: [3, 32, 100]

@@ -1,0 +1,11 @@
+Architecture:
+  model_type: det
+  algorithm: CRAFT
+  Transform:
+  Backbone:
+    name: VGG16_BN
+  Neck:
+    name: CRAFTFPN
+  Head:
+    name: CRAFTHead
+

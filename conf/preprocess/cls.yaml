@@ -1,0 +1,3 @@
+Preprocess:
+  - ClsResizeImg:
+      image_shape: [3, 48, 192]

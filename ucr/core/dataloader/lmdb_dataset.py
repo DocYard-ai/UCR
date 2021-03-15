@@ -17,23 +17,13 @@
 import numpy as np
 import os
 from torch.utils.data import Dataset
+from ucr.core.preprocess import preprocess
 import lmdb
 import cv2
 
 
-def transform(data, ops=None):
-    """ transform """
-    if ops is None:
-        ops = []
-    for op in ops:
-        data = op(data)
-        if data is None:
-            return None
-    return data
-
-
 class LMDBDateSet(Dataset):
-    def __init__(self, config, preprocess, logger):
+    def __init__(self, config, build_preprocess, logger):
         super(LMDBDateSet, self).__init__()
         
         batch_size = config['batch_size_per_card']
@@ -45,7 +35,7 @@ class LMDBDateSet(Dataset):
         self.data_idx_order_list = self.dataset_traversal()
         if self.do_shuffle:
             np.random.shuffle(self.data_idx_order_list)
-        self.ops = preprocess
+        self.ops = build_preprocess
 
     def load_hierarchical_lmdb_dataset(self, data_dir):
         lmdb_sets = {}
@@ -115,7 +105,7 @@ class LMDBDateSet(Dataset):
             return self.__getitem__(np.random.randint(self.__len__()))
         img, label = sample_info
         data = {'image': img, 'label': label}
-        outs = transform(data, self.ops)
+        outs = preprocess(data, self.ops)
         if outs is None:
             return self.__getitem__(np.random.randint(self.__len__()))
         return outs

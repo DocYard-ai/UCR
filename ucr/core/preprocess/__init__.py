@@ -34,7 +34,7 @@ from .sast_process import *
 
 import copy
 
-__all__ = ['build_preprocess']
+__all__ = ['build_preprocess', 'preprocess']
 
 
 def build_preprocess(config, global_config=None):
@@ -54,3 +54,13 @@ def build_preprocess(config, global_config=None):
         ops.append(op)
         
     return ops
+
+def preprocess(data, ops=None):
+    """ preprocess """
+    if ops is None:
+        ops = []
+    for op in ops:
+        data = op(data)
+        if data is None:
+            return None
+    return data

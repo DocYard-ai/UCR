@@ -1,0 +1,15 @@
+defaults:
+    - preprocess: 
+        cls
+    - architecture: 
+        cls_ppocr_mobile
+    - postprocess: 
+        cls
+
+batch_size: 8
+device: cuda
+threshold: 0.9
+label_list: ['0','180']
+
+input_location: test/
+model_location: models/cls/cls_ench_ppocr_mobile.pt

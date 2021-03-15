@@ -17,14 +17,13 @@
 import string
 import numpy as np
 import torch
-from torch.nn import functional as F
 
 
 class BaseRecLabelDecode(object):
     """ Convert between text-label and text-index """
 
     def __init__(self,
-                 character_dict_path=None,
+                 char_dict_location=None,
                  character_type='ch_sim',
                  use_space_char=False):
         support_character_type = [
@@ -48,9 +47,9 @@ class BaseRecLabelDecode(object):
             dict_character = list(self.character_str)
         elif character_type in support_character_type:
             self.character_str = ""
-            assert character_dict_path is not None, "character_dict_path should not be None when character_type is {}".format(
+            assert char_dict_location is not None, "char_dict_location should not be None when character_type is {}".format(
                 character_type)
-            with open(character_dict_path, "rb") as fin:
+            with open(char_dict_location, "rb") as fin:
                 lines = fin.readlines()
                 for line in lines:
                     line = line.decode('utf-8').strip("\n").strip("\r\n")
@@ -105,11 +104,11 @@ class CTCLabelDecode(BaseRecLabelDecode):
     """ Convert between text-label and text-index """
 
     def __init__(self,
-                 character_dict_path=None,
-                 character_type='ch',
+                 char_dict_location=None,
+                 character_type='ch_sim',
                  use_space_char=False,
                  **kwargs):
-        super(CTCLabelDecode, self).__init__(character_dict_path,
+        super(CTCLabelDecode, self).__init__(char_dict_location,
                                              character_type, use_space_char)
 
     def __call__(self, preds, label=None, *args, **kwargs):
@@ -132,11 +131,11 @@ class AttnLabelDecode(BaseRecLabelDecode):
     """ Convert between text-label and text-index """
 
     def __init__(self,
-                 character_dict_path=None,
+                 char_dict_location=None,
                  character_type='ch',
                  use_space_char=False,
                  **kwargs):
-        super(AttnLabelDecode, self).__init__(character_dict_path,
+        super(AttnLabelDecode, self).__init__(char_dict_location,
                                               character_type, use_space_char)
 
     def add_special_char(self, dict_character):
@@ -215,11 +214,11 @@ class SRNLabelDecode(BaseRecLabelDecode):
     """ Convert between text-label and text-index """
 
     def __init__(self,
-                 character_dict_path=None,
+                 char_dict_location=None,
                  character_type='en',
                  use_space_char=False,
                  **kwargs):
-        super(SRNLabelDecode, self).__init__(character_dict_path,
+        super(SRNLabelDecode, self).__init__(char_dict_location,
                                              character_type, use_space_char)
 
     def __call__(self, preds, label=None, *args, **kwargs):

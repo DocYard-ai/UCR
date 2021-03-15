@@ -1,0 +1,14 @@
+defaults:
+    - preprocess: 
+        det_craft
+    - architecture: 
+        det_vgg_craft
+    - postprocess: 
+        det_craft
+
+batch_size: 1
+device: cuda
+
+input_location: test/
+output_location: test_output/
+model_location: models/det/det_vgg_craft.pt

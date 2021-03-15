@@ -1,0 +1,11 @@
+Postprocess:
+  name: CRAFTPostProcess
+  text_thresh: 0.35
+  link_thresh: 0.1
+  min_size: 3
+  use_dilate: False
+  xdilate: 9
+  ydilate: 3
+  xpad: 4
+  ypad: 2
+  rotated_box: False

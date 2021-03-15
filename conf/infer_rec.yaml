@@ -1,0 +1,20 @@
+defaults:
+    - preprocess: 
+        rec_ctc
+    - architecture: 
+        rec_ppocr_server
+    - postprocess: 
+        rec_ctc
+
+batch_size: 8
+device: cuda
+lang: ch_sim
+max_text_length: 25
+use_space_char: True
+whitelist: 
+blacklist: 
+
+input_location: test/
+model_location: models/rec/multi_language/rec_ench_ppocr_server.pt
+font_path: ucr/utils/fonts/only_en.ttf
+char_dict_location: ucr/utils/dict/ench_dict.txt

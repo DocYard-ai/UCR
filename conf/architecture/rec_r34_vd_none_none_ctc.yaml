@@ -1,0 +1,13 @@
+Architecture:
+  model_type: rec
+  algorithm: Rosetta
+  Backbone:
+    name: ResNet
+    layers: 34
+  Neck:
+    name: SequenceEncoder
+    encoder_type: reshape
+  Head:
+    name: CTCHead
+    fc_decay: 0.0004
+

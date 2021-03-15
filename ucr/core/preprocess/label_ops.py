@@ -91,7 +91,7 @@ class BaseRecLabelEncode(object):
 
     def __init__(self,
                  max_text_length,
-                 character_dict_path=None,
+                 char_dict_location=None,
                  character_type='ch_sim',
                  use_space_char=False):
         support_character_type = [
@@ -115,9 +115,9 @@ class BaseRecLabelEncode(object):
             dict_character = list(self.character_str)
         elif character_type in support_character_type:
             self.character_str = ""
-            assert character_dict_path is not None, "character_dict_path should not be None when character_type is {}".format(
+            assert char_dict_location is not None, "char_dict_location should not be None when character_type is {}".format(
                 character_type)
-            with open(character_dict_path, "rb") as fin:
+            with open(char_dict_location, "rb") as fin:
                 lines = fin.readlines()
                 for line in lines:
                     line = line.decode('utf-8').strip("\n").strip("\r\n")
@@ -166,12 +166,12 @@ class CTCLabelEncode(BaseRecLabelEncode):
 
     def __init__(self,
                  max_text_length,
-                 character_dict_path=None,
+                 char_dict_location=None,
                  character_type='ch',
                  use_space_char=False,
                  **kwargs):
         super(CTCLabelEncode,
-              self).__init__(max_text_length, character_dict_path,
+              self).__init__(max_text_length, char_dict_location,
                              character_type, use_space_char)
 
     def __call__(self, data):
@@ -194,12 +194,12 @@ class AttnLabelEncode(BaseRecLabelEncode):
 
     def __init__(self,
                  max_text_length,
-                 character_dict_path=None,
+                 char_dict_location=None,
                  character_type='ch',
                  use_space_char=False,
                  **kwargs):
         super(AttnLabelEncode,
-              self).__init__(max_text_length, character_dict_path,
+              self).__init__(max_text_length, char_dict_location,
                              character_type, use_space_char)
 
     def add_special_char(self, dict_character):
@@ -242,12 +242,12 @@ class SRNLabelEncode(BaseRecLabelEncode):
 
     def __init__(self,
                  max_text_length=25,
-                 character_dict_path=None,
+                 char_dict_location=None,
                  character_type='en',
                  use_space_char=False,
                  **kwargs):
         super(SRNLabelEncode,
-              self).__init__(max_text_length, character_dict_path,
+              self).__init__(max_text_length, char_dict_location,
                              character_type, use_space_char)
 
     def add_special_char(self, dict_character):

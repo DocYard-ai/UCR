@@ -1,0 +1,11 @@
+merge_boxes: False
+merge_slope_thresh: 0.1
+merge_ycenter_thresh: 0.8
+merge_height_thresh: 0.6
+merge_width_thresh: 2.0
+merge_add_margin: 0.05
+
+drop_score: 0.
+input_location: test/
+output_location: test_output/
+is_visualize: True
