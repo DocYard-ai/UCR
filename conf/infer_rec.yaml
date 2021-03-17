@@ -5,7 +5,11 @@ defaults:
         rec_ppocr_server
     - postprocess: 
         rec_ctc
+    - hydra/job_logging: custom
+    - hydra/output: custom 
 
+job_name: rec_infer
+level: INFO
 batch_size: 8
 device: cuda
 lang: ch_sim
@@ -14,7 +18,7 @@ use_space_char: True
 whitelist: 
 blacklist: 
 
-input_location: test/
+input: test/
 model_location: models/rec/multi_language/rec_ench_ppocr_server.pt
 font_path: ucr/utils/fonts/only_en.ttf
 char_dict_location: ucr/utils/dict/ench_dict.txt

@@ -19,7 +19,9 @@ import os
 import random
 from torch.utils.data import Dataset
 from ucr.core.preprocess import preprocess
+import logging
 
+log = logging.getLogger(__name__)
 
 class SimpleDataSet(Dataset):
     def __init__(self, config, preprocess, logger, seed=None):
@@ -40,7 +42,7 @@ class SimpleDataSet(Dataset):
         self.do_shuffle = config['shuffle']
 
         self.seed = seed
-        logger.info("Initialize indexs of datasets:%s" % label_file_list)
+        log.info("Initialize indexs of datasets:%s" % label_file_list)
         self.data_lines = self.get_image_info_list(label_file_list, ratio_list)
         self.data_idx_order_list = list(range(len(self.data_lines)))
         self.ops = preprocess
@@ -76,7 +78,7 @@ class SimpleDataSet(Dataset):
             outs = preprocess(data, self.ops)
             
         except Exception as e:
-            self.logger.error(
+            self.log.error(
                 "When parsing line {}, error happened with msg: {}".format(
                     data_line, e))
             outs = None

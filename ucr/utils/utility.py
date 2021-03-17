@@ -18,7 +18,9 @@ import logging
 import os
 import imghdr
 import cv2
+import logging
 
+log = logging.getLogger(__name__)
 
 def print_dict(d, logger, delimiter=0):
     """
@@ -27,14 +29,14 @@ def print_dict(d, logger, delimiter=0):
     """
     for k, v in sorted(d.items()):
         if isinstance(v, dict):
-            logger.info("{}{} : ".format(delimiter * " ", str(k)))
+            log.info("{}{} : ".format(delimiter * " ", str(k)))
             print_dict(v, logger, delimiter + 4)
         elif isinstance(v, list) and len(v) >= 1 and isinstance(v[0], dict):
-            logger.info("{}{} : ".format(delimiter * " ", str(k)))
+            log.info("{}{} : ".format(delimiter * " ", str(k)))
             for value in v:
                 print_dict(value, logger, delimiter + 4)
         else:
-            logger.info("{}{} : {}".format(delimiter * " ", k, v))
+            log.info("{}{} : {}".format(delimiter * " ", k, v))
 
 
 def get_check_global_params(mode):
@@ -71,8 +73,8 @@ def check_and_read_gif(img_path):
         gif = cv2.VideoCapture(img_path)
         ret, frame = gif.read()
         if not ret:
-            logger = logging.getLogger('ucr')
-            logger.info("Cannot read {}. This gif image maybe corrupted.")
+            # logger = logging.getLogger('ucr')
+            log.warning("Cannot read {}. This gif image maybe corrupted.")
             return None, False
         if len(frame.shape) == 2 or frame.shape[-1] == 1:
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)

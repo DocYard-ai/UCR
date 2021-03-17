@@ -21,7 +21,9 @@ from __future__ import unicode_literals
 
 import numpy as np
 import string
+import logging
 
+log = logging.getLogger(__name__)
 
 class ClsLabelEncode(object):
     def __init__(self, label_list, **kwargs):
@@ -152,8 +154,7 @@ class BaseRecLabelEncode(object):
         text_list = []
         for char in text:
             if char not in self.dict:
-                # logger = get_logger()
-                # logger.warning('{} is not in dict'.format(char))
+                log.warning('{} is not in dict'.format(char))
                 continue
             text_list.append(self.dict[char])
         if len(text_list) == 0:

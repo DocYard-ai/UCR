@@ -6,6 +6,7 @@ merge_width_thresh: 2.0
 merge_add_margin: 0.05
 
 drop_score: 0.
-input_location: test/
-output_location: test_output/
+input: test/
+output: test_output/
 is_visualize: True
+use_cls: False

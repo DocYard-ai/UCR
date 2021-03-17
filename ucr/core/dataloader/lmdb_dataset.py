@@ -20,7 +20,9 @@ from torch.utils.data import Dataset
 from ucr.core.preprocess import preprocess
 import lmdb
 import cv2
+import logging
 
+log = logging.getLogger(__name__)
 
 class LMDBDateSet(Dataset):
     def __init__(self, config, build_preprocess, logger):
@@ -31,7 +33,7 @@ class LMDBDateSet(Dataset):
         self.do_shuffle = config['shuffle']
 
         self.lmdb_sets = self.load_hierarchical_lmdb_dataset(data_dir)
-        logger.info("Initialize indexs of datasets:%s" % data_dir)
+        log.info("Initialize indexs of datasets:%s" % data_dir)
         self.data_idx_order_list = self.dataset_traversal()
         if self.do_shuffle:
             np.random.shuffle(self.data_idx_order_list)

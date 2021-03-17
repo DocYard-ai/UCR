@@ -1,0 +1,19 @@
+hydra:
+    job_logging:
+        formatters:
+            simple:
+                format: "%(message)s"
+        root:
+            level: ${level}
+            handlers: [debug_console_handler, file_handler]
+        version: 1
+        handlers:
+            debug_console_handler:
+                formatter: simple
+                class: logging.StreamHandler
+                stream: ext://sys.stdout
+            file_handler:
+                formatter: simple
+                class: logging.FileHandler
+                filename: ${hydra.job_logging.root.level}.log
+        disable_existing_loggers: False

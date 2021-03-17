@@ -24,7 +24,10 @@ from omegaconf import OmegaConf
 import os
 import sys
 import time
+import logging
+from tqdm import tqdm
 
+log = logging.getLogger(__name__)
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../..')))
@@ -32,13 +35,11 @@ sys.path.append(os.path.abspath(os.path.join(__dir__, '../..')))
 import cv2
 import torch
 import ucr.utils.annotation as utility
-from ucr.utils.logging import get_logger
 from ucr.utils.utility import get_image_file_list, check_and_read_gif
 from ucr.core.preprocess import build_preprocess, preprocess
 from ucr.core.postprocess import build_postprocess
 from ucr.core.architecture import build_architecture
 
-logger = get_logger()
 
 class TextDetector(object):
     def __init__(self, config):
@@ -53,7 +54,7 @@ class TextDetector(object):
         elif self.device == 'cpu':
             self.device = torch.device('cpu')
         else:
-            logger.info("wrong device selected! Choose eiter 'cuda' or 'cpu'")
+            log.error("wrong device selected! Choose eiter 'cuda' or 'cpu'")
             sys.exit(0)
             
         self.predictor.load_state_dict(torch.load(config['model_location'], map_location=self.device))
@@ -162,41 +163,47 @@ class TextDetector(object):
         return dt_boxes, elapse
 
 
-@hydra.main(config_path="../../conf/infer_det.yaml")
-def main(cfg):
+def main(cfg):    
+    log.debug("Detection config:\n{}\n".format(cfg.pretty()))  
     config = OmegaConf.to_container(cfg)
     
-    input_location = hydra.utils.to_absolute_path(config['input_location'])
-    image_file_list = get_image_file_list(input_location)
+    input = hydra.utils.to_absolute_path(config['input'])
+    image_file_list = get_image_file_list(input)
     model_location = hydra.utils.to_absolute_path(config['model_location'])
     config['model_location'] = model_location
     text_detector = TextDetector(config)
-    count = 0
     total_time = 0
-    output_location = hydra.utils.to_absolute_path(config['output_location']) 
-    if not os.path.exists(output_location):
-        os.makedirs(output_location)
-    for image_file in image_file_list:
+    count = 0
+    output = hydra.utils.to_absolute_path(config['output']) 
+    if not os.path.exists(output):
+        os.makedirs(output)
+    for image_file in tqdm(image_file_list):
+        count +=1
         img, flag = check_and_read_gif(image_file)
         if not flag:
             img = cv2.imread(image_file)
         if img is None:
-            logger.info("error in loading image:{}".format(image_file))
+            log.warning("error in loading image:{}".format(image_file))
             continue
         dt_boxes, elapse = text_detector(img)
-        if count > 0:
-            total_time += elapse
-        count += 1
-        logger.info("Predict time of {}: {}".format(image_file, elapse))
-        src_im = utility.draw_text_det_res(dt_boxes, image_file)
+        total_time += elapse
+        src_im = utility.draw_text_det_res(dt_boxes, img)
         img_name_pure = os.path.split(image_file)[-1]
-        img_path = os.path.join(output_location,
-                                "det_res_{}".format(img_name_pure))
+        img_path = os.path.join(output,
+                                "det_{}".format(img_name_pure))
         cv2.imwrite(img_path, src_im)
-        logger.info("The visualized image saved in {}".format(img_path))
-    if count > 1:
-        logger.info("Avg Time: {}".format(total_time / (count - 1)))
+        log.info("[{}/{}] Detection output is saved in --------- {}".format(count,len(image_file_list),img_path))
+    log.info("\nTotal Prediction time for {} images:\t{:.5f} s".format(
+        len(image_file_list), total_time))
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config_path", type=str, default='../../conf')
+    parser.add_argument("--config_name", type=str, default='infer_det')
+    
+    args = parser.parse_args()
+    
+    main_wrapper = hydra.main(config_path=args.config_path, config_name=args.config_name)
+    main_wrapper(main)()

@@ -23,7 +23,9 @@ import hydra
 from omegaconf import OmegaConf
 import os
 import sys
+import logging
 
+log = logging.getLogger(__name__)
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../..')))
@@ -38,11 +40,8 @@ import ucr.utils.annotation as utility
 from ucr.core.architecture import build_architecture
 from ucr.core.postprocess import build_postprocess
 from ucr.core.preprocess import build_preprocess, preprocess
-from ucr.utils.logging import get_logger
 from ucr.utils.utility import get_image_file_list, check_and_read_gif
 from ucr.core.preprocess.label_ops import BaseRecLabelEncode
-
-logger = get_logger()
 
 
 class TextRecognizer(object):
@@ -86,7 +85,7 @@ class TextRecognizer(object):
         elif self.device == 'cpu':
             self.device = torch.device('cpu')
         else:
-            logger.info("wrong device selected! Choose eiter 'cuda' or 'cpu'")
+            log.error("wrong device selected! Choose eiter 'cuda' or 'cpu'")
             sys.exit(0)
         self.predictor.load_state_dict(torch.load(config['model_location'], map_location=self.device))
         self.predictor.eval()
@@ -185,17 +184,17 @@ class TextRecognizer(object):
         return rec_res, elapse
 
 
-@hydra.main(config_path="../../conf/infer_rec.yaml")
 def main(cfg):
+    log.debug("Recognition config:\n{}\n".format(cfg.pretty()))  
     config = OmegaConf.to_container(cfg)
     
-    input_location = hydra.utils.to_absolute_path(config['input_location'])
+    input = hydra.utils.to_absolute_path(config['input'])
     model_location = hydra.utils.to_absolute_path(config['model_location'])
     config['model_location'] = model_location
     char_dict_location = hydra.utils.to_absolute_path(config['char_dict_location'])
     config['char_dict_location'] = char_dict_location
     
-    image_file_list = get_image_file_list(input_location)
+    image_file_list = get_image_file_list(input)
     text_recognizer = TextRecognizer(config)
     valid_image_file_list = []
     img_list = []
@@ -204,15 +203,15 @@ def main(cfg):
         if not flag:
             img = cv2.imread(image_file)
         if img is None:
-            logger.info("error in loading image:{}".format(image_file))
+            log.warning("error in loading image:{}".format(image_file))
             continue
         valid_image_file_list.append(image_file)
         img_list.append(img)
     try:
         rec_res, predict_time = text_recognizer(img_list)
     except:
-        logger.info(traceback.format_exc())
-        logger.info(
+        log.error(traceback.format_exc())
+        log.error(
             "ERROR!!!! \n"
             "Please read the FAQ：https://github.com/PaddlePaddle/PaddleOCR#faq \n"
             "If your model has tps module:  "
@@ -220,12 +219,20 @@ def main(cfg):
             "Please set --rec_image_shape='3,32,100' and --rec_char_type='en' ")
         exit()
     for ino in range(len(img_list)):
-        logger.info("Predicts of {}:{}".format(valid_image_file_list[ino],
+        log.info("[{}/{}] Prediction ['RESULT', SCORE] of {}:\t{}".format(ino+1,len(img_list),valid_image_file_list[ino],
                                                rec_res[ino]))
-    logger.info("Total predict time for {} images, cost: {:.3f}".format(
+    log.info("\nTotal Prediction time for {} images:\t{:.5f} s".format(
         len(img_list), predict_time))
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config_path", type=str, default='../../conf')
+    parser.add_argument("--config_name", type=str, default='infer_rec')
+    
+    args = parser.parse_args()
+    
+    main_wrapper = hydra.main(config_path=args.config_path, config_name=args.config_name)
+    main_wrapper(main)()
 

@@ -35,7 +35,7 @@ def build_dataloader(config, mode, logger):
     assert mode in ['Train', 'Eval', 'Test'
                     ], "Mode should be Train, Eval or Test."
 
-    dataloader = eval(module_name)(config, mode, logger)
+    dataset = eval(module_name)(config, mode, logger)
     loader_config = config[mode]['Dataloader']
     batch_size = loader_config['batch_size_per_card']
     drop_last = loader_config['drop_last']
@@ -43,7 +43,7 @@ def build_dataloader(config, mode, logger):
     num_workers = loader_config['num_workers']
 
     data_loader = DataLoader(
-        dataloader=dataloader,
+        dataset=dataset,
         batch_size=batch_size,
         shuffle=shuffle,
         num_workers=num_workers,

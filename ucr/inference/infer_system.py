@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import os
-from hydra.experimental.initialize import initialize_config_dir
 import tqdm
 import cv2
 import copy
@@ -34,10 +33,8 @@ import ucr.inference.infer_rec as infer_rec
 import ucr.inference.infer_det as infer_det
 import ucr.inference.infer_cls as infer_cls
 from ucr.utils.utility import get_image_file_list, check_and_read_gif
-from ucr.utils.logging import get_logger
 from ucr.utils.annotation import draw_ocr_box_txt
 
-logger = get_logger()
 
 class TextSystem(object):
     def __init__(self, config):
@@ -47,6 +44,8 @@ class TextSystem(object):
         
         self.drop_score = config['drop_score']            
         self.merge_boxes = config['merge_boxes']
+        
+        self.is_visualize = config['is_visualize']
 
         if self.merge_boxes:
             self.merge_slope_thresh = config['merge_slope_thresh']
@@ -89,17 +88,20 @@ class TextSystem(object):
             dst_img = np.rot90(dst_img)
         return dst_img
 
-    def print_draw_crop_rec_res(self, img_crop_list, rec_res):
+    def print_draw_crop_rec_res(self, filename, img_crop_list):
         bbox_num = len(img_crop_list)
+        
+        if not os.path.exists(self.output):
+            os.makedirs(self.output)
         for bno in range(bbox_num):
-            cv2.imwrite("./output/img_crop_%d.jpg" % bno, img_crop_list[bno])
-            logger.info(bno, rec_res[bno])
+            cv2.imwrite(os.path.join(self.output, filename), img_crop_list[bno])
 
-    def __call__(self, img):
+    def __call__(self, img, cls=True):
         ori_im = img.copy()
         dt_boxes, elapse = self.text_detector(img)
-        logger.info("dt_boxes num : {}, elapse : {}".format(
-            len(dt_boxes), elapse))
+        if self.is_visualize:
+            print("\n------------------------dt_boxes num : {},\telapse : {:.3f}------------------------".format(
+                len(dt_boxes), elapse))
         if dt_boxes is None:
             return None, None
         img_crop_list = []
@@ -110,16 +112,20 @@ class TextSystem(object):
             tmp_box = copy.deepcopy(dt_boxes[bno])
             img_crop = self.get_rotate_crop_image(ori_im, tmp_box)
             img_crop_list.append(img_crop)
-            
-        img_crop_list, angle_list, elapse = self.text_classifier(
-            img_crop_list)
-        logger.info("cls num  : {}, elapse : {}".format(
-            len(img_crop_list), elapse))
+        
+        if cls:  
+            img_crop_list, angle_list, elapse = self.text_classifier(
+                img_crop_list)
+            if self.is_visualize:
+                print("------------------------cls num  : {},\telapse : {:.3f}------------------------".format(
+                    len(img_crop_list), elapse))
 
         rec_res, elapse = self.text_recognizer(img_crop_list)
-        logger.info("rec_res num  : {}, elapse : {}".format(
+        if self.is_visualize:
+            print("------------------------rec_res num  : {},\telapse : {:.3f}------------------------\n".format(
             len(rec_res), elapse))
-        # self.print_draw_crop_rec_res(img_crop_list, rec_res)
+
+        # self.print_draw_crop_rec_res(name, img_crop_list)
         filter_boxes, filter_rec_res = [], []
         
         if self.drop_score!=0.:
@@ -322,56 +328,62 @@ def main():
 
     with initialize_config_dir(config_dir=cfg_dir, job_name="infer_det"):
         cfg = compose(config_name="infer_det")    
-        print(cfg.pretty())    
+        # print("Detection config:\n{}\n".format(cfg.pretty()))   
         config_det = OmegaConf.to_container(cfg)
         
     with initialize_config_dir(config_dir=cfg_dir, job_name="infer_rec"):
-        cfg = compose(config_name="infer_rec")        
+        cfg = compose(config_name="infer_rec")      
+        # print("Recognition config:\n{}\n".format(cfg.pretty()))   
         config_rec = OmegaConf.to_container(cfg)
         
     with initialize_config_dir(config_dir=cfg_dir, job_name="infer_cls"):
-        cfg = compose(config_name="infer_cls")        
+        cfg = compose(config_name="infer_cls")       
+        # print("Classification config:\n{}\n".format(cfg.pretty()))  
         config_cls = OmegaConf.to_container(cfg)
     
     with initialize_config_dir(config_dir=cfg_dir, job_name="infer_system"):
         cfg = compose(config_name="infer_system")        
+        # print("Final config:\n{}\n".format(cfg.pretty())) 
         config = OmegaConf.to_container(cfg)
         
     config['Detection'] = config_det
     config['Recognition'] = config_rec
     config['Classification'] = config_cls
     
-    input_location = hydra.utils.to_absolute_path(config['input_location'])
-    image_file_list = get_image_file_list(input_location)
+    input = hydra.utils.to_absolute_path(config['input'])
+    image_file_list = get_image_file_list(input)
     
-    text_sys = TextSystem(config)
     is_visualize = config['is_visualize']
+    text_sys = TextSystem(config)
     font_path = hydra.utils.to_absolute_path(config_rec['font_path'])
     drop_score = config['drop_score']
     
-    
-    output_location = hydra.utils.to_absolute_path(config['output_location'])
+    total_time = 0
+    count = 0
+    output = hydra.utils.to_absolute_path(config['output']) 
+    if not os.path.exists(output):
+        os.makedirs(output)
 
     for image_file in tqdm.tqdm(image_file_list):
+        count +=1
         img, flag = check_and_read_gif(image_file)
         if not flag:
             img = cv2.imread(image_file)
         if img is None:
-            logger.info("error in loading image:{}".format(image_file))
+            print("ERROR in loading image:{}".format(image_file))
             continue
         starttime = time.time()
-        dt_boxes, rec_res = text_sys(img)
+        dt_boxes, rec_res = text_sys(img, cls=config['use_cls'])
         elapse = time.time() - starttime
-        logger.info("Predict time of %s: %.3fs" % (image_file, elapse))
-
-        if config['merge_boxes']:
-            for text, score, _,  _ in rec_res:
-                logger.info("{}, {:.3f}".format(text, score))
-        else:
-            for text, score in rec_res:
-                logger.info("{}, {:.3f}".format(text, score))
 
         if is_visualize:
+            from tabulate import tabulate
+            headers = ["OCR Result", "Score"]
+            if config['merge_boxes']:
+                print(tabulate(rec_res[0:1], headers, tablefmt="fancy_grid"))
+            else:
+                print(tabulate(rec_res, headers, tablefmt="fancy_grid"))
+                
             image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             boxes = dt_boxes
             txts = [rec_res[i][0] for i in range(len(rec_res))]
@@ -384,13 +396,15 @@ def main():
                 scores,
                 drop_score=drop_score,
                 font_path=font_path)
-            if not os.path.exists(output_location):
-                os.makedirs(output_location)
+            if not os.path.exists(output):
+                os.makedirs(output)
+            img_path = os.path.join(output,
+                                    "ocr_{}".format(os.path.basename(image_file)))
             cv2.imwrite(
-                os.path.join(output_location, os.path.basename(image_file)),
-                draw_img[:, :, ::-1])
-            logger.info("The visualized image saved in {}".format(
-                os.path.join(output_location, os.path.basename(image_file))))
+                    img_path, draw_img[:, :, ::-1])
+            print("\n[{}/{}] OCR output is saved in --------- {}\n".format(count,len(image_file_list),img_path))
+    print("\nTotal Prediction time for {} images:\t{:.5f} s".format(
+        len(image_file_list), total_time))
 
 if __name__ == "__main__":
     main()

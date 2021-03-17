@@ -5,11 +5,15 @@ defaults:
         cls_ppocr_mobile
     - postprocess: 
         cls
+    - hydra/job_logging: custom
+    - hydra/output: custom 
 
+job_name: cls_infer
+level: INFO
 batch_size: 8
 device: cuda
 threshold: 0.9
 label_list: ['0','180']
 
-input_location: test/
+input: test/
 model_location: models/cls/cls_ench_ppocr_mobile.pt

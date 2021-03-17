@@ -21,15 +21,16 @@ import numpy as np
 import requests
 from tqdm import tqdm
 import shutil
+from PIL import Image
+
+__dir__ = os.path.dirname(os.path.abspath(__file__))
 
 from omegaconf import OmegaConf
 from hydra.experimental import compose, initialize_config_dir
 
 from ucr.inference import infer_system
-from ucr.utils.logging import get_logger
-
-logger = get_logger()
 from ucr.utils.utility import check_and_read_gif, get_image_file_list
+from ucr.utils.annotation import draw_ocr_box_txt, draw_text_det_res
 
 __all__ = ['UCR']
 
@@ -60,8 +61,19 @@ class UCR(infer_system.TextSystem):
         type = args.type
         backend = args.backend
         model_type = backend + '_' + type
-        lang = args.lang
         
+        lang = args.l
+        if args.lang!='ch_sim': 
+            lang = args.lang
+            if args.l!='ch_sim':
+                print(f'WARNING: "l (={args.l})" argument is superseded by "lang (={args.lang})" argument! l=lang={lang}')
+
+        device = args.d
+        if args.device!='cpu':
+            device = args.device
+            if args.d!='cpu':
+                print(f'WARNING: "d (={args.d})" argument is superseded by "device (={args.device})" argument! d=device={device}')
+
         if not conf_location:
             conf_location = maybe_download(os.path.join(BASE_DIR, '{}/conf'.format(VERSION)),model_urls['conf']['url'], force_download)
         
@@ -70,7 +82,8 @@ class UCR(infer_system.TextSystem):
             overrides = [f"{k}={v}" for k, v in model_urls[model_type]['det'][det_algorithm].items() if k!='url']
             overrides.extend(args.det_overrides)
             cfg = compose(config_name=args.det_config_name, overrides=overrides)    
-            print(cfg.pretty())    
+            # print("Detection config:\n{}\n".format(cfg.pretty()))    
+            
             config_det = OmegaConf.to_container(cfg)
             model_type = backend + '_' + type
             
@@ -78,24 +91,30 @@ class UCR(infer_system.TextSystem):
             model_type = 'torch_mobile' if lang != 'ch_sim' else model_type
             overrides = [f"{k}={v}" for k, v in model_urls[model_type]['rec'][lang].items() if k!='url']
             overrides.extend(args.rec_overrides)
-            cfg = compose(config_name=args.rec_config_name, overrides=overrides)        
+            cfg = compose(config_name=args.rec_config_name, overrides=overrides)      
+            # print("Recognition config:\n{}\n".format(cfg.pretty()))    
+                  
             config_rec = OmegaConf.to_container(cfg)
             model_type = backend + '_' + type
             
         with initialize_config_dir(config_dir=conf_location, job_name="infer_cls"):
             overrides = [f"{k}={v}" for k, v in model_urls['torch_mobile']['cls'].items() if k!='url']
             overrides.extend(args.cls_overrides)
-            cfg = compose(config_name=args.cls_config_name, overrides=overrides)        
+            cfg = compose(config_name=args.cls_config_name, overrides=overrides)    
+            # print("Classification config:\n{}\n".format(cfg.pretty()))    
+                    
             config_cls = OmegaConf.to_container(cfg)
         
         with initialize_config_dir(config_dir=conf_location, job_name="infer_system"):
-            cfg = compose(config_name="infer_system", overrides=args.system_overrides)        
+            cfg = compose(config_name="infer_system", overrides=args.system_overrides)    
+            # print("End-to-end config:\n{}\n".format(cfg.pretty()))    
+                    
             config = OmegaConf.to_container(cfg)
             
         assert model_type in SUPPORT_MODEL_TYPE, 'TYPE_BACKEND must be of {} format, but got {}'.format(
                 SUPPORT_MODEL_TYPE, model_type)
         
-        config_det['device'] = config_rec['device'] = config_cls['device'] = args.device
+        config_det['device'] = config_rec['device'] = config_cls['device'] = device
         
         config_det['batch_size'] = args.det_batch_size
         config_rec['batch_size'] = args.rec_batch_size
@@ -137,82 +156,227 @@ class UCR(infer_system.TextSystem):
         config['Recognition'] = config_rec
         config['Classification'] = config_cls
         
+        self.merge_boxes = config["merge_boxes"]
+        self.drop_score = config["drop_score"]
+        self.font_path = config_rec['font_path']
+        self.is_visualize = config["is_visualize"]
+        
         super().__init__(config)
+            
+    def perform_ocr(self, img, key, output, det, rec, cls):
+        
+        if det and rec:
+            dt_boxes, rec_res = self.__call__(img, cls)
+            if self.merge_boxes:
+                rec_res = rec_res[0:1]
+            value = [[box.tolist(), res] for box, res in zip(dt_boxes, rec_res)]
+            
+            if self.is_visualize:
+                from tabulate import tabulate
+                headers = ["OCR Result", "Score"]
+                if self.merge_boxes:
+                    print(tabulate(rec_res[0:1], headers, tablefmt="fancy_grid"))
+                else:
+                    print(tabulate(rec_res, headers, tablefmt="fancy_grid"))
+                    
+            if output:
+                image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+                boxes = dt_boxes
+                txts = [rec_res[i][0] for i in range(len(rec_res))]
+                scores = [rec_res[i][1] for i in range(len(rec_res))]
 
-    def predict(self, img, det=True, rec=True, cls=False):
+                draw_img = draw_ocr_box_txt(
+                    image,
+                    boxes,
+                    txts,
+                    scores,
+                    drop_score=self.drop_score,
+                    font_path=self.font_path)
+                
+                if not os.path.exists(output):
+                    os.makedirs(output)
+                img_path = os.path.join(output,
+                                        "ocr_{}".format(key))
+                cv2.imwrite(
+                    img_path, draw_img[:, :, ::-1])
+                print("Saving OCR ouput in {}".format(
+                    img_path))
+            
+            return value
+            
+        elif det and not rec:
+            dt_boxes, elapse = self.text_detector(img)
+            if self.is_visualize:
+                print("\n------------------------dt_boxes num : {},\telapse : {:.3f}------------------------".format(
+                len(dt_boxes), elapse))
+            if dt_boxes is not None:
+                value = [box.tolist() for box in dt_boxes]
+                
+                if output:
+                    src_im = draw_text_det_res(dt_boxes, img)
+                    
+                    if not os.path.exists(output):
+                        os.makedirs(output)
+                    img_path = os.path.join(output,
+                                            "det_{}".format(key))
+                    cv2.imwrite(img_path, src_im)
+                    print("Detection output image is saved in {}".format(img_path))
+            
+            return value
+            
+        else:
+            return img 
+    
+    def predict(self, input=None, i=None, output=None, o=None, det=True, rec=True, cls=False):
         """
         ocr with paddleocr
         args：
-            img: img for ocr, support ndarray, img_path and list or ndarray
+            input: input for ocr, support ndarray, img_path and list or ndarray
             det: use text detection or not, if false, only rec will be exec. default is True
             rec: use text recognition or not, if false, only det will be exec. default is True
         """
-        assert isinstance(img, (np.ndarray, list, str))
-        if isinstance(img, list) and det == True:
-            logger.error('When input a list of images, det must be false')
-            exit(0)
-
-        img_list = []
         
-        if isinstance(img, str):
+        if input is not None:
+            input = input
+        elif i is not None:
+            input = i
+        elif input is None and i is None:
+            print('Input is mandatory: can be either ndarray (or list of ndarray), img_filepath, img_folderpath or img_webpath!')
+            sys.exit(0)
+        
+        assert isinstance(input, (np.ndarray, list, str))
+
+        rec_dict = {}
+        out_dict={} 
+        
+        if output is not None:
+            output = output
+        elif o is not None:
+            output = o
+            
+        if output:
+            print("Saving prediction results in '{}' folder\n".format(output))  
+            if not os.path.exists(output):
+                os.makedirs(output)   
+                
+        if isinstance(input, str):
             # download net image
-            if img.startswith('http') and img.endswith('.jpg'):
-                download_with_progressbar(img, 'tmp.jpg')
-                img = 'tmp.jpg'
-            image_file = img
-            img, flag = check_and_read_gif(image_file)
-            if not flag:
-                with open(image_file, 'rb') as f:
-                    np_arr = np.frombuffer(f.read(), dtype=np.uint8)
-                    img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-            if img is None:
-                logger.error("error in loading image:{}".format(image_file))
-                return None
-        if isinstance(img, np.ndarray) and len(img.shape) == 2:
-            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        if det and rec:
-            dt_boxes, rec_res = self.__call__(img)
-            return [[box.tolist(), res] for box, res in zip(dt_boxes, rec_res)]
-        elif det and not rec:
-            dt_boxes, elapse = self.text_detector(img)
-            if dt_boxes is None:
-                return None
-            return [box.tolist() for box in dt_boxes]
+            if input.startswith('http') and input.endswith('.jpg'):
+                download_with_progressbar(input, 'downloaded.jpg')
+                input = 'downloaded.jpg'
+                
+            img_list = get_image_file_list(input)
+               
+            if len(img_list) == 0:
+                print('NO images found in {}. Please check input location!'.format(input))
+                sys.exit(0) 
+                
+            for image_file in tqdm(img_list):
+                key = os.path.basename(image_file)
+                img, flag = check_and_read_gif(image_file)
+                if not flag:
+                    img = cv2.imread(image_file)
+                if img is None:
+                    print("ERROR in loading image:{}".format(image_file))
+                    continue
+                result = self.perform_ocr(img, key, output, det, rec, cls)
+                if det:
+                    out_dict[key] = result
+                else:
+                    rec_dict[key] = result
+        
+        elif isinstance(input, np.ndarray) or isinstance(input, list):
+            
+            if isinstance(input, np.ndarray):
+                input = [input]
+            
+            if isinstance(input[0], np.ndarray):
+                
+                for i, image in enumerate(input):  
+                    key = str(i) + '.jpg'
+                    if len(image.shape) == 2:
+                        img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) 
+                    elif len(image.shape) == 3:
+                        img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) 
+                    elif len(image.shape) == 4: # png file
+                        img = cv2.cvtColor(image[:3], cv2.COLOR_RGB2BGR) 
+                    else:
+                        print("ERROR: Input array has {} channels. Expected '2', '3' or '4'.".format(len(image.shape)))
+                        continue
+                    
+                    result = self.perform_ocr(img, key, output, det, rec, cls)
+                    if det:
+                        out_dict[key] = result
+                    else:
+                        rec_dict[key] = result
+            
+            else:
+                print('When input is a list, it can only be a list of numpy arrays!')
+                sys.exit(0)
+        
         else:
-            if not isinstance(img, list):
-                img = [img]
+            print('Following Input format is only supported: string (path to image file or image directory \
+                         or web address of jpg file), a numpy array or a list of numpy arrays!')
+            sys.exit(0)
+            
+        
+        if rec_dict:
+            img = list(rec_dict.values())
             if cls:
                 img, cls_res, elapse = self.text_classifier(img)
                 if not rec:
-                    return cls_res
-            rec_res, elapse = self.text_recognizer(img)
-            return rec_res
-   
+                    if self.is_visualize:
+                        cls_list = [[k,v[0], v[1]] for k,v in zip(list(rec_dict.keys()), cls_res)]
+                        print("Classification Result:\n")
+                        from tabulate import tabulate
+                        headers = ["File Name", "Classification Result", "Score"]
+                        print(tabulate(cls_list, headers, tablefmt="fancy_grid"))
+                        
+                    if output:
+                        output_names = [f'{k}_{v[0]}.jpg' for k,v in zip(list(rec_dict.keys()), cls_res)]    
+                        for bno in range(len(img)):
+                            cv2.imwrite(os.path.join(output,output_names[bno]), img[bno])
+                        
+                    cls_output = {k:[v] for k,v in zip(list(rec_dict.keys()), cls_res)}       
+                    return cls_output               
+            if rec:    
+                rec_res, elapse = self.text_recognizer(img)
+                if self.is_visualize:
+                    rec_list = [[k,v[0], v[1]] for k,v in zip(list(rec_dict.keys()), rec_res)]
+                    print("Recognition Result:\n")
+                    from tabulate import tabulate
+                    headers = ["File Name", "Recognition Result", "Score"]
+                    print(tabulate(rec_list, headers, tablefmt="fancy_grid"))
+                                            
+                if output:
+                    output_names = [f'{k}_{v[0]}.jpg' for k,v in zip(list(rec_dict.keys()), rec_res)]    
+                    for bno in range(len(img)):
+                        cv2.imwrite(os.path.join(output,output_names[bno]), img[bno])
+                        
+                rec_output = {k:[v] for k,v in zip(list(rec_dict.keys()), rec_res)} 
+                return rec_output
+        else:
+            return out_dict
+
+
 def main():
     args = parse_args(mMain=True)
-    input_location = args.input_location
-    if input_location.startswith('http') and input_location.endswith('.jpg'):
-        download_with_progressbar(input_location, 'tmp.jpg')
-        image_file_list = ['tmp.jpg']
-    else:
-        image_file_list = get_image_file_list(input_location)   
-    if len(image_file_list) == 0:
-        logger.error('no images find in {}'.format(args.input_location))
-        return 
     
     ocr_engine = UCR(**(args.__dict__))
-    for img_path in image_file_list:
-        logger.info('{}{}{}'.format('*' * 10, img_path, '*' * 10))
-        result = ocr_engine.predict(img_path,
-                                det=args.det,
-                                rec=args.rec,
-                                cls=args.cls)
-        if result is not None:
-            for line in result:
-                logger.info(line)
-
+    result = ocr_engine.predict(input=args.input,
+                            output=args.output,
+                            det=args.det,
+                            rec=args.rec,
+                            cls=args.cls)
+    if result is not None:
+        for k,v in result.items():
+            print(f'\n------------------------{k}:------------------------')
+            from tabulate import tabulate
+            print(tabulate(v, tablefmt="fancy_grid"))
+            
 
 def download_with_progressbar(url, save_path):
+    print("Downloading '{}' to '{}'".format(url, save_path))
     response = requests.get(url, stream=True)
     total_size_in_bytes = int(response.headers.get('content-length', 0))
     block_size = 1024  # 1 Kibibyte
@@ -223,7 +387,7 @@ def download_with_progressbar(url, save_path):
             file.write(data)
     progress_bar.close()
     if total_size_in_bytes == 0 or progress_bar.n != total_size_in_bytes:
-        logger.error("Something went wrong while downloading model.")
+        print("Something went wrong while downloading model.")
         sys.exit(0)
 
 
@@ -233,8 +397,6 @@ def maybe_download(model_storage_directory, url, force_download=False):
     fname = url.split('/')[-1][0:-4]
     tmp_path = os.path.join(model_storage_directory, fname)
     if force_download or not os.path.exists(tmp_path):
-    
-        logger.info('Downloading {} to {}'.format(url, tmp_path))
         os.makedirs(tmp_path, exist_ok=True)
         download_with_progressbar(url, tmp_path+'.zip')
         
@@ -256,10 +418,10 @@ def parse_args(mMain=True, add_help=True):
         # params for prediction system
         parser.add_argument("--hydra_conf_location", type=str, default=None)
         parser.add_argument("--force_download", type=str2bool, default=False)
-        parser.add_argument("--input_location", type=str, default='input_dir/')
-        parser.add_argument("--output_location", type=str, default='output_dir/')
-        parser.add_argument("--device", type=str, default='cpu')
-        parser.add_argument("--lang", type=str, default='ch_sim')
+        parser.add_argument("-i", "--input", type=str, required=True)
+        parser.add_argument("-o", "--output", type=str, default=None)
+        parser.add_argument("-d", "--device", type=str, default='cpu')
+        parser.add_argument("-l", "--lang", type=str, default='ch_sim')
         parser.add_argument("--backend", type=str, default='torch')
         parser.add_argument("--type", type=str, default='mobile')
         parser.add_argument("--system_overrides", nargs='+', type=str, default=[])
@@ -296,9 +458,9 @@ def parse_args(mMain=True, add_help=True):
         return argparse.Namespace(
             hydra_conf_location=None,
             force_download=False,
-            input_location='input_dir/',
-            output_location='output_dir/',
+            d = 'cpu',
             device='cpu',
+            l = 'ch_sim',
             lang='ch_sim',
             type='mobile',
             backend='torch',

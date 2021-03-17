@@ -25,11 +25,11 @@ import sys
 __dir__ = os.path.dirname(__file__)
 sys.path.append(os.path.join(__dir__, '../..'))
 
-def draw_text_det_res(dt_boxes, img_path):
-    src_im = cv2.imread(img_path)
+def draw_text_det_res(dt_boxes, img):
+    src_im = img.copy()
     for box in dt_boxes:
         box = np.array(box).astype(np.int32).reshape(-1, 2)
-        cv2.polylines(src_im, [box], True, color=(255, 255, 0), thickness=2)
+        cv2.polylines(src_im, [box], True, color=(20, 255, 57), thickness=2)
     return src_im
 
 
