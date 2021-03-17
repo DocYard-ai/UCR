@@ -3,8 +3,6 @@ test
 
 # output dir
 test_output
-output
-outputs
 # model dir
 models
 
