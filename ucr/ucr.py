@@ -18,6 +18,7 @@ import os
 import sys
 import cv2
 import numpy as np
+import pandas as pd
 import requests
 from tqdm import tqdm
 import shutil
@@ -160,6 +161,7 @@ class UCR(infer_system.TextSystem):
         self.drop_score = config["drop_score"]
         self.font_path = config_rec['font_path']
         self.is_visualize = config["is_visualize"]
+        self.output_format = args.output_format
         
         super().__init__(config)
             
@@ -169,8 +171,13 @@ class UCR(infer_system.TextSystem):
             dt_boxes, rec_res = self.__call__(img, cls)
             if self.merge_boxes:
                 rec_res = rec_res[0:1]
-            value = [[box.tolist(), res] for box, res in zip(dt_boxes, rec_res)]
             
+            if self.output_format=='ppocr':
+                value = [[box.tolist(), res] for box, res in zip(dt_boxes, rec_res)]
+            elif self.output_format=='df':
+                info_list = [[int(box[0][0]), int(box[0][1]), int(box[2][0]), int(box[2][1]), res[0]] for box, res in zip(dt_boxes, rec_res)]
+                value = pd.DataFrame(info_list, columns=['startX', 'startY', 'endX', 'endY', 'OCR'])
+                
             if self.is_visualize:
                 from tabulate import tabulate
                 headers = ["OCR Result", "Score"]
@@ -210,7 +217,12 @@ class UCR(infer_system.TextSystem):
                 print("\n------------------------dt_boxes num : {},\telapse : {:.3f}------------------------".format(
                 len(dt_boxes), elapse))
             if dt_boxes is not None:
-                value = [box.tolist() for box in dt_boxes]
+                if self.output_format=='ppocr':
+                    value = [box.tolist() for box in dt_boxes]
+                    
+                elif self.output_format=='df':
+                    info_list = [[int(box[0][0]), int(box[0][1]), int(box[2][0]), int(box[2][1])] for box in dt_boxes]
+                    value = pd.DataFrame(info_list, columns=['startX', 'startY', 'endX', 'endY'])
                 
                 if output:
                     src_im = draw_text_det_res(dt_boxes, img)
@@ -424,6 +436,7 @@ def parse_args(mMain=True, add_help=True):
         parser.add_argument("-l", "--lang", type=str, default='ch_sim')
         parser.add_argument("--backend", type=str, default='torch')
         parser.add_argument("--type", type=str, default='mobile')
+        parser.add_argument("--output_format", type=str, default='df')
         parser.add_argument("--system_overrides", nargs='+', type=str, default=[])
         parser.add_argument("--det", type=str2bool, default=True)
         parser.add_argument("--rec", type=str2bool, default=True)
@@ -464,6 +477,7 @@ def parse_args(mMain=True, add_help=True):
             lang='ch_sim',
             type='mobile',
             backend='torch',
+            output_format='df',
             system_overrides=[],
             
             det_algorithm='CRAFT',

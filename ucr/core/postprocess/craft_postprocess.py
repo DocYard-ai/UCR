@@ -111,6 +111,10 @@ class CRAFTPostProcess(object):
                 continue
             box = np.array(points)
             
+            if not self.rotated_box:
+                l,t,w,h = cv2.boundingRect(box)
+                box = np.array([[l,t], [l+w,t], [l+w,t+h], [l,t+h]])
+            
             boxes.append(box)
         
         if len(boxes)==0:
@@ -125,6 +129,7 @@ class CRAFTPostProcess(object):
         boxes[boxes[:,2,0]>width] = width
         boxes[boxes[:,3,1]>height] = height 
         boxes[boxes[:,3,1]>height] = height
+        
         
         boxes[:,:, 0] = np.clip(
             np.round(boxes[:,:, 0] / width * dest_width), 0, dest_width)
