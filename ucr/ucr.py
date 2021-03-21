@@ -270,68 +270,55 @@ class UCR(infer_system.TextSystem):
             print("Saving prediction results in '{}' folder\n".format(output))  
             if not os.path.exists(output):
                 os.makedirs(output)   
-                
+        
+        is_imgpath = False
         if isinstance(input, str):
             # download net image
             if input.startswith('http') and input.endswith('.jpg'):
                 download_with_progressbar(input, 'downloaded.jpg')
                 input = 'downloaded.jpg'
                 
-            img_list = get_image_file_list(input)
-               
-            if len(img_list) == 0:
-                print('NO images found in {}. Please check input location!'.format(input))
-                sys.exit(0) 
-                
-            for image_file in tqdm(img_list):
-                key = os.path.basename(image_file)
-                img, flag = check_and_read_gif(image_file)
-                if not flag:
-                    img = cv2.imread(image_file)
-                if img is None:
-                    print("ERROR in loading image:{}".format(image_file))
-                    continue
-                result = self.perform_ocr(img, key, output, det, rec, cls)
-                if det:
-                    out_dict[key] = result
-                else:
-                    rec_dict[key] = result
-        
-        elif isinstance(input, np.ndarray) or isinstance(input, list):
+            input = get_image_file_list(input)
             
-            if isinstance(input, np.ndarray):
-                input = [input]
-            
-            if isinstance(input[0], np.ndarray):
-                
-                for i, image in enumerate(input):  
-                    key = str(i) + '.jpg'
-                    if len(image.shape) == 2:
-                        img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) 
-                    elif len(image.shape) == 3:
-                        img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) 
-                    elif len(image.shape) == 4: # png file
-                        img = cv2.cvtColor(image[:3], cv2.COLOR_RGB2BGR) 
-                    else:
-                        print("ERROR: Input array has {} channels. Expected '2', '3' or '4'.".format(len(image.shape)))
-                        continue
-                    
-                    result = self.perform_ocr(img, key, output, det, rec, cls)
-                    if det:
-                        out_dict[key] = result
-                    else:
-                        rec_dict[key] = result
-            
-            else:
-                print('When input is a list, it can only be a list of numpy arrays!')
-                sys.exit(0)
+        elif isinstance(input, np.ndarray):
+            input = [input]
         
         else:
-            print('Following Input format is only supported: string (path to image file or image directory \
-                         or web address of jpg file), a numpy array or a list of numpy arrays!')
-            sys.exit(0)
-            
+            if isinstance(input[0], str):
+                is_imgpath = True
+                
+        if len(input) == 0:
+            print('NO images found in {}. Please check input location!'.format(input))
+            sys.exit(0) 
         
+        i = 0
+        for image in tqdm(input, colour='green', desc='OCR'):
+            if is_imgpath:
+                key = os.path.basename(image)
+                img, flag = check_and_read_gif(image)
+                if not flag:
+                    img = cv2.imread(image)
+                if img is None:
+                    print("ERROR in loading image:{}".format(image))
+                    continue
+            else:
+                key = str(i) + '.jpg'
+                i +=1
+                if len(image.shape) == 2:
+                    img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) 
+                elif len(image.shape) == 3:
+                    img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) 
+                elif len(image.shape) == 4: # png file
+                    img = cv2.cvtColor(image[:3], cv2.COLOR_RGB2BGR) 
+                else:
+                    print("ERROR: Input array has {} channels. Expected '2', '3' or '4'.".format(len(image.shape)))
+                    continue  
+            result = self.perform_ocr(img, key, output, det, rec, cls)
+            if det:
+                out_dict[key] = result
+            else:
+                rec_dict[key] = result
+                    
         if rec_dict:
             img = list(rec_dict.values())
             if cls:
