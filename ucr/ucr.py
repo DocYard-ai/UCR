@@ -176,7 +176,7 @@ class UCR(infer_system.TextSystem):
                 value = [[box.tolist(), res] for box, res in zip(dt_boxes, rec_res)]
             elif self.output_format=='df':
                 info_list = [[int(box[0][0]), int(box[0][1]), int(box[2][0]), int(box[2][1]), res[0]] for box, res in zip(dt_boxes, rec_res)]
-                value = pd.DataFrame(info_list, columns=['startX', 'startY', 'endX', 'endY', 'OCR'])
+                value = pd.DataFrame(info_list, columns=['startX', 'startY', 'endX', 'endY', 'Text'])
                 
             if self.is_visualize:
                 from tabulate import tabulate
@@ -279,6 +279,7 @@ class UCR(infer_system.TextSystem):
                 input = 'downloaded.jpg'
                 
             input = get_image_file_list(input)
+            is_imgpath = True
             
         elif isinstance(input, np.ndarray):
             input = [input]

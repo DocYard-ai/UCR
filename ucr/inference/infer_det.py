@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import numpy as np
 import hydra
+from hydra.core.global_hydra import GlobalHydra
 from omegaconf import OmegaConf
 import os
 import sys
@@ -166,6 +167,7 @@ class TextDetector(object):
 def main(cfg):    
     log.debug("Detection config:\n{}\n".format(cfg.pretty()))  
     config = OmegaConf.to_container(cfg)
+    GlobalHydra.instance().clear()
     
     input = hydra.utils.to_absolute_path(config['input'])
     image_file_list = get_image_file_list(input)

@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import numpy as np
 import hydra
+from hydra.core.global_hydra import GlobalHydra
 from omegaconf import OmegaConf
 import os
 import sys
@@ -187,6 +188,7 @@ class TextRecognizer(object):
 def main(cfg):
     log.debug("Recognition config:\n{}\n".format(cfg.pretty()))  
     config = OmegaConf.to_container(cfg)
+    GlobalHydra.instance().clear()
     
     input = hydra.utils.to_absolute_path(config['input'])
     model_location = hydra.utils.to_absolute_path(config['model_location'])

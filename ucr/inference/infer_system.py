@@ -360,9 +360,6 @@ def main():
     
     total_time = 0
     count = 0
-    output = hydra.utils.to_absolute_path(config['output']) 
-    if not os.path.exists(output):
-        os.makedirs(output)
 
     for image_file in tqdm.tqdm(image_file_list):
         count +=1
@@ -377,6 +374,9 @@ def main():
         elapse = time.time() - starttime
 
         if is_visualize:
+            output = hydra.utils.to_absolute_path(config['output']) 
+            if not os.path.exists(output):
+                os.makedirs(output)
             from tabulate import tabulate
             headers = ["OCR Result", "Score"]
             if config['merge_boxes']:

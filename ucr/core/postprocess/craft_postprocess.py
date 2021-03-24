@@ -99,8 +99,7 @@ class CRAFTPostProcess(object):
 
         xpad = self.xpad
         ypad = self.ypad
-        
-        padding = np.array([[-xpad, -ypad], [+xpad, -ypad], [+xpad, +ypad], [-xpad, +ypad]])
+        padding = np.array([[-xpad, int(ypad*-1.5)], [int(xpad*0.8), int(ypad*-1.5)], [int(xpad*0.8), int(ypad*0.8)], [-xpad, int(ypad*0.8)]])
         boxes = []
         scores = []
         for index in range(num_contours):

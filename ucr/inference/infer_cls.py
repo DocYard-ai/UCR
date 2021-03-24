@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import hydra
+from hydra.core.global_hydra import GlobalHydra
 from omegaconf import OmegaConf
 import numpy as np
 import traceback
@@ -120,6 +121,7 @@ class TextClassifier(object):
 def main(cfg):
     log.debug("Classification config:\n{}\n".format(cfg.pretty()))  
     config = OmegaConf.to_container(cfg)
+    GlobalHydra.instance().clear()
     
     input = hydra.utils.to_absolute_path(config['input'])
     model_location = hydra.utils.to_absolute_path(config['model_location'])

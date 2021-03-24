@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ucr"
-version = "0.2.2" # This will be overriden by the CI at publish time
+version = "0.2.5" # This will be overriden by the CI at publish time
 description = "Universal Character Recognizer (UCR): Simple, Intuitive, Extensible, Multi-Lingual OCR engine"
 authors = ["Abhigyan Raman <abhigyan@docyard.ai>"]
 packages = [
@@ -19,7 +19,6 @@ tqdm = "^4.40"
 numpy = "<1.20.0"
 opencv-python = "^4.1.0"
 imgaug = "^0.4.0"
-torchvision = "^0.9.0"
 hydra-core = "^1.0.6"
 pyclipper = "^1.2.1"
 tabulate = "^0.8.9"
