@@ -8,5 +8,6 @@ merge_add_margin: 0.05
 drop_score: 0.
 input: test/
 output: test_output/
-is_visualize: True
+output_format: df
+verbose: True
 use_cls: False

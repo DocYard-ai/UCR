@@ -282,6 +282,13 @@ def draw_boxes(image, boxes, scores=None, drop_score=0.5):
         image = cv2.polylines(np.array(image), [box], True, (255, 0, 0), 2)
     return image
 
+def print_draw_crop_rec_res(output, filename, img_crop_list):
+    bbox_num = len(img_crop_list)
+    
+    if not os.path.exists(output):
+        os.makedirs(output)
+    for bno in range(bbox_num):
+        cv2.imwrite(os.path.join(output, f'{filename}_bno'), img_crop_list[bno])
 
 if __name__ == '__main__':
     test_img = "./doc/test_v2"

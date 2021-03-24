@@ -179,7 +179,7 @@ def main(cfg):
     output = hydra.utils.to_absolute_path(config['output']) 
     if not os.path.exists(output):
         os.makedirs(output)
-    for image_file in tqdm(image_file_list):
+    for image_file in tqdm(image_file_list, colour='green', desc='Detection', unit = 'image'):
         count +=1
         img, flag = check_and_read_gif(image_file)
         if not flag:

@@ -31,7 +31,7 @@ __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../..')))
 
-import tqdm
+from tqdm import tqdm
 import cv2
 import time
 import traceback
@@ -200,7 +200,7 @@ def main(cfg):
     text_recognizer = TextRecognizer(config)
     valid_image_file_list = []
     img_list = []
-    for image_file in tqdm.tqdm(image_file_list):
+    for image_file in tqdm(image_file_list, colour='green', desc='Recognition', unit = 'image'):
         img, flag = check_and_read_gif(image_file)
         if not flag:
             img = cv2.imread(image_file)

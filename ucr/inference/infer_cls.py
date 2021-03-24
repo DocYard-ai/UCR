@@ -26,7 +26,7 @@ import traceback
 import os
 import sys
 import logging
-import tqdm
+from tqdm import tqdm
 
 log = logging.getLogger(__name__)
 
@@ -131,7 +131,7 @@ def main(cfg):
     text_classifier = TextClassifier(config)
     valid_image_file_list = []
     img_list = []
-    for image_file in tqdm.tqdm(image_file_list):
+    for image_file in tqdm(image_file_list, colour='green', desc='Classification', unit = 'image'):
         img, flag = check_and_read_gif(image_file)
         if not flag:
             img = cv2.imread(image_file)

@@ -15,11 +15,12 @@
 # limitations under the License.
 
 import os
-import tqdm
+from tqdm import tqdm
 import cv2
 import copy
 import numpy as np
-import time
+import pandas as pd
+
 from PIL import Image
 import hydra
 from omegaconf import OmegaConf
@@ -32,9 +33,8 @@ sys.path.append(os.path.join(__dir__, '../..'))
 import ucr.inference.infer_rec as infer_rec
 import ucr.inference.infer_det as infer_det
 import ucr.inference.infer_cls as infer_cls
-from ucr.utils.utility import get_image_file_list, check_and_read_gif
-from ucr.utils.annotation import draw_ocr_box_txt
-
+from ucr.utils.utility import get_image_file_list, check_and_read_gif, download_with_progressbar, merge_text_boxes, sorted_boxes
+from ucr.utils.annotation import draw_ocr_box_txt, draw_text_det_res
 
 class TextSystem(object):
     def __init__(self, config):
@@ -44,16 +44,16 @@ class TextSystem(object):
         
         self.drop_score = config['drop_score']            
         self.merge_boxes = config['merge_boxes']
+        self.output_format = config['output_format']
+        self.verbose = config['verbose']
+        self.font_path = config['Recognition']['font_path']
         
-        self.is_visualize = config['is_visualize']
-
         if self.merge_boxes:
             self.merge_slope_thresh = config['merge_slope_thresh']
             self.merge_ycenter_thresh = config['merge_ycenter_thresh']
             self.merge_height_thresh = config['merge_height_thresh']
             self.merge_width_thresh = config['merge_width_thresh']
             self.merge_add_margin = config['merge_add_margin']
-
 
     def get_rotate_crop_image(self, img, points):
         '''
@@ -88,25 +88,17 @@ class TextSystem(object):
             dst_img = np.rot90(dst_img)
         return dst_img
 
-    def print_draw_crop_rec_res(self, filename, img_crop_list):
-        bbox_num = len(img_crop_list)
-        
-        if not os.path.exists(self.output):
-            os.makedirs(self.output)
-        for bno in range(bbox_num):
-            cv2.imwrite(os.path.join(self.output, filename), img_crop_list[bno])
-
-    def __call__(self, img, cls=True):
+    def det_cls_rec(self, img, cls):  
         ori_im = img.copy()
         dt_boxes, elapse = self.text_detector(img)
-        if self.is_visualize:
+        if self.verbose:
             print("\n------------------------dt_boxes num : {},\telapse : {:.3f}------------------------".format(
                 len(dt_boxes), elapse))
         if dt_boxes is None:
             return None, None
         img_crop_list = []
 
-        dt_boxes = self.sorted_boxes(dt_boxes)
+        dt_boxes = sorted_boxes(dt_boxes)
 
         for bno in range(len(dt_boxes)):
             tmp_box = copy.deepcopy(dt_boxes[bno])
@@ -114,33 +106,31 @@ class TextSystem(object):
             img_crop_list.append(img_crop)
         
         if cls:  
-            img_crop_list, angle_list, elapse = self.text_classifier(
+            img_crop_list, _, elapse = self.text_classifier(
                 img_crop_list)
-            if self.is_visualize:
+            if self.verbose:
                 print("------------------------cls num  : {},\telapse : {:.3f}------------------------".format(
                     len(img_crop_list), elapse))
 
         rec_res, elapse = self.text_recognizer(img_crop_list)
-        if self.is_visualize:
+        if self.verbose:
             print("------------------------rec_res num  : {},\telapse : {:.3f}------------------------\n".format(
             len(rec_res), elapse))
 
-        # self.print_draw_crop_rec_res(name, img_crop_list)
         filter_boxes, filter_rec_res = [], []
         
         if self.drop_score!=0.:
             for box, rec_reuslt in zip(dt_boxes, rec_res):
-                text, score = rec_reuslt
+                _, score = rec_reuslt
                 if score >= self.drop_score:
                     filter_boxes.append(box)
-                    filter_rec_res.append(rec_reuslt)
-        
+                    filter_rec_res.append(rec_reuslt) 
         else:
             filter_boxes = dt_boxes
             filter_rec_res = rec_res
                 
         if self.merge_boxes:
-            free_box, free_text, merged_box, merged_text = self.merge_text_boxes(
+            free_box, free_text, merged_box, merged_text = merge_text_boxes(
                 filter_boxes, filter_rec_res,
                 slope_thresh = self.merge_slope_thresh,
                 ycenter_thresh = self.merge_ycenter_thresh,
@@ -151,177 +141,190 @@ class TextSystem(object):
             rec_res = free_text + merged_text
             
         return dt_boxes, rec_res
-
-    def merge_text_boxes(self,dt_boxes, rec_res, **params):
-        dt_boxes = np.asarray(dt_boxes)
-        polys = np.empty((len(dt_boxes), 8))
-        polys[:,0] = dt_boxes[:,0,0]
-        polys[:,1] = dt_boxes[:,0,1]
-        polys[:,2] = dt_boxes[:,1,0]
-        polys[:,3] = dt_boxes[:,1,1]
-        polys[:,4] = dt_boxes[:,2,0]
-        polys[:,5] = dt_boxes[:,2,1]
-        polys[:,6] = dt_boxes[:,3,0]
-        polys[:,7] = dt_boxes[:,3,1]
-        slope_ths = params["slope_thresh"]
-        ycenter_ths = params["ycenter_thresh"]
-        height_ths = params["height_thresh"]
-        width_ths = params["width_thresh"]
-        add_margin = params["add_margin"]
-
-        horizontal_list, free_list_box, free_list_text, combined_list, merged_list_box, merged_list_text = [],[],[],[],[],[]
-
-        for i, poly in enumerate(polys):
-            slope_up = (poly[3]-poly[1])/np.maximum(10, (poly[2]-poly[0]))
-            slope_down = (poly[5]-poly[7])/np.maximum(10, (poly[4]-poly[6]))
-            if max(abs(slope_up), abs(slope_down)) < slope_ths:
-                x_max = max([poly[0],poly[2],poly[4],poly[6]])
-                x_min = min([poly[0],poly[2],poly[4],poly[6]])
-                y_max = max([poly[1],poly[3],poly[5],poly[7]])
-                y_min = min([poly[1],poly[3],poly[5],poly[7]])
-                horizontal_list.append([x_min, x_max, y_min, y_max, 0.5*(y_min+y_max), y_max-y_min, rec_res[i][0], rec_res[i][1],str(poly)])
-            else:
-                height = np.linalg.norm( [poly[6]-poly[0],poly[7]-poly[1]])
-                margin = int(1.44*add_margin*height)
-                theta13 = abs(np.arctan( (poly[1]-poly[5])/np.maximum(10, (poly[0]-poly[4]))))
-                theta24 = abs(np.arctan( (poly[3]-poly[7])/np.maximum(10, (poly[2]-poly[6]))))
-                # do I need to clip minimum, maximum value here?
-                x1 = poly[0] - np.cos(theta13)*margin
-                y1 = poly[1] - np.sin(theta13)*margin
-                x2 = poly[2] + np.cos(theta24)*margin
-                y2 = poly[3] - np.sin(theta24)*margin
-                x3 = poly[4] + np.cos(theta13)*margin
-                y3 = poly[5] + np.sin(theta13)*margin
-                x4 = poly[6] - np.cos(theta24)*margin
-                y4 = poly[7] + np.sin(theta24)*margin
-
-                free_list_box.append(np.array([[x1,y1],[x2,y2],[x3,y3],[x4,y4]]))
-                free_list_text.append([rec_res[i][0], rec_res[i][1],str(poly), rec_res[i][0]])
-
-        horizontal_list = sorted(horizontal_list, key=lambda item: item[4])
-
-        # combine box
-        new_box = []
-        for poly in horizontal_list:
-
-            if len(new_box) == 0:
-                b_height = [poly[5]]
-                b_ycenter = [poly[4]]
-                new_box.append(poly)
-            else:
-                # comparable height and comparable y_center level up to ths*height
-                if (abs(np.mean(b_height) - poly[5]) < height_ths*np.mean(b_height)) and (abs(np.mean(b_ycenter) - poly[4]) < ycenter_ths*np.mean(b_height)):
-                    b_height.append(poly[5])
-                    b_ycenter.append(poly[4])
-                    new_box.append(poly)
-                else:
-                    b_height = [poly[5]]
-                    b_ycenter = [poly[4]]
-                    combined_list.append(new_box)
-                    new_box = [poly]
-        combined_list.append(new_box)
-
-        # merge list use sort again
-        for boxes in combined_list:
-            if len(boxes) == 1: # one box per line
-                box = boxes[0]
-                margin = int(add_margin*min(box[1]-box[0],box[5]))
-                _x0 = _x3 = box[0]-margin
-                _y0 = _y1 = box[2]-margin
-                _x1 = _x2 = box[1]+margin
-                _y2 = _y3 = box[3]+margin
-                merged_list_box.append(np.array([[_x0,_y0],[_x1,_y1],[_x2,_y2],[_x3,_y3]]))
-                merged_list_text.append([box[6], box[7], box[8], box[6]])
-            else: # multiple boxes per line
-                boxes = sorted(boxes, key=lambda item: item[0])
-
-                merged_box, new_box = [],[]
-                for box in boxes:
-                    if len(new_box) == 0:
-                        b_height = [box[5]]
-                        x_max = box[1]
-                        new_box.append(box)
-                    else:
-                        if abs(box[0]-x_max) < width_ths *(box[3]-box[2]): # merge boxes
-                            x_max = box[1]
-                            new_box.append(box)
-                        else:
-                            if (abs(np.mean(b_height) - box[5]) < height_ths*np.mean(b_height)) and (abs(box[0]-x_max) < width_ths *(box[3]-box[2])): # merge boxes
-                                b_height.append(box[5])
-                                x_max = box[1]
-                                new_box.append(box)
-                            else:
-                                b_height = [box[5]]
-                                x_max = box[1]
-                                merged_box.append(new_box)
-                                new_box = [box]
-                if len(new_box) >0: merged_box.append(new_box)
-
-                for mbox in merged_box:
-                    if len(mbox) != 1: # adjacent box in same line
-                        # do I need to add margin here?
-                        x_min = min(mbox, key=lambda x: x[0])[0]
-                        x_max = max(mbox, key=lambda x: x[1])[1]
-                        y_min = min(mbox, key=lambda x: x[2])[2]
-                        y_max = max(mbox, key=lambda x: x[3])[3]
-                        text_comb = str(mbox[0][6]) if isinstance(mbox[0][6], str) else ''
-                        sum_score = mbox[0][7]
-                        box_id = str(mbox[0][8])
-                        text_id = str(mbox[0][6]) if isinstance(mbox[0][6], str) else ''
-                        for val in range(len(mbox)-1):
-                            if isinstance(mbox[val+1][6], str):
-                                strin = mbox[val+1][6]
-                            else:
-                                strin = ''
-                            text_comb += ' ' + strin
-                            sum_score += mbox[val+1][7]
-                            box_id += '|||' + str(mbox[val+1][8])
-                            text_id += '|||' + strin 
-                        avg_score = sum_score / len(mbox)
-                        margin = int(add_margin*(y_max - y_min))
-
-                        # merged_list.append([x_min-margin, x_max+margin, y_min-margin, y_max+margin, text_comb, avg_score])
-                        _x0 = _x3 = x_min-margin
-                        _y0 = _y1 = y_min-margin
-                        _x1 = _x2 = x_max+margin
-                        _y2 = _y3 = y_max+margin
-                        merged_list_box.append(np.array([[_x0,_y0],[_x1,_y1],[_x2,_y2],[_x3,_y3]]))
-                        merged_list_text.append([text_comb, avg_score, box_id, text_id])
-
-                    else: # non adjacent box in same line
-                        box = mbox[0]
-
-                        margin = int(add_margin*(box[3] - box[2]))
-                        # merged_list.append([box[0]-margin,box[1]+margin,box[2]-margin,box[3]+margin, box[6], box[7]])
-                        _x0 = _x3 = box[0]-margin
-                        _y0 = _y1 = box[2]-margin
-                        _x1 = _x2 = box[1]+margin
-                        _y2 = _y3 = box[3]+margin
-                        merged_list_box.append(np.array([[_x0,_y0],[_x1,_y1],[_x2,_y2],[_x3,_y3]]))
-                        merged_list_text.append([box[6], box[7], box[8], box[6]])
-
-        # may need to check if box is really in image
-        return free_list_box, free_list_text, merged_list_box, merged_list_text
     
-    def sorted_boxes(self, dt_boxes):
-        """
-        Sort text boxes in order from top to bottom, left to right
-        config:
-            dt_boxes(array):detected text boxes with shape [4, 2]
-        return:
-            sorted boxes(array) with shape [4, 2]
-        """
-        num_boxes = dt_boxes.shape[0]
-        sorted_boxes = sorted(dt_boxes, key=lambda x: (x[0][1], x[0][0]))
-        _boxes = list(sorted_boxes)
+    def perform_ocr(self, img, key, output, rec, cls):
+        if rec:
+            dt_boxes, rec_res = self.det_cls_rec(img, cls)
+            if self.merge_boxes:
+                rec_res = rec_res[0:1]
+            
+            if self.output_format=='ppocr':
+                value = [[box.tolist(), res] for box, res in zip(dt_boxes, rec_res)]
+            elif self.output_format=='df':
+                info_list = [[int(box[0][0]), int(box[0][1]), int(box[2][0]), int(box[2][1]), res[0]] for box, res in zip(dt_boxes, rec_res)]
+                value = pd.DataFrame(info_list, columns=['startX', 'startY', 'endX', 'endY', 'Text'])
+                
+            if self.verbose:
+                from tabulate import tabulate
+                headers = ["OCR Result", "Score"]
+                if self.merge_boxes:
+                    print(tabulate(rec_res[0:1], headers, tablefmt="fancy_grid"))
+                else:
+                    print(tabulate(rec_res, headers, tablefmt="fancy_grid"))
+                    
+            if output:
+                image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+                boxes = dt_boxes
+                txts = [rec_res[i][0] for i in range(len(rec_res))]
+                scores = [rec_res[i][1] for i in range(len(rec_res))]
 
-        for i in range(num_boxes - 1):
-            if abs(_boxes[i + 1][0][1] - _boxes[i][0][1]) < 10 and \
-                    (_boxes[i + 1][0][0] < _boxes[i][0][0]):
-                tmp = _boxes[i]
-                _boxes[i] = _boxes[i + 1]
-                _boxes[i + 1] = tmp
-        return _boxes
+                draw_img = draw_ocr_box_txt(
+                    image,
+                    boxes,
+                    txts,
+                    scores,
+                    drop_score=self.drop_score,
+                    font_path=self.font_path)
+                
+                if not os.path.exists(output):
+                    os.makedirs(output)
+                img_path = os.path.join(output,
+                                        "ocr_{}".format(key))
+                cv2.imwrite(
+                    img_path, draw_img[:, :, ::-1])
+                print("Saving OCR ouput in {}".format(
+                    img_path))
+            
+            return value
+            
+        else:
+            dt_boxes, elapse = self.text_detector(img)
+            if self.verbose:
+                print("\n------------------------dt_boxes num : {},\telapse : {:.3f}------------------------".format(
+                len(dt_boxes), elapse))
+            if dt_boxes is not None:
+                if self.output_format=='ppocr':
+                    value = [box.tolist() for box in dt_boxes]
+                    
+                elif self.output_format=='df':
+                    info_list = [[int(box[0][0]), int(box[0][1]), int(box[2][0]), int(box[2][1])] for box in dt_boxes]
+                    value = pd.DataFrame(info_list, columns=['startX', 'startY', 'endX', 'endY'])
+                
+                if output:
+                    src_im = draw_text_det_res(dt_boxes, img)
+                    
+                    if not os.path.exists(output):
+                        os.makedirs(output)
+                    img_path = os.path.join(output,
+                                            "det_{}".format(key))
+                    cv2.imwrite(img_path, src_im)
+                    print("Detection output image is saved in {}".format(img_path))
+            
+            return value
+        
+    
+    def __call__(self, input=None, i=None, output=None, o=None, det=True, rec=True, cls=False):
+        
+        if input is not None:
+            input = input
+        elif i is not None:
+            input = i
+        elif input is None and i is None:
+            print('ERROR: Input is mandatory: can be either ndarray (or list of ndarray), img_filepath, img_folderpath or img_webpath!')
+            sys.exit(0)
+        
+        assert isinstance(input, (np.ndarray, list, str))
+        
+        rec_dict = {}
+        out_dict={} 
+        
+        if output is not None:
+            output = output
+        elif o is not None:
+            output = o
+            
+        if output:
+            print("Saving prediction results in '{}' folder\n".format(output))  
+            if not os.path.exists(output):
+                os.makedirs(output)   
+        
+        is_imgpath = False
+        if isinstance(input, str):
+            # download net image
+            if input.startswith('http') and input.endswith('.jpg'):
+                download_with_progressbar(input, 'downloaded.jpg')
+                input = 'downloaded.jpg'
+                
+            input = get_image_file_list(input)
+            is_imgpath = True
+            
+        elif isinstance(input, np.ndarray):
+            input = [input]
+        
+        else:
+            if isinstance(input[0], str):
+                is_imgpath = True
+                
+        if len(input) == 0:
+            print('NO images found in {}. Please check input location!'.format(input))
+            sys.exit(0) 
+        
+        print(f'Performing Inference on {len(input)} files')
+        i = 0
+        for image in tqdm(input, colour='green', desc='OCR', unit='image'):
+            if is_imgpath:
+                key = image
+                img, flag = check_and_read_gif(image)
+                if not flag:
+                    img = cv2.imread(image)
+                if img is None:
+                    print("ERROR in loading image:{}".format(image))
+                    continue
+            else:
+                key = str(i) + '.jpg'
+                i +=1
+                if len(image.shape) == 2:
+                    img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) 
+                elif len(image.shape) == 3:
+                    img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) 
+                elif len(image.shape) == 4: # png file
+                    img = cv2.cvtColor(image[:3], cv2.COLOR_RGB2BGR) 
+                else:
+                    print("ERROR: Input array has {} channels. Expected '2', '3' or '4'.".format(len(image.shape)))
+                    continue  
+            if det:
+                out_dict[key] = self.perform_ocr(img, key, output, rec, cls)
+            else:
+                rec_dict[key] = img
+                    
+        if rec_dict:
+            img = list(rec_dict.values())
+            if cls:
+                img, cls_res, _ = self.text_classifier(img)
+                if not rec:
+                    if self.verbose:
+                        cls_list = [[k,v[0], v[1]] for k,v in zip(list(rec_dict.keys()), cls_res)]
+                        print("Classification Result:\n")
+                        from tabulate import tabulate
+                        headers = ["File Name", "Classification Result", "Score"]
+                        print(tabulate(cls_list, headers, tablefmt="fancy_grid"))
+                        
+                    if output:
+                        output_names = [f'{k}_{v[0]}.jpg' for k,v in zip(list(rec_dict.keys()), cls_res)]    
+                        for bno in range(len(img)):
+                            cv2.imwrite(os.path.join(output,output_names[bno]), img[bno])
+                        
+                    cls_output = {k:[v] for k,v in zip(list(rec_dict.keys()), cls_res)}       
+                    return cls_output               
+            if rec:    
+                rec_res, _ = self.text_recognizer(img)
+                if self.verbose:
+                    rec_list = [[k,v[0], v[1]] for k,v in zip(list(rec_dict.keys()), rec_res)]
+                    print("Recognition Result:\n")
+                    from tabulate import tabulate
+                    headers = ["File Name", "Recognition Result", "Score"]
+                    print(tabulate(rec_list, headers, tablefmt="fancy_grid"))
+                                            
+                if output:
+                    output_names = [f'{k}_{v[0]}.jpg' for k,v in zip(list(rec_dict.keys()), rec_res)]    
+                    for bno in range(len(img)):
+                        cv2.imwrite(os.path.join(output,output_names[bno]), img[bno])
+                        
+                rec_output = {k:[v] for k,v in zip(list(rec_dict.keys()), rec_res)} 
+                return rec_output
+        else:
+            return out_dict
+
 
 def main():        
     cfg_dir = hydra.utils.to_absolute_path('conf')
@@ -350,61 +353,11 @@ def main():
     config['Recognition'] = config_rec
     config['Classification'] = config_cls
     
-    input = hydra.utils.to_absolute_path(config['input'])
-    image_file_list = get_image_file_list(input)
-    
-    is_visualize = config['is_visualize']
     text_sys = TextSystem(config)
-    font_path = hydra.utils.to_absolute_path(config_rec['font_path'])
-    drop_score = config['drop_score']
     
-    total_time = 0
-    count = 0
-
-    for image_file in tqdm.tqdm(image_file_list):
-        count +=1
-        img, flag = check_and_read_gif(image_file)
-        if not flag:
-            img = cv2.imread(image_file)
-        if img is None:
-            print("ERROR in loading image:{}".format(image_file))
-            continue
-        starttime = time.time()
-        dt_boxes, rec_res = text_sys(img, cls=config['use_cls'])
-        elapse = time.time() - starttime
-
-        if is_visualize:
-            output = hydra.utils.to_absolute_path(config['output']) 
-            if not os.path.exists(output):
-                os.makedirs(output)
-            from tabulate import tabulate
-            headers = ["OCR Result", "Score"]
-            if config['merge_boxes']:
-                print(tabulate(rec_res[0:1], headers, tablefmt="fancy_grid"))
-            else:
-                print(tabulate(rec_res, headers, tablefmt="fancy_grid"))
-                
-            image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-            boxes = dt_boxes
-            txts = [rec_res[i][0] for i in range(len(rec_res))]
-            scores = [rec_res[i][1] for i in range(len(rec_res))]
-
-            draw_img = draw_ocr_box_txt(
-                image,
-                boxes,
-                txts,
-                scores,
-                drop_score=drop_score,
-                font_path=font_path)
-            if not os.path.exists(output):
-                os.makedirs(output)
-            img_path = os.path.join(output,
-                                    "ocr_{}".format(os.path.basename(image_file)))
-            cv2.imwrite(
-                    img_path, draw_img[:, :, ::-1])
-            print("\n[{}/{}] OCR output is saved in --------- {}\n".format(count,len(image_file_list),img_path))
-    print("\nTotal Prediction time for {} images:\t{:.5f} s".format(
-        len(image_file_list), total_time))
+    input = hydra.utils.to_absolute_path(config['input'])
+    _ = text_sys(input)
+    
 
 if __name__ == "__main__":
     main()

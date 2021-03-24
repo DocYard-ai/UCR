@@ -15,32 +15,109 @@
 # limitations under the License.
 
 import os
-import sys
-import cv2
-import numpy as np
-import pandas as pd
-import requests
-from tqdm import tqdm
-import shutil
-from PIL import Image
 
-__dir__ = os.path.dirname(os.path.abspath(__file__))
-
+from tabulate import tabulate
 from omegaconf import OmegaConf
 from hydra.experimental import compose, initialize_config_dir
 
 from ucr.inference import infer_system
-from ucr.utils.utility import check_and_read_gif, get_image_file_list
-from ucr.utils.annotation import draw_ocr_box_txt, draw_text_det_res
+from ucr.utils.utility import maybe_download
 
 __all__ = ['UCR']
 
+__dir__ = os.path.dirname(os.path.abspath(__file__))
 SUPPORT_DET_MODEL = ['DB', 'CRAFT']
 SUPPORT_REC_MODEL = ['CRNN']
 SUPPORT_CLS_MODEL = ['CLS']
 VERSION = 1.0
 SUPPORT_MODEL_TYPE = ['torch_mobile', 'torch_server', 'onnx_mobile', 'onnx_server']
 BASE_DIR = os.path.expanduser("~/.ucr/")
+
+
+def parse_args(mMain=True, add_help=True):
+    import argparse
+    
+    def str2bool(v):
+        return v.lower() in ("true", "t", "1")
+
+    if mMain:
+        parser = argparse.ArgumentParser()
+        
+        # params for prediction system
+        parser.add_argument("--hydra_conf_location", type=str, default=None)
+        parser.add_argument("--force_download", type=str2bool, default=False)
+        parser.add_argument("-i", "--input", type=str, required=True)
+        parser.add_argument("-o", "--output", type=str, default=None)
+        parser.add_argument("-d", "--device", type=str, default='cpu')
+        parser.add_argument("-l", "--lang", type=str, default='ch_sim')
+        parser.add_argument("--backend", type=str, default='torch')
+        parser.add_argument("--type", type=str, default='mobile')
+        parser.add_argument("--output_format", type=str, default=None)
+        parser.add_argument("--system_overrides", nargs='+', type=str, default=[])
+        parser.add_argument("--det", type=str2bool, default=True)
+        parser.add_argument("--rec", type=str2bool, default=True)
+        parser.add_argument("--cls", type=str2bool, default=False)
+        parser.add_argument("--verbose", type=str2bool, default=False)
+        
+        
+        # params for detection engine
+        parser.add_argument("--det_algorithm", type=str, default='CRAFT')
+        parser.add_argument("--det_config_name", type=str, default='infer_det')
+        parser.add_argument("--det_model_location", type=str, default=None)
+        parser.add_argument("--det_batch_size", type=int, default=1) #batch_size is not yet implemented in the code
+        parser.add_argument("--det_overrides", nargs='+', type=str, default=[])
+        
+        # params for recogniton engine
+        parser.add_argument("--rec_algorithm", type=str, default='CRNN')
+        parser.add_argument("--rec_config_name", type=str, default='infer_rec')
+        parser.add_argument("--rec_model_location", type=str, default=None)
+        parser.add_argument("--rec_batch_size", type=int, default=8) 
+        parser.add_argument("--rec_overrides", nargs='+', type=str, default=[])
+        parser.add_argument("--rec_whitelist", type=str, default=None)
+        parser.add_argument("--rec_blacklist", type=str, default=None)
+        
+        # params for detection engine
+        parser.add_argument("--cls_algorithm", type=str, default='CLS')
+        parser.add_argument("--cls_config_name", type=str, default='infer_cls')
+        parser.add_argument("--cls_model_location", type=str, default=None)
+        parser.add_argument("--cls_batch_size", type=int, default=8)
+        parser.add_argument("--cls_overrides", nargs='+', type=str, default=[])
+
+        return parser.parse_args()
+    else:
+        return argparse.Namespace(
+            hydra_conf_location=None,
+            force_download=False,
+            d = 'cpu',
+            device='cpu',
+            l = 'ch_sim',
+            lang='ch_sim',
+            type='mobile',
+            backend='torch',
+            output_format=None,
+            system_overrides=[],
+            verbose= False,
+            
+            det_algorithm='CRAFT',
+            det_config_name='infer_det',
+            det_model_location=None,
+            det_batch_size=1,
+            det_overrides=[],
+            
+            rec_algorithm='CRNN',
+            rec_config_name='infer_rec',
+            rec_model_location=None,
+            rec_batch_size=8,
+            rec_overrides=[],
+            rec_whitelist=None,
+            rec_blacklist=None,
+            
+            cls_algorithm='CLS',
+            cls_config_name='infer_cls',
+            cls_model_location=None,
+            cls_batch_size=8,
+            cls_overrides=[],
+        )
 
 
 class UCR(infer_system.TextSystem):
@@ -156,208 +233,14 @@ class UCR(infer_system.TextSystem):
         config['Detection'] = config_det
         config['Recognition'] = config_rec
         config['Classification'] = config_cls
-        
-        self.merge_boxes = config["merge_boxes"]
-        self.drop_score = config["drop_score"]
-        self.font_path = config_rec['font_path']
-        self.is_visualize = config["is_visualize"]
-        self.output_format = args.output_format
+        config["verbose"] = args.verbose
+        config["output_format"] = args.output_format if args.output_format else config["output_format"]
         
         super().__init__(config)
-            
-    def perform_ocr(self, img, key, output, det, rec, cls):
-        
-        if det and rec:
-            dt_boxes, rec_res = self.__call__(img, cls)
-            if self.merge_boxes:
-                rec_res = rec_res[0:1]
-            
-            if self.output_format=='ppocr':
-                value = [[box.tolist(), res] for box, res in zip(dt_boxes, rec_res)]
-            elif self.output_format=='df':
-                info_list = [[int(box[0][0]), int(box[0][1]), int(box[2][0]), int(box[2][1]), res[0]] for box, res in zip(dt_boxes, rec_res)]
-                value = pd.DataFrame(info_list, columns=['startX', 'startY', 'endX', 'endY', 'Text'])
-                
-            if self.is_visualize:
-                from tabulate import tabulate
-                headers = ["OCR Result", "Score"]
-                if self.merge_boxes:
-                    print(tabulate(rec_res[0:1], headers, tablefmt="fancy_grid"))
-                else:
-                    print(tabulate(rec_res, headers, tablefmt="fancy_grid"))
-                    
-            if output:
-                image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-                boxes = dt_boxes
-                txts = [rec_res[i][0] for i in range(len(rec_res))]
-                scores = [rec_res[i][1] for i in range(len(rec_res))]
-
-                draw_img = draw_ocr_box_txt(
-                    image,
-                    boxes,
-                    txts,
-                    scores,
-                    drop_score=self.drop_score,
-                    font_path=self.font_path)
-                
-                if not os.path.exists(output):
-                    os.makedirs(output)
-                img_path = os.path.join(output,
-                                        "ocr_{}".format(key))
-                cv2.imwrite(
-                    img_path, draw_img[:, :, ::-1])
-                print("Saving OCR ouput in {}".format(
-                    img_path))
-            
-            return value
-            
-        elif det and not rec:
-            dt_boxes, elapse = self.text_detector(img)
-            if self.is_visualize:
-                print("\n------------------------dt_boxes num : {},\telapse : {:.3f}------------------------".format(
-                len(dt_boxes), elapse))
-            if dt_boxes is not None:
-                if self.output_format=='ppocr':
-                    value = [box.tolist() for box in dt_boxes]
-                    
-                elif self.output_format=='df':
-                    info_list = [[int(box[0][0]), int(box[0][1]), int(box[2][0]), int(box[2][1])] for box in dt_boxes]
-                    value = pd.DataFrame(info_list, columns=['startX', 'startY', 'endX', 'endY'])
-                
-                if output:
-                    src_im = draw_text_det_res(dt_boxes, img)
-                    
-                    if not os.path.exists(output):
-                        os.makedirs(output)
-                    img_path = os.path.join(output,
-                                            "det_{}".format(key))
-                    cv2.imwrite(img_path, src_im)
-                    print("Detection output image is saved in {}".format(img_path))
-            
-            return value
-            
-        else:
-            return img 
     
     def predict(self, input=None, i=None, output=None, o=None, det=True, rec=True, cls=False):
-        """
-        ocr with paddleocr
-        args：
-            input: input for ocr, support ndarray, img_path and list or ndarray
-            det: use text detection or not, if false, only rec will be exec. default is True
-            rec: use text recognition or not, if false, only det will be exec. default is True
-        """
+        super().__call__(input, i, output, o, det, rec, cls)
         
-        if input is not None:
-            input = input
-        elif i is not None:
-            input = i
-        elif input is None and i is None:
-            print('Input is mandatory: can be either ndarray (or list of ndarray), img_filepath, img_folderpath or img_webpath!')
-            sys.exit(0)
-        
-        assert isinstance(input, (np.ndarray, list, str))
-
-        rec_dict = {}
-        out_dict={} 
-        
-        if output is not None:
-            output = output
-        elif o is not None:
-            output = o
-            
-        if output:
-            print("Saving prediction results in '{}' folder\n".format(output))  
-            if not os.path.exists(output):
-                os.makedirs(output)   
-        
-        is_imgpath = False
-        if isinstance(input, str):
-            # download net image
-            if input.startswith('http') and input.endswith('.jpg'):
-                download_with_progressbar(input, 'downloaded.jpg')
-                input = 'downloaded.jpg'
-                
-            input = get_image_file_list(input)
-            is_imgpath = True
-            
-        elif isinstance(input, np.ndarray):
-            input = [input]
-        
-        else:
-            if isinstance(input[0], str):
-                is_imgpath = True
-                
-        if len(input) == 0:
-            print('NO images found in {}. Please check input location!'.format(input))
-            sys.exit(0) 
-        
-        i = 0
-        for image in tqdm(input, colour='green', desc='OCR'):
-            if is_imgpath:
-                key = os.path.basename(image)
-                img, flag = check_and_read_gif(image)
-                if not flag:
-                    img = cv2.imread(image)
-                if img is None:
-                    print("ERROR in loading image:{}".format(image))
-                    continue
-            else:
-                key = str(i) + '.jpg'
-                i +=1
-                if len(image.shape) == 2:
-                    img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) 
-                elif len(image.shape) == 3:
-                    img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) 
-                elif len(image.shape) == 4: # png file
-                    img = cv2.cvtColor(image[:3], cv2.COLOR_RGB2BGR) 
-                else:
-                    print("ERROR: Input array has {} channels. Expected '2', '3' or '4'.".format(len(image.shape)))
-                    continue  
-            result = self.perform_ocr(img, key, output, det, rec, cls)
-            if det:
-                out_dict[key] = result
-            else:
-                rec_dict[key] = result
-                    
-        if rec_dict:
-            img = list(rec_dict.values())
-            if cls:
-                img, cls_res, elapse = self.text_classifier(img)
-                if not rec:
-                    if self.is_visualize:
-                        cls_list = [[k,v[0], v[1]] for k,v in zip(list(rec_dict.keys()), cls_res)]
-                        print("Classification Result:\n")
-                        from tabulate import tabulate
-                        headers = ["File Name", "Classification Result", "Score"]
-                        print(tabulate(cls_list, headers, tablefmt="fancy_grid"))
-                        
-                    if output:
-                        output_names = [f'{k}_{v[0]}.jpg' for k,v in zip(list(rec_dict.keys()), cls_res)]    
-                        for bno in range(len(img)):
-                            cv2.imwrite(os.path.join(output,output_names[bno]), img[bno])
-                        
-                    cls_output = {k:[v] for k,v in zip(list(rec_dict.keys()), cls_res)}       
-                    return cls_output               
-            if rec:    
-                rec_res, elapse = self.text_recognizer(img)
-                if self.is_visualize:
-                    rec_list = [[k,v[0], v[1]] for k,v in zip(list(rec_dict.keys()), rec_res)]
-                    print("Recognition Result:\n")
-                    from tabulate import tabulate
-                    headers = ["File Name", "Recognition Result", "Score"]
-                    print(tabulate(rec_list, headers, tablefmt="fancy_grid"))
-                                            
-                if output:
-                    output_names = [f'{k}_{v[0]}.jpg' for k,v in zip(list(rec_dict.keys()), rec_res)]    
-                    for bno in range(len(img)):
-                        cv2.imwrite(os.path.join(output,output_names[bno]), img[bno])
-                        
-                rec_output = {k:[v] for k,v in zip(list(rec_dict.keys()), rec_res)} 
-                return rec_output
-        else:
-            return out_dict
-
 
 def main():
     args = parse_args(mMain=True)
@@ -371,123 +254,7 @@ def main():
     if result is not None:
         for k,v in result.items():
             print(f'\n------------------------{k}:------------------------')
-            from tabulate import tabulate
             print(tabulate(v, tablefmt="fancy_grid"))
-            
-
-def download_with_progressbar(url, save_path):
-    print("Downloading '{}' to '{}'".format(url, save_path))
-    response = requests.get(url, stream=True)
-    total_size_in_bytes = int(response.headers.get('content-length', 0))
-    block_size = 1024  # 1 Kibibyte
-    progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
-    with open(save_path, 'wb') as file:
-        for data in response.iter_content(block_size):
-            progress_bar.update(len(data))
-            file.write(data)
-    progress_bar.close()
-    if total_size_in_bytes == 0 or progress_bar.n != total_size_in_bytes:
-        print("Something went wrong while downloading model.")
-        sys.exit(0)
-
-
-def maybe_download(model_storage_directory, url, force_download=False):
-    # using custom model
-    
-    fname = url.split('/')[-1][0:-4]
-    tmp_path = os.path.join(model_storage_directory, fname)
-    if force_download or not os.path.exists(tmp_path):
-        os.makedirs(tmp_path, exist_ok=True)
-        download_with_progressbar(url, tmp_path+'.zip')
-        
-        shutil.unpack_archive(tmp_path+'.zip', tmp_path, 'zip')
-        
-        os.remove(tmp_path+'.zip')
-        
-    return tmp_path
-
-def parse_args(mMain=True, add_help=True):
-    import argparse
-    
-    def str2bool(v):
-        return v.lower() in ("true", "t", "1")
-
-    if mMain:
-        parser = argparse.ArgumentParser()
-        
-        # params for prediction system
-        parser.add_argument("--hydra_conf_location", type=str, default=None)
-        parser.add_argument("--force_download", type=str2bool, default=False)
-        parser.add_argument("-i", "--input", type=str, required=True)
-        parser.add_argument("-o", "--output", type=str, default=None)
-        parser.add_argument("-d", "--device", type=str, default='cpu')
-        parser.add_argument("-l", "--lang", type=str, default='ch_sim')
-        parser.add_argument("--backend", type=str, default='torch')
-        parser.add_argument("--type", type=str, default='mobile')
-        parser.add_argument("--output_format", type=str, default='df')
-        parser.add_argument("--system_overrides", nargs='+', type=str, default=[])
-        parser.add_argument("--det", type=str2bool, default=True)
-        parser.add_argument("--rec", type=str2bool, default=True)
-        parser.add_argument("--cls", type=str2bool, default=False)
-        
-        
-        # params for detection engine
-        parser.add_argument("--det_algorithm", type=str, default='CRAFT')
-        parser.add_argument("--det_config_name", type=str, default='infer_det')
-        parser.add_argument("--det_model_location", type=str, default=None)
-        parser.add_argument("--det_batch_size", type=int, default=1) #batch_size is not yet implemented in the code
-        parser.add_argument("--det_overrides", nargs='+', type=str, default=[])
-        
-        # params for recogniton engine
-        parser.add_argument("--rec_algorithm", type=str, default='CRNN')
-        parser.add_argument("--rec_config_name", type=str, default='infer_rec')
-        parser.add_argument("--rec_model_location", type=str, default=None)
-        parser.add_argument("--rec_batch_size", type=int, default=8) 
-        parser.add_argument("--rec_overrides", nargs='+', type=str, default=[])
-        parser.add_argument("--rec_whitelist", type=str, default=None)
-        parser.add_argument("--rec_blacklist", type=str, default=None)
-        
-        # params for detection engine
-        parser.add_argument("--cls_algorithm", type=str, default='CLS')
-        parser.add_argument("--cls_config_name", type=str, default='infer_cls')
-        parser.add_argument("--cls_model_location", type=str, default=None)
-        parser.add_argument("--cls_batch_size", type=int, default=8)
-        parser.add_argument("--cls_overrides", nargs='+', type=str, default=[])
-
-        return parser.parse_args()
-    else:
-        return argparse.Namespace(
-            hydra_conf_location=None,
-            force_download=False,
-            d = 'cpu',
-            device='cpu',
-            l = 'ch_sim',
-            lang='ch_sim',
-            type='mobile',
-            backend='torch',
-            output_format='df',
-            system_overrides=[],
-            
-            det_algorithm='CRAFT',
-            det_config_name='infer_det',
-            det_model_location=None,
-            det_batch_size=1,
-            det_overrides=[],
-            
-            rec_algorithm='CRNN',
-            rec_config_name='infer_rec',
-            rec_model_location=None,
-            rec_batch_size=8,
-            rec_overrides=[],
-            rec_whitelist=None,
-            rec_blacklist=None,
-            
-            cls_algorithm='CLS',
-            cls_config_name='infer_cls',
-            cls_model_location=None,
-            cls_batch_size=8,
-            cls_overrides=[],
-        )
 
 
 model_urls = {
