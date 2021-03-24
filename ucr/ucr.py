@@ -19,6 +19,7 @@ import os
 from tabulate import tabulate
 from omegaconf import OmegaConf
 from hydra.experimental import compose, initialize_config_dir
+import torch
 
 from ucr.inference import infer_system
 from ucr.utils.utility import maybe_download
@@ -48,7 +49,7 @@ def parse_args(mMain=True, add_help=True):
         parser.add_argument("--force_download", type=str2bool, default=False)
         parser.add_argument("-i", "--input", type=str, required=True)
         parser.add_argument("-o", "--output", type=str, default=None)
-        parser.add_argument("-d", "--device", type=str, default='cpu')
+        parser.add_argument("-d", "--device", type=str, default='cuda')
         parser.add_argument("-l", "--lang", type=str, default='ch_sim')
         parser.add_argument("--backend", type=str, default='torch')
         parser.add_argument("--type", type=str, default='mobile')
@@ -88,8 +89,8 @@ def parse_args(mMain=True, add_help=True):
         return argparse.Namespace(
             hydra_conf_location=None,
             force_download=False,
-            d = 'cpu',
-            device='cpu',
+            d = 'cuda',
+            device='cuda',
             l = 'ch_sim',
             lang='ch_sim',
             type='mobile',
@@ -147,11 +148,16 @@ class UCR(infer_system.TextSystem):
                 print(f'WARNING: "l (={args.l})" argument is superseded by "lang (={args.lang})" argument! l=lang={lang}')
 
         device = args.d
-        if args.device!='cpu':
+        if args.device!='cuda':
             device = args.device
-            if args.d!='cpu':
+            if args.d!='cuda':
                 print(f'WARNING: "d (={args.d})" argument is superseded by "device (={args.device})" argument! d=device={device}')
 
+        if device == 'cuda' and not torch.cuda.is_available():
+            print(f'WARNING: Unable to load CUDA kernels. Check if NVIDIA GPU is available and CUDA installed.\n \
+                  Falling back to CPU execution.')
+            device = 'cpu'
+        
         if not conf_location:
             conf_location = maybe_download(os.path.join(BASE_DIR, '{}/conf'.format(VERSION)),model_urls['conf']['url'], force_download)
         
@@ -239,7 +245,7 @@ class UCR(infer_system.TextSystem):
         super().__init__(config)
     
     def predict(self, input=None, i=None, output=None, o=None, det=True, rec=True, cls=False):
-        super().__call__(input, i, output, o, det, rec, cls)
+        return super().__call__(input, i, output, o, det, rec, cls)
         
 
 def main():
