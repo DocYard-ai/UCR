@@ -134,7 +134,7 @@ def draw_ocr_box_txt(image,
             ],
             outline=color)
         else:
-            img_fraction = 1.05
+            img_fraction = 1
             # font_size=1
             font_change=False
             font_size = max(int(box_height * 0.8), 10)
@@ -148,13 +148,13 @@ def draw_ocr_box_txt(image,
                 font_size +=1
             font = ImageFont.truetype(font_path, font_size)
             draw_right.text(
-                [box[0][0]+3, box[0][1]+3], txt, fill=(0, 0, 0), font=font)
+                [box[0][0]+1, box[0][1]+1], txt, fill=(0, 0, 0), font=font)
 
             wid,het = font.getsize(txt)
             draw_right.polygon(
             [
-                box[0][0], box[0][1], box[0][0] + wid + 6, box[0][1], box[0][0] + wid + 6,
-                box[0][1] + het + 6, box[0][0], box[0][1] + het + 6
+                box[0][0], box[0][1], box[0][0] + wid, box[0][1], box[0][0] + wid,
+                box[0][1] + het + 2, box[0][0], box[0][1] + het + 2
             ],
             outline=color)
     img_left = Image.blend(image, img_left, 0.5)

@@ -7,5 +7,5 @@ Postprocess:
   xdilate: 9
   ydilate: 3
   xpad: 4
-  ypad: 2
+  ypad: 4
   rotated_box: False

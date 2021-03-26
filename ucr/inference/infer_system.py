@@ -179,7 +179,7 @@ class TextSystem(object):
                 if not os.path.exists(output):
                     os.makedirs(output)
                 img_path = os.path.join(output,
-                                        "ocr_{}".format(key))
+                                        "ocr_{}".format(key.split('/')[-1]))
                 cv2.imwrite(
                     img_path, draw_img[:, :, ::-1])
                 print("Saving OCR ouput in {}".format(
@@ -206,14 +206,14 @@ class TextSystem(object):
                     if not os.path.exists(output):
                         os.makedirs(output)
                     img_path = os.path.join(output,
-                                            "det_{}".format(key))
+                                            "det_{}".format(key.split('/')[-1]))
                     cv2.imwrite(img_path, src_im)
                     print("Detection output image is saved in {}".format(img_path))
             
             return value
         
     
-    def __call__(self, input=None, i=None, output=None, o=None, det=True, rec=True, cls=False):
+    def __call__(self, input=None, output=None, i=None, o=None, det=True, rec=True, cls=False):
         
         if input is not None:
             input = input

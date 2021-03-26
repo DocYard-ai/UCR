@@ -244,9 +244,8 @@ class UCR(infer_system.TextSystem):
         
         super().__init__(config)
     
-    def predict(self, input=None, i=None, output=None, o=None, det=True, rec=True, cls=False):
-        return super().__call__(input, i, output, o, det, rec, cls)
-        
+    def predict(self, input=None, output=None, i=None, o=None, det=True, rec=True, cls=False):
+        return super().__call__(input, output, i, o, det, rec, cls)
 
 def main():
     args = parse_args(mMain=True)
