@@ -267,7 +267,8 @@ class SEModule(nn.Module):
             stride=1,
             padding=0)
         self.relu=nn.ReLU(inplace=True)
-        self.hardsigmoid=HardSigmoid(slope=0.2,offset=0.5)
+        # self.hardsigmoid=HardSigmoid(slope=0.2,offset=0.5)
+        self.hardsigmoid = nn.Hardsigmoid(inplace=True)
         
     def forward(self, inputs):
         outputs = self.avg_pool(inputs)

@@ -79,7 +79,7 @@ class CRAFTPostProcess(object):
             
         return np.array(boxes, dtype=np.int16), scores
     
-    def boxes_from_bitmap(self, pred, _bitmap, dest_width, dest_height):
+    def boxes_from_bitmap1(self, pred, _bitmap, dest_width, dest_height):
         '''
         _bitmap: single map with shape (1, H, W),
                 whose values are binarized as {0, 1}
@@ -136,7 +136,7 @@ class CRAFTPostProcess(object):
             np.round(boxes[:,:, 1] / height * dest_height), 0, dest_height)
         return boxes, scores
 
-    def boxes_from_bitmap1(self, pred, _bitmap, dest_width, dest_height):
+    def boxes_from_bitmap(self, pred, _bitmap, dest_width, dest_height):
         '''
         _bitmap: single map with shape (1, H, W),
                 whose values are binarized as {0, 1}
