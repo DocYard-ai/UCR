@@ -84,7 +84,6 @@ markdown_extensions:
       generic: true
   - pymdownx.tasklist:
       custom_checkbox: true
-      clickable_checkbox: true
   - codehilite
   - pymdownx.highlight:
       use_pygments: true
@@ -120,6 +119,8 @@ extra_javascript:
 nav:
   - Home:
     - UCR: index.md
+    - TL;DR: coming_soon.md
+    - Model Zoo: pretrained.md
   - Installation: getting_started.md
   - Tutorials: coming_soon.md
   - How to Contribute!: coming_soon.md
