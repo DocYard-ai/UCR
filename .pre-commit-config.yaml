@@ -1,4 +1,4 @@
-exclude: 'conf|input|docs|output'
+exclude: 'conf|input|docs|output|ucr/utils/dict|ucr/utils/fonts'
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
