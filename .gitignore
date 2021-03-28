@@ -7,6 +7,7 @@ logs
 new
 # model dir
 models
+notebooks
 
 # training dirs/files (since wip)
 ucr/core/loss/

@@ -5,8 +5,8 @@ site_description: Universal Character Recognizer
 site_author: Abhigyan Raman
 
 #Repository
-repo_url: https://github.com/DocYardAI/UCR
-repo_name: DocYardAI/UCR
+repo_url: https://github.com/DocYard-ai/UCR
+repo_name: DocYard-ai/UCR
 edit_uri: "" #disables edit button
 
 # Copyright
@@ -91,56 +91,6 @@ markdown_extensions:
   - toc:
       toc_depth: 4
 
-# Extensions
-# markdown_extensions:
-#   - meta:
-#   - pymdownx.emoji:
-#       emoji_index: !!python/name:materialx.emoji.twemoji
-#       emoji_generator: !!python/name:materialx.emoji.to_svg
-#   - admonition: # alerts
-#   - pymdownx.details: #  collapsible alerts
-#   - pymdownx.superfences:
-#       preserve_tabs: true
-#       custom_fences:
-#         - name: mermaid
-#           class: mermaid
-#           format: !!python/name:pymdownx.superfences.fence_code_format
-#         - name: math
-#           class: arithmatex
-#           format: !!python/name:pymdownx.arithmatex.fence_mathjax_format # nest code and content inside alerts
-#   - attr_list: # add HTML and CSS to Markdown elements
-#   - pymdownx.inlinehilite:
-#       custom_inline:
-#         - name: math
-#           class: arithmatex
-#           format: !!python/name:pymdownx.arithmatex.inline_mathjax_format # inline code highlights
-#   - pymdownx.keys: # show keystroke symbols
-#   - pymdownx.snippets: # insert content from other files
-#   - pymdownx.tabbed: # content tabs
-#   - footnotes:
-#   - def_list:
-#   - pymdownx.smartsymbols:
-#   - pymdownx.mark:
-#   - pymdownx.magiclink:
-#       hide_protocol: true
-#       repo_url_shortener: true
-#       repo_url_shorthand: true
-#       social_url_shorthand: true
-#       social_url_shortener: true
-#       user: DocYard-ai
-#       repo: UCR
-#       normalize_issue_symbols: true
-#   - pymdownx.arithmatex: # mathjax
-#       generic: true
-#   - pymdownx.tasklist:
-#       custom_checkbox: true
-#       clickable_checkbox: true
-#   - codehilite:
-#   - pymdownx.highlight:
-#       use_pygments: true
-#   - toc:
-#       toc_depth: 4
-
 # Plugins
 plugins:
   - search
@@ -169,13 +119,28 @@ extra_javascript:
 # Page tree
 nav:
   - Home:
-      - UCR: index.md
+    - UCR: index.md
   - Installation: getting_started.md
   - Tutorials: coming_soon.md
   - How to Contribute!: coming_soon.md
-    # - Config: ucr/config.md
-    # - Data: ucr/data.md
-    # - Models: ucr/models.md
-    # - Training: ucr/train.md
-    # - Inference: ucr/predict.md
-    # - Utilities: ucr/utils.md
+  - Reference:
+    - Index: ucr/Index.md
+    - core: 
+      - preprocess: ucr/core/preprocess/index.md
+      - dataloader: ucr/core/dataloader/index.md
+      - architecture: 
+        - transform: ucr/core/architecture/transform/index.md
+        - backbone: ucr/core/architecture/backbone/index.md
+        - neck: ucr/core/architecture/neck/index.md
+        - head: ucr/core/architecture/head/index.md
+      - postprocess: ucr/core/postprocess/index.md
+    - inference: 
+      - infer_det: ucr/inference/infer_det.md
+      - infer_rec: ucr/inference/infer_rec.md
+      - infer_cls: ucr/inference/infer_cls.md
+      - infer_system: ucr/inference/infer_system.md
+    - utils:
+      - utility: ucr/utils/utility.md
+      - annotation: ucr/utils/annotation.md
+    - train: ucr/train.md
+    - ucr: ucr/ucr.md
