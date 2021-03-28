@@ -14,13 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from torch import nn
-import torch
 import numpy as np
+import torch
+from torch import nn
 
 __all__ = ["ResNetFPN"]
 
@@ -65,9 +63,9 @@ class ResNetFPN(nn.Module):
                 for i in range(self.depth[block]):
                     conv_ = "res" + str(block + 2) + chr(97 + i)
                     if i == 0 and block != 0:
-                        stride = (2, 1)
+                        pass
                     else:
-                        stride = (1, 1)
+                        pass
                     basic_block = BasicBlock(
                         in_channels=in_ch,
                         out_channels=num_filters[block],
@@ -185,7 +183,7 @@ class ShortCut(nn.Module):
         super(ShortCut, self).__init__()
         self.use_conv = True
 
-        if in_channels != out_channels or stride != 1 or is_first == True:
+        if in_channels != out_channels or stride != 1 or is_first:
             if stride == (1, 1):
                 self.conv = ConvBNLayer(in_channels, out_channels, 1, 1)
             else:  # stride==(2,2)

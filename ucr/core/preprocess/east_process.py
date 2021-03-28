@@ -15,11 +15,9 @@
 # limitations under the License.
 
 import math
+
 import cv2
 import numpy as np
-import json
-import sys
-import os
 
 __all__ = ["EASTProcessTrain"]
 
@@ -42,7 +40,7 @@ class EASTProcessTrain(object):
     def preprocess(self, im):
         input_size = self.input_size
         im_shape = im.shape
-        im_size_min = np.min(im_shape[0:2])
+        # im_size_min = np.min(im_shape[0:2])
         im_size_max = np.max(im_shape[0:2])
         im_scale = float(input_size) / float(im_size_max)
         im = cv2.resize(im, None, None, fx=im_scale, fy=im_scale)
@@ -135,7 +133,7 @@ class EASTProcessTrain(object):
             if abs(p_area) < 1:
                 continue
             if p_area > 0:
-                #'poly in wrong direction'
+                # 'poly in wrong direction'
                 if not tag:
                     tag = True  # reversed cases should be ignore
                 poly = poly[(0, 3, 2, 1), :]
@@ -179,7 +177,7 @@ class EASTProcessTrain(object):
         dist3 = np.linalg.norm(poly[1] - poly[2])
         if dist0 + dist1 > dist2 + dist3:
             # first move (p0, p1), (p2, p3), then (p0, p3), (p1, p2)
-            ## p0, p1
+            # p0, p1
             theta = np.arctan2(
                 (poly[1][1] - poly[0][1]), (poly[1][0] - poly[0][0])
             )
@@ -187,7 +185,7 @@ class EASTProcessTrain(object):
             poly[0][1] += R * r[0] * np.sin(theta)
             poly[1][0] -= R * r[1] * np.cos(theta)
             poly[1][1] -= R * r[1] * np.sin(theta)
-            ## p2, p3
+            # p2, p3
             theta = np.arctan2(
                 (poly[2][1] - poly[3][1]), (poly[2][0] - poly[3][0])
             )
@@ -195,7 +193,7 @@ class EASTProcessTrain(object):
             poly[3][1] += R * r[3] * np.sin(theta)
             poly[2][0] -= R * r[2] * np.cos(theta)
             poly[2][1] -= R * r[2] * np.sin(theta)
-            ## p0, p3
+            # p0, p3
             theta = np.arctan2(
                 (poly[3][0] - poly[0][0]), (poly[3][1] - poly[0][1])
             )
@@ -203,7 +201,7 @@ class EASTProcessTrain(object):
             poly[0][1] += R * r[0] * np.cos(theta)
             poly[3][0] -= R * r[3] * np.sin(theta)
             poly[3][1] -= R * r[3] * np.cos(theta)
-            ## p1, p2
+            # p1, p2
             theta = np.arctan2(
                 (poly[2][0] - poly[1][0]), (poly[2][1] - poly[1][1])
             )
@@ -212,7 +210,7 @@ class EASTProcessTrain(object):
             poly[2][0] -= R * r[2] * np.sin(theta)
             poly[2][1] -= R * r[2] * np.cos(theta)
         else:
-            ## p0, p3
+            # p0, p3
             # print poly
             theta = np.arctan2(
                 (poly[3][0] - poly[0][0]), (poly[3][1] - poly[0][1])
@@ -221,7 +219,7 @@ class EASTProcessTrain(object):
             poly[0][1] += R * r[0] * np.cos(theta)
             poly[3][0] -= R * r[3] * np.sin(theta)
             poly[3][1] -= R * r[3] * np.cos(theta)
-            ## p1, p2
+            # p1, p2
             theta = np.arctan2(
                 (poly[2][0] - poly[1][0]), (poly[2][1] - poly[1][1])
             )
@@ -229,7 +227,7 @@ class EASTProcessTrain(object):
             poly[1][1] += R * r[1] * np.cos(theta)
             poly[2][0] -= R * r[2] * np.sin(theta)
             poly[2][1] -= R * r[2] * np.cos(theta)
-            ## p0, p1
+            # p0, p1
             theta = np.arctan2(
                 (poly[1][1] - poly[0][1]), (poly[1][0] - poly[0][0])
             )
@@ -237,7 +235,7 @@ class EASTProcessTrain(object):
             poly[0][1] += R * r[0] * np.sin(theta)
             poly[1][0] -= R * r[1] * np.cos(theta)
             poly[1][1] -= R * r[1] * np.sin(theta)
-            ## p2, p3
+            # p2, p3
             theta = np.arctan2(
                 (poly[2][1] - poly[3][1]), (poly[2][0] - poly[3][0])
             )
@@ -414,7 +412,7 @@ class EASTProcessTrain(object):
         if np.sum((text_tags * 1.0)) >= text_tags.size:
             return None
         # pad and resize image
-        input_size = self.input_size
+        self.input_size
         im, ratio = self.preprocess(im)
         text_polys[:, :, 0] *= ratio
         text_polys[:, :, 1] *= ratio

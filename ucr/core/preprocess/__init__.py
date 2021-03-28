@@ -14,25 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
-from .iaa_augment import IaaAugment
-from .make_border_map import MakeBorderMap
-from .make_shrink_map import MakeShrinkMap
-from .random_crop_data import EastRandomCropData, PSERandomCrop
-
-from .rec_img_aug import RecAug, RecResizeImg, ClsResizeImg
-from .randaugment import RandAugment
-from .operators import *
-from .label_ops import *
-
-from .east_process import *
-from .sast_process import *
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import copy
+
+from .east_process import *
+from .iaa_augment import IaaAugment
+from .label_ops import *
+from .make_border_map import MakeBorderMap
+from .make_shrink_map import MakeShrinkMap
+from .operators import *
+from .randaugment import RandAugment
+from .random_crop_data import EastRandomCropData, PSERandomCrop
+from .rec_img_aug import ClsResizeImg, RecAug, RecResizeImg
+from .sast_process import *
 
 __all__ = ["build_preprocess", "preprocess"]
 

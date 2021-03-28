@@ -14,34 +14,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-from tqdm import tqdm
-import cv2
 import copy
+import os
+import sys
+
+import cv2
+import hydra
 import numpy as np
 import pandas as pd
-
-from PIL import Image
-import hydra
-from omegaconf import OmegaConf
 from hydra.experimental import compose, initialize_config_dir
-
-import sys
+from omegaconf import OmegaConf
+from PIL import Image
+from tqdm import tqdm
 
 __dir__ = os.path.dirname(__file__)
 sys.path.append(os.path.join(__dir__, "../.."))
 
-import ucr.inference.infer_rec as infer_rec
-import ucr.inference.infer_det as infer_det
 import ucr.inference.infer_cls as infer_cls
+import ucr.inference.infer_det as infer_det
+import ucr.inference.infer_rec as infer_rec
+from ucr.utils.annotation import draw_ocr_box_txt, draw_text_det_res
 from ucr.utils.utility import (
-    get_image_file_list,
     check_and_read_gif,
     download_with_progressbar,
+    get_image_file_list,
     merge_text_boxes,
     sorted_boxes,
 )
-from ucr.utils.annotation import draw_ocr_box_txt, draw_text_det_res
 
 
 class TextSystem(object):

@@ -14,15 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from PIL import Image, ImageEnhance, ImageOps
-import numpy as np
 import random
+
+import numpy as np
 import six
+from PIL import Image, ImageEnhance, ImageOps
 
 
 class RawRandAugment(object):

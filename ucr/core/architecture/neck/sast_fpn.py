@@ -14,13 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 
 
 class ConvBNLayer(nn.Module):
@@ -86,7 +84,9 @@ class DeConvBNLayer(nn.Module):
             bias=False,
         )
 
-        self.bn = nn.BatchNorm2d(out_channels,)
+        self.bn = nn.BatchNorm2d(
+            out_channels,
+        )
         if self.act == "relu":
             self.relu = nn.ReLU(inplace=True)
 

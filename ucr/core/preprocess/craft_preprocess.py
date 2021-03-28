@@ -1,7 +1,7 @@
 # Copyright (c) 2020 FSMLP Authors. All Rights Reserved.
 
-import numpy as np
 import cv2
+import numpy as np
 
 
 class CRAFTPreprocessTest(object):

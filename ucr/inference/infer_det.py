@@ -14,18 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-import numpy as np
-import hydra
-from hydra.core.global_hydra import GlobalHydra
-from omegaconf import OmegaConf
+import logging
 import os
 import sys
 import time
-import logging
+
+import hydra
+import numpy as np
+from hydra.core.global_hydra import GlobalHydra
+from omegaconf import OmegaConf
 from tqdm import tqdm
 
 log = logging.getLogger(__name__)
@@ -35,11 +34,12 @@ sys.path.append(os.path.abspath(os.path.join(__dir__, "../..")))
 
 import cv2
 import torch
+
 import ucr.utils.annotation as utility
-from ucr.utils.utility import get_image_file_list, check_and_read_gif
-from ucr.core.preprocess import build_preprocess, preprocess
-from ucr.core.postprocess import build_postprocess
 from ucr.core.architecture import build_architecture
+from ucr.core.postprocess import build_postprocess
+from ucr.core.preprocess import build_preprocess, preprocess
+from ucr.utils.utility import check_and_read_gif, get_image_file_list
 
 
 class TextDetector(object):

@@ -1,11 +1,11 @@
 # Copyright (c) 2020 FSMLP Authors. All Rights Reserved.
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 
+import math
+
+import cv2
 import numpy as np
 import torch
-import cv2
-import math
 
 
 class CRAFTPostProcess(object):
@@ -55,7 +55,7 @@ class CRAFTPostProcess(object):
             cv2.CHAIN_APPROX_SIMPLE,
         )
         if len(outs) == 3:
-            img, contours, _ = outs[0], outs[1], outs[2]
+            _, contours, _ = outs[0], outs[1], outs[2]
         elif len(outs) == 2:
             contours, _ = outs[0], outs[1]
 
@@ -106,7 +106,7 @@ class CRAFTPostProcess(object):
             cv2.CHAIN_APPROX_SIMPLE,
         )
         if len(outs) == 3:
-            img, contours, _ = outs[0], outs[1], outs[2]
+            _, contours, _ = outs[0], outs[1], outs[2]
         elif len(outs) == 2:
             contours, _ = outs[0], outs[1]
 
@@ -246,8 +246,8 @@ class CRAFTPostProcess(object):
         return boxes, scores
 
     def unclip(self, box):
-        from shapely.geometry import Polygon
         import pyclipper
+        from shapely.geometry import Polygon
 
         unclip_ratio = 1.1
         poly = Polygon(box)

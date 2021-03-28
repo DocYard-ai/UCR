@@ -14,10 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import copy
 
@@ -25,16 +27,16 @@ __all__ = ["build_postprocess"]
 
 
 def build_postprocess(config, global_config=None):
+    from .cls_postprocess import ClsPostProcess
     from .craft_postprocess import CRAFTPostProcess
     from .db_postprocess import DBPostProcess
     from .east_postprocess import EASTPostProcess
-    from .sast_postprocess import SASTPostProcess
     from .rec_postprocess import (
-        CTCLabelDecode,
         AttnLabelDecode,
+        CTCLabelDecode,
         SRNLabelDecode,
     )
-    from .cls_postprocess import ClsPostProcess
+    from .sast_postprocess import SASTPostProcess
 
     support_dict = [
         "CRAFTPostProcess",

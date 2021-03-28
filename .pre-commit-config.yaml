@@ -1,15 +1,14 @@
-exclude: 'conf|input|docs|output|ucr/utils/dict|ucr/utils/fonts'
+exclude: 'conf|input|docs|logs|models|output|ucr/utils/dict|ucr/utils/fonts'
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v1.2.3
     hooks:
       - id: trailing-whitespace
+      - id: mixed-line-ending      
       - id: end-of-file-fixer
       - id: check-added-large-files
         args: [--maxkb=15000]
-      - id: check-yaml
-        exclude: "mkdocs.yml"
 
   - repo: https://github.com/ambv/black
     rev: stable

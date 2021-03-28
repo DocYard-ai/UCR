@@ -14,17 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
+
+from collections import OrderedDict
 
 import torch
 from torch import nn
 from torch.nn import functional as F
-from .self_attention import WrapEncoderForFeature
-from .self_attention import WrapEncoder
 
-from collections import OrderedDict
+from .self_attention import WrapEncoder, WrapEncoderForFeature
 
 gradient_clip = 10
 
@@ -49,7 +47,6 @@ class PVAM(nn.Module):
         self.hidden_dims = hidden_dims
         # Transformer encoder
         t = 256
-        c = 512
         self.wrap_encoder_for_feature = WrapEncoderForFeature(
             src_vocab_size=1,
             max_length=t,
@@ -70,7 +67,8 @@ class PVAM(nn.Module):
         # PVAM
         self.flatten0 = nn.Flatten(start_dim=0, end_dim=1)
         self.fc0 = nn.Linear(
-            in_features=in_channels, out_features=in_channels,
+            in_features=in_channels,
+            out_features=in_channels,
         )
         self.emb = nn.Embedding(
             num_embeddings=self.max_length, embedding_dim=in_channels
@@ -213,7 +211,8 @@ class GSRM(nn.Module):
         pad = nn.ConstantPad1d((0, 1), value=0.0)
         gsrm_feature2 = pad(gsrm_feature2.permute(0, 2, 1)).permute(0, 2, 1)
         gsrm_feature2 = gsrm_feature2[
-            :, 1:,
+            :,
+            1:,
         ]
         gsrm_features = gsrm_feature1 + gsrm_feature2
 

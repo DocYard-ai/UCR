@@ -15,11 +15,12 @@
 # limitations under the License.
 
 import math
-import cv2
-import numpy as np
 import random
 
-from .text_image_aug import tia_perspective, tia_stretch, tia_distort
+import cv2
+import numpy as np
+
+from .text_image_aug import tia_distort, tia_perspective, tia_stretch
 
 
 class RecAug(object):
@@ -352,7 +353,12 @@ def get_warpR(config):
         [
             [1, 0, 0, 0],
             [0, np.cos(rad(anglex)), -np.sin(rad(anglex)), 0],
-            [0, -np.sin(rad(anglex)), np.cos(rad(anglex)), 0,],
+            [
+                0,
+                -np.sin(rad(anglex)),
+                np.cos(rad(anglex)),
+                0,
+            ],
             [0, 0, 0, 1],
         ],
         np.float32,
@@ -361,7 +367,12 @@ def get_warpR(config):
         [
             [np.cos(rad(angley)), 0, np.sin(rad(angley)), 0],
             [0, 1, 0, 0],
-            [-np.sin(rad(angley)), 0, np.cos(rad(angley)), 0,],
+            [
+                -np.sin(rad(angley)),
+                0,
+                np.cos(rad(angley)),
+                0,
+            ],
             [0, 0, 0, 1],
         ],
         np.float32,
@@ -408,7 +419,7 @@ def get_warpR(config):
         dy = -r1
         T1 = np.float32([[1.0, 0, dx], [0, 1.0, dy], [0, 0, 1.0 / ratio]])
         ret = T1.dot(warpR)
-    except:
+    except Exception:
         ratio = 1.0
         T1 = np.float32([[1.0, 0, 0], [0, 1.0, 0], [0, 0, 1.0]])
         ret = T1

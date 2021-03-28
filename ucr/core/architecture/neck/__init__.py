@@ -21,8 +21,8 @@ def build_neck(config):
     from .craft_fpn import CRAFTFPN
     from .db_fpn import DBFPN
     from .east_fpn import EASTFPN
-    from .sast_fpn import SASTFPN
     from .rnn import SequenceEncoder
+    from .sast_fpn import SASTFPN
 
     support_dict = [
         "CRAFTFPN",

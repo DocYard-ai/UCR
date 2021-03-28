@@ -14,15 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-import numpy as np
 import cv2
+import numpy as np
+import pyclipper
 import torch
 from shapely.geometry import Polygon
-import pyclipper
 
 
 class DBPostProcess(object):
@@ -64,7 +62,7 @@ class DBPostProcess(object):
             cv2.CHAIN_APPROX_SIMPLE,
         )
         if len(outs) == 3:
-            img, contours, _ = outs[0], outs[1], outs[2]
+            _, contours, _ = outs[0], outs[1], outs[2]
         elif len(outs) == 2:
             contours, _ = outs[0], outs[1]
 

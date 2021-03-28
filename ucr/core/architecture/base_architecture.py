@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 
 from torch import nn
-from ucr.core.architecture.transform import build_transform
+
 from ucr.core.architecture.backbone import build_backbone
-from ucr.core.architecture.neck import build_neck
 from ucr.core.architecture.head import build_head
+from ucr.core.architecture.neck import build_neck
+from ucr.core.architecture.transform import build_transform
 
 __all__ = ["BaseArchitecture"]
 

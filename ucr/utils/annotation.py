@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import math
 import os
+import sys
+
 import cv2
 import numpy as np
-import json
 from PIL import Image, ImageDraw, ImageFont
-import math
-
-import sys
 
 __dir__ = os.path.dirname(__file__)
 sys.path.append(os.path.join(__dir__, "../.."))

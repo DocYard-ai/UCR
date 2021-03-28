@@ -14,15 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import math
+
+import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
-import numpy as np
 
 
 class ConvBNLayer(nn.Module):
@@ -93,7 +92,7 @@ class LocalizationNetwork(nn.Module):
             in_channels = num_filters
             self.block_list.append(pool)
         name = "loc_fc1"
-        stdv = 1.0 / math.sqrt(num_filters_list[-1] * 1.0)
+        1.0 / math.sqrt(num_filters_list[-1] * 1.0)
         self.fc1 = nn.Linear(in_channels, fc_dim)
 
         # Init fc2 in LocalizationNetwork
@@ -105,14 +104,13 @@ class LocalizationNetwork(nn.Module):
 
     def forward(self, x):
         """
-           Estimating parameters of geometric transformation
-           Args:
-               image: input
-           Return:
-               batch_C_prime: the matrix of the geometric transformation
+        Estimating parameters of geometric transformation
+        Args:
+            image: input
+        Return:
+            batch_C_prime: the matrix of the geometric transformation
         """
-        B = x.shape[0]
-        i = 0
+        x.shape[0]
         for block in self.block_list:
             x = block(x)
         x = x.squeeze(2).squeeze(2)
@@ -141,7 +139,6 @@ class GridGenerator(nn.Module):
         self.eps = 1e-6
         self.F = num_fiducial
 
-        name = "ex_fc"
         # initializer = nn.initializer.Constant(value=0.0)
         self.fc = nn.Linear(in_channels, 6)
 
@@ -237,7 +234,7 @@ class GridGenerator(nn.Module):
 
     def build_P_hat_torch(self, C, P):
         F = self.F
-        eps = self.eps
+        self.eps
         n = P.shape[0]  # n (= self.I_r_width x self.I_r_height)
         # P_tile: n x 2 -> n x 1 x 2 -> n x F x 2
         P_tile = np.tile(

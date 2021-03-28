@@ -14,9 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import torch
 import torch.nn as nn
@@ -64,7 +62,6 @@ class AttentionHead(nn.Module):
             probs = None
             # probs = torch.zeros((batch_size, num_steps, self.num_classes)).type_as(inputs)
             char_onehots = None
-            outputs = None
             alpha = None
 
             for i in range(num_steps):

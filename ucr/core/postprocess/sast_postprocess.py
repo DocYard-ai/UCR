@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import sys
+
 import numpy as np
-from .locality_aware_nms import nms_locality
 import torch
+
+from .locality_aware_nms import nms_locality
 
 
 class SASTPostProcess(object):
@@ -67,7 +67,7 @@ class SASTPostProcess(object):
     def shrink_quad_along_width(
         self, quad, begin_width_ratio=0.0, end_width_ratio=1.0
     ):
-        """ 
+        """
         Generate shrink_quad_along_width.
         """
         ratio_pair = np.array(

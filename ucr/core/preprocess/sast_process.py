@@ -15,11 +15,9 @@
 # limitations under the License.
 
 import math
+
 import cv2
 import numpy as np
-import json
-import sys
-import os
 
 __all__ = ["SASTProcessTrain"]
 
@@ -64,7 +62,7 @@ class SASTProcessTrain(object):
             rect = cv2.minAreaRect(
                 poly.astype(np.int32)
             )  # (center (x,y), (width, height), angle of rotation)
-            center_point = rect[0]
+            rect[0]
             box = np.array(cv2.boxPoints(rect))
 
             first_point_idx = 0
@@ -110,7 +108,7 @@ class SASTProcessTrain(object):
                 print("invalid poly")
                 continue
             if p_area > 0:
-                if tag == False:
+                if not tag:
                     print("poly in wrong direction")
                     tag = True  # reversed cases should be ignore
                 poly = poly[
@@ -221,8 +219,7 @@ class SASTProcessTrain(object):
         return im, polys, tags, hv_tags
 
     def generate_direction_map(self, poly_quads, direction_map):
-        """
-        """
+        """"""
         width_list = []
         height_list = []
         for quad in poly_quads:
@@ -266,8 +263,7 @@ class SASTProcessTrain(object):
         return direction_map
 
     def calculate_average_height(self, poly_quads):
-        """
-        """
+        """"""
         height_list = []
         for quad in poly_quads:
             quad_h = (
@@ -294,14 +290,26 @@ class SASTProcessTrain(object):
         h, w = int(h * ds_ratio), int(w * ds_ratio)
         polys = polys * ds_ratio
 
-        score_map = np.zeros((h, w,), dtype=np.float32)
+        score_map = np.zeros(
+            (
+                h,
+                w,
+            ),
+            dtype=np.float32,
+        )
         tbo_map = np.zeros((h, w, 5), dtype=np.float32)
-        training_mask = np.ones((h, w,), dtype=np.float32)
-        direction_map = np.ones((h, w, 3)) * np.array([0, 0, 1]).reshape(
-            [1, 1, 3]
-        ).astype(np.float32)
+        training_mask = np.ones(
+            (
+                h,
+                w,
+            ),
+            dtype=np.float32,
+        )
+        _ = np.ones((h, w, 3)) * np.array([0, 0, 1]).reshape([1, 1, 3]).astype(
+            np.float32
+        )
 
-        for poly_idx, poly_tag in enumerate(zip(polys, tags)):
+        for _, poly_tag in enumerate(zip(polys, tags)):
             poly = poly_tag[0]
             tag = poly_tag[1]
 
@@ -387,7 +395,7 @@ class SASTProcessTrain(object):
 
         for poly, poly_tag in zip(polys, tags):
 
-            if poly_tag == True:
+            if poly_tag:
                 continue
 
             # adjust point order for vertical poly
@@ -696,7 +704,7 @@ class SASTProcessTrain(object):
             line = self.theta_line_cross_point(angle, point)
             cross_point_upper = self.line_cross_point(up_line, line)
             cross_point_lower = self.line_cross_point(lower_line, line)
-            ##FIX, offset reverse
+            # FIX, offset reverse
             upper_offset_x, upper_offset_y = cross_point_upper - point
             lower_offset_x, lower_offset_y = cross_point_lower - point
             tbo_map[y, x, 0] = upper_offset_y

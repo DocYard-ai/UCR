@@ -14,13 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
-import os
-from torch.utils.data import Dataset
-from ucr.core.preprocess import preprocess
-import lmdb
-import cv2
 import logging
+import os
+
+import cv2
+import lmdb
+import numpy as np
+from torch.utils.data import Dataset
+
+from ucr.core.preprocess import preprocess
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +31,7 @@ class LMDBDateSet(Dataset):
     def __init__(self, config, build_preprocess, logger):
         super(LMDBDateSet, self).__init__()
 
-        batch_size = config["batch_size_per_card"]
+        config["batch_size_per_card"]
         data_dir = config["data_dir"]
         self.do_shuffle = config["shuffle"]
 

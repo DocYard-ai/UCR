@@ -1,17 +1,19 @@
 # -*- coding:utf-8 -*-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-import numpy as np
 import cv2
+import numpy as np
 
 np.seterr(divide="ignore", invalid="ignore")
+import warnings
+
 import pyclipper
 from shapely.geometry import Polygon
-import sys
-import warnings
 
 warnings.simplefilter("ignore")
 
@@ -58,7 +60,7 @@ class MakeBorderMap(object):
             * (1 - np.power(self.shrink_ratio, 2))
             / polygon_shape.length
         )
-        subject = [tuple(l) for l in polygon]
+        subject = [tuple(text) for text in polygon]
         padding = pyclipper.PyclipperOffset()
         padding.AddPath(
             subject, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON

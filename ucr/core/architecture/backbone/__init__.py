@@ -20,15 +20,15 @@ __all__ = ["build_backbone"]
 def build_backbone(config, model_type):
     if model_type == "det":
         from .det_mobilenet_v3 import MobileNetV3
-        from .det_vgg16_bn import VGG16_BN
         from .det_resnet_vd import ResNet
         from .det_resnet_vd_sast import ResNet_SAST
+        from .det_vgg16_bn import VGG16_BN
 
         support_dict = ["VGG16_BN", "MobileNetV3", "ResNet", "ResNet_SAST"]
     elif model_type == "rec" or model_type == "cls":
         from .rec_mobilenet_v3 import MobileNetV3
-        from .rec_resnet_vd import ResNet
         from .rec_resnet_fpn import ResNetFPN
+        from .rec_resnet_vd import ResNet
 
         support_dict = ["MobileNetV3", "ResNet", "ResNetFPN"]
     else:

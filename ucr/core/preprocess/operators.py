@@ -15,15 +15,18 @@
 # limitations under the License.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import sys
-import six
+
 import cv2
 import numpy as np
+import six
 
 
 class DecodeImage(object):
@@ -63,8 +66,7 @@ class DecodeImage(object):
 
 
 class NormalizeImage(object):
-    """ normalize image such as substract mean, divide std
-    """
+    """normalize image such as substract mean, divide std"""
 
     def __init__(self, scale=None, mean=None, std=None, order="chw", **kwargs):
         if isinstance(scale, str):
@@ -94,8 +96,7 @@ class NormalizeImage(object):
 
 
 class ToCHWImage(object):
-    """ convert hwc image to chw image
-    """
+    """convert hwc image to chw image"""
 
     def __init__(self, **kwargs):
         pass
@@ -201,7 +202,7 @@ class DetResizeForTest(object):
             if int(resize_w) <= 0 or int(resize_h) <= 0:
                 return None, (None, None)
             img = cv2.resize(img, (int(resize_w), int(resize_h)))
-        except:
+        except Exception:
             sys.exit(0)
         ratio_h = resize_h / float(h)
         ratio_w = resize_w / float(w)

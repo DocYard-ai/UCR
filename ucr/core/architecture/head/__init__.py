@@ -19,18 +19,17 @@ __all__ = ["build_head"]
 
 def build_head(config):
     # det head
+    # cls head
+    from .cls_head import ClsHead
     from .det_craft_head import CRAFTHead
     from .det_db_head import DBHead
     from .det_east_head import EASTHead
     from .det_sast_head import SASTHead
+    from .rec_att_head import AttentionHead
 
     # rec head
     from .rec_ctc_head import CTCHead
-    from .rec_att_head import AttentionHead
     from .rec_srn_head import SRNHead
-
-    # cls head
-    from .cls_head import ClsHead
 
     support_dict = [
         "CRAFTHead",

@@ -14,35 +14,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-import numpy as np
-import hydra
-from hydra.core.global_hydra import GlobalHydra
-from omegaconf import OmegaConf
+import logging
 import os
 import sys
-import logging
+
+import hydra
+import numpy as np
+from hydra.core.global_hydra import GlobalHydra
+from omegaconf import OmegaConf
 
 log = logging.getLogger(__name__)
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.append(os.path.abspath(os.path.join(__dir__, "../..")))
 
-from tqdm import tqdm
-import cv2
 import time
 import traceback
-import torch
 
-import ucr.utils.annotation as utility
+import cv2
+import torch
+from tqdm import tqdm
+
 from ucr.core.architecture import build_architecture
 from ucr.core.postprocess import build_postprocess
 from ucr.core.preprocess import build_preprocess, preprocess
-from ucr.utils.utility import get_image_file_list, check_and_read_gif
 from ucr.core.preprocess.label_ops import BaseRecLabelEncode
+from ucr.utils.utility import check_and_read_gif, get_image_file_list
 
 
 class TextRecognizer(object):
@@ -236,7 +235,7 @@ def main(cfg):
         img_list.append(img)
     try:
         rec_res, predict_time = text_recognizer(img_list)
-    except:
+    except Exception:
         log.error(traceback.format_exc())
         log.error(
             "ERROR!!!! \n"

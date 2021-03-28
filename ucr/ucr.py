@@ -16,10 +16,10 @@
 
 import os
 
-from tabulate import tabulate
-from omegaconf import OmegaConf
-from hydra.experimental import compose, initialize_config_dir
 import torch
+from hydra.experimental import compose, initialize_config_dir
+from omegaconf import OmegaConf
+from tabulate import tabulate
 
 from ucr.inference import infer_system
 from ucr.utils.utility import maybe_download
@@ -139,8 +139,8 @@ class UCR(infer_system.TextSystem):
         force_download = args.force_download
         conf_location = args.hydra_conf_location
         det_algorithm = args.det_algorithm
-        rec_algorithm = args.rec_algorithm
-        cls_algorithm = args.cls_algorithm
+        args.rec_algorithm
+        args.cls_algorithm
 
         type = args.type
         backend = args.backend
@@ -149,7 +149,7 @@ class UCR(infer_system.TextSystem):
         lang = args.l
         if args.lang != "ch_sim":
             lang = args.lang
-            if args.l != "ch_sim":
+            if lang != "ch_sim":
                 print(
                     f'WARNING: "l (={args.l})" argument is superseded by "lang (={args.lang})" argument! l=lang={lang}'
                 )
@@ -157,14 +157,14 @@ class UCR(infer_system.TextSystem):
         device = args.d
         if args.device != "cuda":
             device = args.device
-            if args.d != "cuda":
+            if device != "cuda":
                 print(
                     f'WARNING: "d (={args.d})" argument is superseded by "device (={args.device})" argument! d=device={device}'
                 )
 
         if device == "cuda" and not torch.cuda.is_available():
             print(
-                f"WARNING: Unable to load CUDA kernels. Check if NVIDIA GPU is available and CUDA installed.\n \
+                "WARNING: Unable to load CUDA kernels. Check if NVIDIA GPU is available and CUDA installed.\n \
                   Falling back to CPU execution."
             )
             device = "cpu"

@@ -14,16 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import imghdr
 import logging
 import os
-import imghdr
-import cv2
-import logging
 import shutil
-import requests
 import sys
-from tqdm import tqdm
+
+import cv2
 import numpy as np
+import requests
+from tqdm import tqdm
 
 log = logging.getLogger(__name__)
 

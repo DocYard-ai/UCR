@@ -1,13 +1,15 @@
 # -*- coding:utf-8 -*-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-import numpy as np
 import cv2
-from shapely.geometry import Polygon
+import numpy as np
 import pyclipper
+from shapely.geometry import Polygon
 
 __all__ = ["MakeShrinkMap"]
 
@@ -50,7 +52,7 @@ class MakeShrinkMap(object):
                     * (1 - np.power(self.shrink_ratio, 2))
                     / polygon_shape.length
                 )
-                subject = [tuple(l) for l in text_polys[i]]
+                subject = [tuple(text) for text in text_polys[i]]
                 padding = pyclipper.PyclipperOffset()
                 padding.AddPath(
                     subject, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON

@@ -14,17 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-import numpy as np
-from .locality_aware_nms import nms_locality
+import sys
+
 import cv2
+import numpy as np
 import torch
 
-import os
-import sys
+from .locality_aware_nms import nms_locality
 
 
 class EASTPostProcess(object):

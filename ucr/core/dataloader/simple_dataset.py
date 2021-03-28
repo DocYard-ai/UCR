@@ -14,12 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
+import logging
 import os
 import random
+
+import numpy as np
 from torch.utils.data import Dataset
+
 from ucr.core.preprocess import preprocess
-import logging
 
 log = logging.getLogger(__name__)
 

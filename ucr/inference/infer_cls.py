@@ -14,18 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-import hydra
-from hydra.core.global_hydra import GlobalHydra
-from omegaconf import OmegaConf
-import numpy as np
-import traceback
+import logging
 import os
 import sys
-import logging
+import traceback
+
+import hydra
+import numpy as np
+from hydra.core.global_hydra import GlobalHydra
+from omegaconf import OmegaConf
 from tqdm import tqdm
 
 log = logging.getLogger(__name__)
@@ -34,15 +33,16 @@ __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.append(os.path.abspath(os.path.join(__dir__, "../..")))
 
-import torch
-import cv2
 import copy
 import time
 
-from ucr.core.preprocess import build_preprocess, preprocess
-from ucr.core.postprocess import build_postprocess
+import cv2
+import torch
+
 from ucr.core.architecture import build_architecture
-from ucr.utils.utility import get_image_file_list, check_and_read_gif
+from ucr.core.postprocess import build_postprocess
+from ucr.core.preprocess import build_preprocess, preprocess
+from ucr.utils.utility import check_and_read_gif, get_image_file_list
 
 
 class TextClassifier(object):
@@ -155,7 +155,7 @@ def main(cfg):
         img_list.append(img)
     try:
         img_list, cls_res, predict_time = text_classifier(img_list)
-    except:
+    except Exception:
         log.error(traceback.format_exc())
         log.error(
             "ERROR!!!! \n"

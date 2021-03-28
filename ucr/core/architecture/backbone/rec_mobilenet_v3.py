@@ -17,8 +17,8 @@
 from torch import nn
 
 from ucr.core.architecture.backbone.det_mobilenet_v3 import (
-    ResidualUnit,
     ConvBNLayer,
+    ResidualUnit,
     make_divisible,
 )
 
@@ -41,21 +41,25 @@ class MobileNetV3(nn.Module):
         if large_stride is None:
             large_stride = [1, 2, 2, 2]
 
-        assert isinstance(large_stride, list), (
-            "large_stride type must "
-            "be list but got {}".format(type(large_stride))
+        assert isinstance(
+            large_stride, list
+        ), "large_stride type must " "be list but got {}".format(
+            type(large_stride)
         )
-        assert isinstance(small_stride, list), (
-            "small_stride type must "
-            "be list but got {}".format(type(small_stride))
+        assert isinstance(
+            small_stride, list
+        ), "small_stride type must " "be list but got {}".format(
+            type(small_stride)
         )
-        assert len(large_stride) == 4, (
-            "large_stride length must be "
-            "4 but got {}".format(len(large_stride))
+        assert (
+            len(large_stride) == 4
+        ), "large_stride length must be " "4 but got {}".format(
+            len(large_stride)
         )
-        assert len(small_stride) == 4, (
-            "small_stride length must be "
-            "4 but got {}".format(len(small_stride))
+        assert (
+            len(small_stride) == 4
+        ), "small_stride length must be " "4 but got {}".format(
+            len(small_stride)
         )
 
         if model_name == "large":

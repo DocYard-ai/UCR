@@ -14,13 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import division, print_function, unicode_literals
 
-import numpy as np
 import imgaug
 import imgaug.augmenters as iaa
+import numpy as np
 
 
 class AugmenterBuilder(object):

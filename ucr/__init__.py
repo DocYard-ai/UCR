@@ -15,5 +15,5 @@
 # limitations under the License.
 
 __all__ = ["UCR", "draw_ocr"]
-from ucr.utils.annotation import draw_ocr
 from ucr.ucr import UCR
+from ucr.utils.annotation import draw_ocr
