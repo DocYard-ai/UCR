@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__all__ = ['build_head']
+__all__ = ["build_head"]
 
 
 def build_head(config):
@@ -31,13 +31,21 @@ def build_head(config):
 
     # cls head
     from .cls_head import ClsHead
+
     support_dict = [
-        'CRAFTHead', 'DBHead', 'EASTHead', 'SASTHead', 'CTCHead', 'ClsHead', 'AttentionHead',
-        'SRNHead'
+        "CRAFTHead",
+        "DBHead",
+        "EASTHead",
+        "SASTHead",
+        "CTCHead",
+        "ClsHead",
+        "AttentionHead",
+        "SRNHead",
     ]
 
-    module_name = config.pop('name')
-    assert module_name in support_dict, Exception('head only support {}'.format(
-        support_dict))
+    module_name = config.pop("name")
+    assert module_name in support_dict, Exception(
+        "head only support {}".format(support_dict)
+    )
     module_class = eval(module_name)(**config)
     return module_class

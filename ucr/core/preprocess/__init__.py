@@ -34,26 +34,28 @@ from .sast_process import *
 
 import copy
 
-__all__ = ['build_preprocess', 'preprocess']
+__all__ = ["build_preprocess", "preprocess"]
 
 
 def build_preprocess(config, global_config=None):
-    
+
     config = copy.deepcopy(config)
-    assert isinstance(config, list), ('operator config should be a list')
+    assert isinstance(config, list), "operator config should be a list"
     ops = []
     for preprocess in config:
-        assert isinstance(preprocess,
-                          dict) and len(preprocess) == 1, "yaml format error"
-        
+        assert (
+            isinstance(preprocess, dict) and len(preprocess) == 1
+        ), "yaml format error"
+
         op_name = list(preprocess)[0]
         param = {} if preprocess[op_name] is None else preprocess[op_name]
         if global_config is not None:
             param.update(global_config)
         op = eval(op_name)(**param)
         ops.append(op)
-        
+
     return ops
+
 
 def preprocess(data, ops=None):
     """ preprocess """

@@ -24,10 +24,8 @@ from torch import nn
 class CTCHead(nn.Module):
     def __init__(self, in_channels, out_channels, fc_decay=0.0004, **kwargs):
         super(CTCHead, self).__init__()
-        
-        self.fc = nn.Linear(
-            in_channels,
-            out_channels)
+
+        self.fc = nn.Linear(in_channels, out_channels)
         self.softmax = nn.Softmax(dim=2)
         self.out_channels = out_channels
 

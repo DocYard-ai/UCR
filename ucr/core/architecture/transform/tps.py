@@ -26,14 +26,16 @@ import numpy as np
 
 
 class ConvBNLayer(nn.Module):
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride=1,
-                 groups=1,
-                 act=None,
-                 name=None):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride=1,
+        groups=1,
+        act=None,
+        name=None,
+    ):
         super(ConvBNLayer, self).__init__()
         self.act = act
         self.conv = nn.Conv2d(
@@ -43,17 +45,18 @@ class ConvBNLayer(nn.Module):
             stride=stride,
             padding=(kernel_size - 1) // 2,
             groups=groups,
-            bias=False)
-  
+            bias=False,
+        )
+
         self.bn = nn.BatchNorm2d(out_channels)
-        
-        if self.act=='relu':
-            self.relu=nn.ReLU(inplace=True)
+
+        if self.act == "relu":
+            self.relu = nn.ReLU(inplace=True)
 
     def forward(self, inputs):
         y = self.conv(inputs)
         y = self.bn(y)
-        if self.act=='relu':
+        if self.act == "relu":
             y = self.relu(y)
         return y
 
@@ -75,14 +78,13 @@ class LocalizationNetwork(nn.Module):
             num_filters = num_filters_list[fno]
             name = "loc_conv%d" % fno
             conv = ConvBNLayer(
-                    in_channels=in_channels,
-                    out_channels=num_filters,
-                    kernel_size=3,
-                    act='relu',
-                    name=name)
-            self.add_module(
-                name,
-                conv)
+                in_channels=in_channels,
+                out_channels=num_filters,
+                kernel_size=3,
+                act="relu",
+                name=name,
+            )
+            self.add_module(name, conv)
             self.block_list.append(conv)
             if fno == len(num_filters_list) - 1:
                 pool = nn.AdaptiveAvgPool2d(1)
@@ -92,17 +94,13 @@ class LocalizationNetwork(nn.Module):
             self.block_list.append(pool)
         name = "loc_fc1"
         stdv = 1.0 / math.sqrt(num_filters_list[-1] * 1.0)
-        self.fc1 = nn.Linear(
-            in_channels,
-            fc_dim)
+        self.fc1 = nn.Linear(in_channels, fc_dim)
 
         # Init fc2 in LocalizationNetwork
         # initial_bias = self.get_initial_fiducials()
         # initial_bias = initial_bias.view(-1)
         name = "loc_fc2"
-        self.fc2 = nn.Linear(
-            fc_dim,
-            F * 2)
+        self.fc2 = nn.Linear(fc_dim, F * 2)
         self.out_channels = F * 2
 
     def forward(self, x):
@@ -145,9 +143,7 @@ class GridGenerator(nn.Module):
 
         name = "ex_fc"
         # initializer = nn.initializer.Constant(value=0.0)
-        self.fc = nn.Linear(
-            in_channels,
-            6)
+        self.fc = nn.Linear(in_channels, 6)
 
     def forward(self, batch_C_prime, I_r_size):
         """
@@ -161,8 +157,16 @@ class GridGenerator(nn.Module):
         C = self.build_C_torch()
         P = self.build_P_torch(I_r_size)
 
-        inv_delta_C_tensor = torch.tensor(self.build_inv_delta_C_torch(C)).float().type_as(batch_C_prime)
-        P_hat_tensor = torch.tensor(self.build_P_hat_torch(C, P)).float().type_as(batch_C_prime)
+        inv_delta_C_tensor = (
+            torch.tensor(self.build_inv_delta_C_torch(C))
+            .float()
+            .type_as(batch_C_prime)
+        )
+        P_hat_tensor = (
+            torch.tensor(self.build_P_hat_torch(C, P))
+            .float()
+            .type_as(batch_C_prime)
+        )
 
         inv_delta_C_tensor.detach()
         P_hat_tensor.detach()
@@ -172,7 +176,8 @@ class GridGenerator(nn.Module):
         batch_C_ex_part_tensor.detach()
 
         batch_C_prime_with_zeros = torch.cat(
-            (batch_C_prime, batch_C_ex_part_tensor), dim=1)
+            (batch_C_prime, batch_C_ex_part_tensor), dim=1
+        )
         batch_T = torch.matmul(inv_delta_C_tensor, batch_C_prime_with_zeros)
         batch_P_prime = torch.matmul(P_hat_tensor, batch_T)
         return batch_P_prime
@@ -190,13 +195,18 @@ class GridGenerator(nn.Module):
 
     def build_P_torch(self, I_r_size):
         I_r_height, I_r_width = I_r_size
-        I_r_grid_x = (np.arange(-I_r_width, I_r_width, 2) + 1.0) / I_r_width  # self.I_r_width
-        I_r_grid_y = (np.arange(-I_r_height, I_r_height, 2) + 1.0) / I_r_height  # self.I_r_height
+        I_r_grid_x = (
+            np.arange(-I_r_width, I_r_width, 2) + 1.0
+        ) / I_r_width  # self.I_r_width
+        I_r_grid_y = (
+            np.arange(-I_r_height, I_r_height, 2) + 1.0
+        ) / I_r_height  # self.I_r_height
         P = np.stack(  # self.I_r_width x self.I_r_height x 2
-            np.meshgrid(I_r_grid_x, I_r_grid_y),
-            axis=2
+            np.meshgrid(I_r_grid_x, I_r_grid_y), axis=2
         )
-        return torch.as_tensor(P.reshape([-1, 2]))  # n (= self.I_r_width x self.I_r_height) x 2
+        return torch.as_tensor(
+            P.reshape([-1, 2])
+        )  # n (= self.I_r_width x self.I_r_height) x 2
 
     def build_inv_delta_C_torch(self, C):
         """ Return inv_delta_C which is needed to calculate T """
@@ -213,10 +223,14 @@ class GridGenerator(nn.Module):
         delta_C = np.concatenate(  # F+3 x F+3
             [
                 np.concatenate([np.ones((F, 1)), C, hat_C], axis=1),  # F x F+3
-                np.concatenate([np.zeros((2, 3)), np.transpose(C)], axis=1),  # 2 x F+3
-                np.concatenate([np.zeros((1, 3)), np.ones((1, F))], axis=1)  # 1 x F+3
+                np.concatenate(
+                    [np.zeros((2, 3)), np.transpose(C)], axis=1
+                ),  # 2 x F+3
+                np.concatenate(
+                    [np.zeros((1, 3)), np.ones((1, F))], axis=1
+                ),  # 1 x F+3
             ],
-            axis=0
+            axis=0,
         )
         inv_delta_C = np.linalg.inv(delta_C)
         return torch.as_tensor(inv_delta_C)  # F+3 x F+3
@@ -226,11 +240,17 @@ class GridGenerator(nn.Module):
         eps = self.eps
         n = P.shape[0]  # n (= self.I_r_width x self.I_r_height)
         # P_tile: n x 2 -> n x 1 x 2 -> n x F x 2
-        P_tile = np.tile(np.expand_dims(P, axis=1), (1, F, 1))  # n x 2 -> n x 1 x 2 -> n x F x 2
+        P_tile = np.tile(
+            np.expand_dims(P, axis=1), (1, F, 1)
+        )  # n x 2 -> n x 1 x 2 -> n x F x 2
         C_tile = np.expand_dims(C, axis=0)  # 1 x F x 2
         P_diff = P_tile - C_tile  # n x F x 2
-        rbf_norm = np.linalg.norm(P_diff, ord=2, axis=2, keepdims=False)  # n x F
-        rbf = np.multiply(np.square(rbf_norm), np.log(rbf_norm + self.eps))  # n x F
+        rbf_norm = np.linalg.norm(
+            P_diff, ord=2, axis=2, keepdims=False
+        )  # n x F
+        rbf = np.multiply(
+            np.square(rbf_norm), np.log(rbf_norm + self.eps)
+        )  # n x F
         P_hat = np.concatenate([np.ones((n, 1)), P, rbf], axis=1)
         return torch.as_tensor(P_hat)  # n x F+3
 
@@ -245,10 +265,12 @@ class GridGenerator(nn.Module):
 class TPS(nn.Module):
     def __init__(self, in_channels, num_fiducial, loc_lr, model_name):
         super(TPS, self).__init__()
-        self.loc_net = LocalizationNetwork(in_channels, num_fiducial, loc_lr,
-                                           model_name)
-        self.grid_generator = GridGenerator(self.loc_net.out_channels,
-                                            num_fiducial)
+        self.loc_net = LocalizationNetwork(
+            in_channels, num_fiducial, loc_lr, model_name
+        )
+        self.grid_generator = GridGenerator(
+            self.loc_net.out_channels, num_fiducial
+        )
         self.out_channels = in_channels
 
     def forward(self, image):
@@ -256,6 +278,9 @@ class TPS(nn.Module):
         batch_C_prime = self.loc_net(image)
         batch_P_prime = self.grid_generator(batch_C_prime, image.shape[2:])
         batch_P_prime = batch_P_prime.view(
-            -1, image.shape[2], image.shape[3], 2)
-        batch_I_r = F.grid_sample(image, grid=batch_P_prime, align_corners=True)
+            -1, image.shape[2], image.shape[3], 2
+        )
+        batch_I_r = F.grid_sample(
+            image, grid=batch_P_prime, align_corners=True
+        )
         return batch_I_r

@@ -24,16 +24,18 @@ import torch.nn.functional as F
 
 
 class ConvBNLayer(nn.Module):
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 groups=1,
-                 if_act=True,
-                 act=None,
-                 name=None):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride,
+        padding,
+        groups=1,
+        if_act=True,
+        act=None,
+        name=None,
+    ):
         super(ConvBNLayer, self).__init__()
         self.if_act = if_act
         self.act = act
@@ -44,35 +46,37 @@ class ConvBNLayer(nn.Module):
             stride=stride,
             padding=padding,
             groups=groups,
-            bias=False)
-  
-        self.bn = nn.BatchNorm2d(
-            out_channels)
-        
-        if self.act=='relu':
-            self.relu=nn.ReLU(inplace=True)
+            bias=False,
+        )
+
+        self.bn = nn.BatchNorm2d(out_channels)
+
+        if self.act == "relu":
+            self.relu = nn.ReLU(inplace=True)
 
     def forward(self, inputs):
         y = self.conv(inputs)
         y = self.bn(y)
-        if self.act=='relu':
+        if self.act == "relu":
             y = self.relu(y)
         return y
-    
+
 
 class DeConvBNLayer(nn.Module):
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 groups=1,
-                 if_act=True,
-                 act=None,
-                 name=None):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride,
+        padding,
+        groups=1,
+        if_act=True,
+        act=None,
+        name=None,
+    ):
         super(DeConvBNLayer, self).__init__()
-        
+
         self.act = act
         self.deconv = nn.ConvTranspose2d(
             in_channels=in_channels,
@@ -81,18 +85,17 @@ class DeConvBNLayer(nn.Module):
             stride=stride,
             padding=padding,
             groups=groups,
-            bias=False)
+            bias=False,
+        )
 
-        self.bn = nn.BatchNorm2d(
-            out_channels,
-            )
-        if self.act=='relu':
-            self.relu=nn.ReLU(inplace=True)
+        self.bn = nn.BatchNorm2d(out_channels,)
+        if self.act == "relu":
+            self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
         x = self.deconv(x)
         x = self.bn(x)
-        if self.act=='relu':
+        if self.act == "relu":
             x = self.relu(x)
         return x
 
@@ -107,54 +110,61 @@ class EASTFPN(nn.Module):
             self.out_channels = 64
         self.in_channels = in_channels[::-1]
         self.h1_conv = ConvBNLayer(
-            in_channels=self.out_channels+self.in_channels[1],
+            in_channels=self.out_channels + self.in_channels[1],
             out_channels=self.out_channels,
             kernel_size=3,
             stride=1,
             padding=1,
-            act='relu')
+            act="relu",
+        )
         self.h2_conv = ConvBNLayer(
-            in_channels=self.out_channels+self.in_channels[2],
+            in_channels=self.out_channels + self.in_channels[2],
             out_channels=self.out_channels,
             kernel_size=3,
             stride=1,
             padding=1,
-            act='relu')
+            act="relu",
+        )
         self.h3_conv = ConvBNLayer(
-            in_channels=self.out_channels+self.in_channels[3],
+            in_channels=self.out_channels + self.in_channels[3],
             out_channels=self.out_channels,
             kernel_size=3,
             stride=1,
             padding=1,
-            act='relu')
+            act="relu",
+        )
         self.g0_deconv = DeConvBNLayer(
             in_channels=self.in_channels[0],
             out_channels=self.out_channels,
             kernel_size=4,
             stride=2,
             padding=1,
-            act='relu')
+            act="relu",
+        )
         self.g1_deconv = DeConvBNLayer(
             in_channels=self.out_channels,
             out_channels=self.out_channels,
             kernel_size=4,
             stride=2,
             padding=1,
-            act='relu')
+            act="relu",
+        )
         self.g2_deconv = DeConvBNLayer(
             in_channels=self.out_channels,
             out_channels=self.out_channels,
             kernel_size=4,
             stride=2,
             padding=1,
-            act='relu')
+            act="relu",
+        )
         self.g3_conv = ConvBNLayer(
             in_channels=self.out_channels,
             out_channels=self.out_channels,
             kernel_size=3,
             stride=1,
             padding=1,
-            act='relu')
+            act="relu",
+        )
 
     def forward(self, x):
         f = x[::-1]

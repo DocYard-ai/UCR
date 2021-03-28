@@ -28,9 +28,9 @@ class RecAug(object):
         self.aug_prob = aug_prob
 
     def __call__(self, data):
-        img = data['image']
+        img = data["image"]
         img = warp(img, 10, self.use_tia, self.aug_prob)
-        data['image'] = img
+        data["image"] = img
         return data
 
 
@@ -39,29 +39,27 @@ class ClsResizeImg(object):
         self.image_shape = image_shape
 
     def __call__(self, data):
-        img = data['image']
+        img = data["image"]
         norm_img = resize_norm_img(img, self.image_shape)
-        data['image'] = norm_img
+        data["image"] = norm_img
         return data
 
 
 class RecResizeImg(object):
-    def __init__(self,
-                 image_shape,
-                 infer_mode=False,
-                 character_type='ch',
-                 **kwargs):
+    def __init__(
+        self, image_shape, infer_mode=False, character_type="ch", **kwargs
+    ):
         self.image_shape = image_shape
         self.infer_mode = infer_mode
         self.character_type = character_type
 
     def __call__(self, data):
-        img = data['image']
+        img = data["image"]
         if self.infer_mode and self.character_type == "ch":
             norm_img = resize_norm_img_chinese(img, self.image_shape)
         else:
             norm_img = resize_norm_img(img, self.image_shape)
-        data['image'] = norm_img
+        data["image"] = norm_img
         return data
 
 
@@ -72,16 +70,22 @@ class SRNRecResizeImg(object):
         self.max_text_length = max_text_length
 
     def __call__(self, data):
-        img = data['image']
+        img = data["image"]
         norm_img = resize_norm_img_srn(img, self.image_shape)
-        data['image'] = norm_img
-        [encoder_word_pos, gsrm_word_pos, gsrm_slf_attn_bias1, gsrm_slf_attn_bias2] = \
-            srn_other_inputs(self.image_shape, self.num_heads, self.max_text_length)
+        data["image"] = norm_img
+        [
+            encoder_word_pos,
+            gsrm_word_pos,
+            gsrm_slf_attn_bias1,
+            gsrm_slf_attn_bias2,
+        ] = srn_other_inputs(
+            self.image_shape, self.num_heads, self.max_text_length
+        )
 
-        data['encoder_word_pos'] = encoder_word_pos
-        data['gsrm_word_pos'] = gsrm_word_pos
-        data['gsrm_slf_attn_bias1'] = gsrm_slf_attn_bias1
-        data['gsrm_slf_attn_bias2'] = gsrm_slf_attn_bias2
+        data["encoder_word_pos"] = encoder_word_pos
+        data["gsrm_word_pos"] = gsrm_word_pos
+        data["gsrm_slf_attn_bias1"] = gsrm_slf_attn_bias1
+        data["gsrm_slf_attn_bias2"] = gsrm_slf_attn_bias2
         return data
 
 
@@ -95,7 +99,7 @@ def resize_norm_img(img, image_shape):
     else:
         resized_w = int(math.ceil(imgH * ratio))
     resized_image = cv2.resize(img, (resized_w, imgH))
-    resized_image = resized_image.astype('float32')
+    resized_image = resized_image.astype("float32")
     if image_shape[0] == 1:
         resized_image = resized_image / 255
         resized_image = resized_image[np.newaxis, :]
@@ -121,7 +125,7 @@ def resize_norm_img_chinese(img, image_shape):
     else:
         resized_w = int(math.ceil(imgH * ratio))
     resized_image = cv2.resize(img, (resized_w, imgH))
-    resized_image = resized_image.astype('float32')
+    resized_image = resized_image.astype("float32")
     if image_shape[0] == 1:
         resized_image = resized_image / 255
         resized_image = resized_image[np.newaxis, :]
@@ -152,7 +156,7 @@ def resize_norm_img_srn(img, image_shape):
 
     img_np = np.asarray(img_new)
     img_np = cv2.cvtColor(img_np, cv2.COLOR_BGR2GRAY)
-    img_black[:, 0:img_np.shape[1]] = img_np
+    img_black[:, 0 : img_np.shape[1]] = img_np
     img_black = img_black[:, :, np.newaxis]
 
     row, col, c = img_black.shape
@@ -166,25 +170,37 @@ def srn_other_inputs(image_shape, num_heads, max_text_length):
     imgC, imgH, imgW = image_shape
     feature_dim = int((imgH / 8) * (imgW / 8))
 
-    encoder_word_pos = np.array(range(0, feature_dim)).reshape(
-        (feature_dim, 1)).astype('int64')
-    gsrm_word_pos = np.array(range(0, max_text_length)).reshape(
-        (max_text_length, 1)).astype('int64')
+    encoder_word_pos = (
+        np.array(range(0, feature_dim))
+        .reshape((feature_dim, 1))
+        .astype("int64")
+    )
+    gsrm_word_pos = (
+        np.array(range(0, max_text_length))
+        .reshape((max_text_length, 1))
+        .astype("int64")
+    )
 
     gsrm_attn_bias_data = np.ones((1, max_text_length, max_text_length))
     gsrm_slf_attn_bias1 = np.triu(gsrm_attn_bias_data, 1).reshape(
-        [1, max_text_length, max_text_length])
-    gsrm_slf_attn_bias1 = np.tile(gsrm_slf_attn_bias1,
-                                  [num_heads, 1, 1]) * [-1e9]
+        [1, max_text_length, max_text_length]
+    )
+    gsrm_slf_attn_bias1 = np.tile(gsrm_slf_attn_bias1, [num_heads, 1, 1]) * [
+        -1e9
+    ]
 
     gsrm_slf_attn_bias2 = np.tril(gsrm_attn_bias_data, -1).reshape(
-        [1, max_text_length, max_text_length])
-    gsrm_slf_attn_bias2 = np.tile(gsrm_slf_attn_bias2,
-                                  [num_heads, 1, 1]) * [-1e9]
+        [1, max_text_length, max_text_length]
+    )
+    gsrm_slf_attn_bias2 = np.tile(gsrm_slf_attn_bias2, [num_heads, 1, 1]) * [
+        -1e9
+    ]
 
     return [
-        encoder_word_pos, gsrm_word_pos, gsrm_slf_attn_bias1,
-        gsrm_slf_attn_bias2
+        encoder_word_pos,
+        gsrm_word_pos,
+        gsrm_slf_attn_bias1,
+        gsrm_slf_attn_bias2,
     ]
 
 
@@ -227,7 +243,7 @@ def jitter(img):
         s = int(random.random() * thres * 0.01)
         src_img = img.copy()
         for i in range(s):
-            img[i:, i:, :] = src_img[:w - i, :h - i, :]
+            img[i:, i:, :] = src_img[: w - i, : h - i, :]
         return img
     else:
         return img
@@ -238,7 +254,7 @@ def add_gasuss_noise(image, mean=0, var=0.1):
     Gasuss noise
     """
 
-    noise = np.random.normal(mean, var**0.5, image.shape)
+    noise = np.random.normal(mean, var ** 0.5, image.shape)
     out = image + 0.5 * noise
     out = np.clip(out, 0, 255)
     out = np.uint8(out)
@@ -259,7 +275,7 @@ def get_crop(image):
     if ratio:
         crop_img = crop_img[top_crop:h, :, :]
     else:
-        crop_img = crop_img[0:h - top_crop, :, :]
+        crop_img = crop_img[0 : h - top_crop, :, :]
     return crop_img
 
 
@@ -318,30 +334,47 @@ def get_warpR(config):
     """
     get_warpR
     """
-    anglex, angley, anglez, fov, w, h, r = \
-        config.anglex, config.angley, config.anglez, config.fov, config.w, config.h, config.r
+    anglex, angley, anglez, fov, w, h, r = (
+        config.anglex,
+        config.angley,
+        config.anglez,
+        config.fov,
+        config.w,
+        config.h,
+        config.r,
+    )
     if w > 69 and w < 112:
         anglex = anglex * 1.5
 
-    z = np.sqrt(w**2 + h**2) / 2 / np.tan(rad(fov / 2))
+    z = np.sqrt(w ** 2 + h ** 2) / 2 / np.tan(rad(fov / 2))
     # Homogeneous coordinate transformation matrix
-    rx = np.array([[1, 0, 0, 0],
-                   [0, np.cos(rad(anglex)), -np.sin(rad(anglex)), 0], [
-                       0,
-                       -np.sin(rad(anglex)),
-                       np.cos(rad(anglex)),
-                       0,
-                   ], [0, 0, 0, 1]], np.float32)
-    ry = np.array([[np.cos(rad(angley)), 0, np.sin(rad(angley)), 0],
-                   [0, 1, 0, 0], [
-                       -np.sin(rad(angley)),
-                       0,
-                       np.cos(rad(angley)),
-                       0,
-                   ], [0, 0, 0, 1]], np.float32)
-    rz = np.array([[np.cos(rad(anglez)), np.sin(rad(anglez)), 0, 0],
-                   [-np.sin(rad(anglez)), np.cos(rad(anglez)), 0, 0],
-                   [0, 0, 1, 0], [0, 0, 0, 1]], np.float32)
+    rx = np.array(
+        [
+            [1, 0, 0, 0],
+            [0, np.cos(rad(anglex)), -np.sin(rad(anglex)), 0],
+            [0, -np.sin(rad(anglex)), np.cos(rad(anglex)), 0,],
+            [0, 0, 0, 1],
+        ],
+        np.float32,
+    )
+    ry = np.array(
+        [
+            [np.cos(rad(angley)), 0, np.sin(rad(angley)), 0],
+            [0, 1, 0, 0],
+            [-np.sin(rad(angley)), 0, np.cos(rad(angley)), 0,],
+            [0, 0, 0, 1],
+        ],
+        np.float32,
+    )
+    rz = np.array(
+        [
+            [np.cos(rad(anglez)), np.sin(rad(anglez)), 0, 0],
+            [-np.sin(rad(anglez)), np.cos(rad(anglez)), 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ],
+        np.float32,
+    )
     r = rx.dot(ry).dot(rz)
     # generate 4 points
     pcenter = np.array([h / 2, w / 2, 0, 0], np.float32)
@@ -373,11 +406,11 @@ def get_warpR(config):
 
         dx = -c1
         dy = -r1
-        T1 = np.float32([[1., 0, dx], [0, 1., dy], [0, 0, 1.0 / ratio]])
+        T1 = np.float32([[1.0, 0, dx], [0, 1.0, dy], [0, 0, 1.0 / ratio]])
         ret = T1.dot(warpR)
     except:
         ratio = 1.0
-        T1 = np.float32([[1., 0, 0], [0, 1., 0], [0, 0, 1.]])
+        T1 = np.float32([[1.0, 0, 0], [0, 1.0, 0], [0, 0, 1.0]])
         ret = T1
     return ret, (-r1, -c1), ratio, dst
 
@@ -387,8 +420,13 @@ def get_warpAffine(config):
     get_warpAffine
     """
     anglez = config.anglez
-    rz = np.array([[np.cos(rad(anglez)), np.sin(rad(anglez)), 0],
-                   [-np.sin(rad(anglez)), np.cos(rad(anglez)), 0]], np.float32)
+    rz = np.array(
+        [
+            [np.cos(rad(anglez)), np.sin(rad(anglez)), 0],
+            [-np.sin(rad(anglez)), np.cos(rad(anglez)), 0],
+        ],
+        np.float32,
+    )
     return rz
 
 

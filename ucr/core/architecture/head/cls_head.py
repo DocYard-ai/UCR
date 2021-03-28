@@ -35,9 +35,7 @@ class ClsHead(nn.Module):
     def __init__(self, in_channels, class_dim, **kwargs):
         super(ClsHead, self).__init__()
         self.pool = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Linear(
-            in_channels,
-            class_dim)
+        self.fc = nn.Linear(in_channels, class_dim)
 
     def forward(self, x):
         x = self.pool(x)

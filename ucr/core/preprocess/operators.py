@@ -29,32 +29,36 @@ import numpy as np
 class DecodeImage(object):
     """ decode image """
 
-    def __init__(self, img_mode='RGB', channel_first=False, **kwargs):
+    def __init__(self, img_mode="RGB", channel_first=False, **kwargs):
         self.img_mode = img_mode
         self.channel_first = channel_first
 
     def __call__(self, data):
-        img = data['image']
+        img = data["image"]
         if six.PY2:
-            assert type(img) is str and len(
-                img) > 0, "invalid input 'img' in DecodeImage"
+            assert (
+                type(img) is str and len(img) > 0
+            ), "invalid input 'img' in DecodeImage"
         else:
-            assert type(img) is bytes and len(
-                img) > 0, "invalid input 'img' in DecodeImage"
-        img = np.frombuffer(img, dtype='uint8')
+            assert (
+                type(img) is bytes and len(img) > 0
+            ), "invalid input 'img' in DecodeImage"
+        img = np.frombuffer(img, dtype="uint8")
         img = cv2.imdecode(img, 1)
         if img is None:
             return None
-        if self.img_mode == 'GRAY':
+        if self.img_mode == "GRAY":
             img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        elif self.img_mode == 'RGB':
-            assert img.shape[2] == 3, 'invalid shape of image[%s]' % (img.shape)
+        elif self.img_mode == "RGB":
+            assert img.shape[2] == 3, "invalid shape of image[%s]" % (
+                img.shape
+            )
             img = img[:, :, ::-1]
 
         if self.channel_first:
             img = img.transpose((2, 0, 1))
 
-        data['image'] = img
+        data["image"] = img
         return data
 
 
@@ -62,27 +66,30 @@ class NormalizeImage(object):
     """ normalize image such as substract mean, divide std
     """
 
-    def __init__(self, scale=None, mean=None, std=None, order='chw', **kwargs):
+    def __init__(self, scale=None, mean=None, std=None, order="chw", **kwargs):
         if isinstance(scale, str):
             scale = eval(scale)
         self.scale = np.float32(scale if scale is not None else 1.0 / 255.0)
         mean = mean if mean is not None else [0.485, 0.456, 0.406]
         std = std if std is not None else [0.229, 0.224, 0.225]
 
-        shape = (3, 1, 1) if order == 'chw' else (1, 1, 3)
-        self.mean = np.array(mean).reshape(shape).astype('float32')
-        self.std = np.array(std).reshape(shape).astype('float32')
+        shape = (3, 1, 1) if order == "chw" else (1, 1, 3)
+        self.mean = np.array(mean).reshape(shape).astype("float32")
+        self.std = np.array(std).reshape(shape).astype("float32")
 
     def __call__(self, data):
-        img = data['image']
+        img = data["image"]
         from PIL import Image
+
         if isinstance(img, Image.Image):
             img = np.array(img)
 
-        assert isinstance(img,
-                          np.ndarray), "invalid input 'img' in NormalizeImage"
-        data['image'] = (
-            img.astype('float32') * self.scale - self.mean) / self.std
+        assert isinstance(
+            img, np.ndarray
+        ), "invalid input 'img' in NormalizeImage"
+        data["image"] = (
+            img.astype("float32") * self.scale - self.mean
+        ) / self.std
         return data
 
 
@@ -94,11 +101,12 @@ class ToCHWImage(object):
         pass
 
     def __call__(self, data):
-        img = data['image']
+        img = data["image"]
         from PIL import Image
+
         if isinstance(img, Image.Image):
             img = np.array(img)
-        data['image'] = img.transpose((2, 0, 1))
+        data["image"] = img.transpose((2, 0, 1))
         return data
 
 
@@ -117,21 +125,21 @@ class DetResizeForTest(object):
     def __init__(self, **kwargs):
         super(DetResizeForTest, self).__init__()
         self.resize_type = 0
-        if 'image_shape' in kwargs:
-            self.image_shape = kwargs['image_shape']
+        if "image_shape" in kwargs:
+            self.image_shape = kwargs["image_shape"]
             self.resize_type = 1
-        elif 'limit_side_len' in kwargs:
-            self.limit_side_len = kwargs['limit_side_len']
-            self.limit_type = kwargs.get('limit_type', 'min')
-        elif 'resize_long' in kwargs:
+        elif "limit_side_len" in kwargs:
+            self.limit_side_len = kwargs["limit_side_len"]
+            self.limit_type = kwargs.get("limit_type", "min")
+        elif "resize_long" in kwargs:
             self.resize_type = 2
-            self.resize_long = kwargs.get('resize_long', 960)
+            self.resize_long = kwargs.get("resize_long", 960)
         else:
             self.limit_side_len = 736
-            self.limit_type = 'min'
+            self.limit_type = "min"
 
     def __call__(self, data):
-        img = data['image']
+        img = data["image"]
         src_h, src_w, _ = img.shape
 
         if self.resize_type == 0:
@@ -142,8 +150,8 @@ class DetResizeForTest(object):
         else:
             # img, shape = self.resize_image_type1(img)
             img, [ratio_h, ratio_w] = self.resize_image_type1(img)
-        data['image'] = img
-        data['shape'] = np.array([src_h, src_w, ratio_h, ratio_w])
+        data["image"] = img
+        data["shape"] = np.array([src_h, src_w, ratio_h, ratio_w])
         return data
 
     def resize_image_type1(self, img):
@@ -167,14 +175,14 @@ class DetResizeForTest(object):
         h, w, _ = img.shape
 
         # limit the max side
-        if self.limit_type == 'max':
+        if self.limit_type == "max":
             if max(h, w) > limit_side_len:
                 if h > w:
                     ratio = float(limit_side_len) / h
                 else:
                     ratio = float(limit_side_len) / w
             else:
-                ratio = 1.
+                ratio = 1.0
         else:
             if min(h, w) < limit_side_len:
                 if h < w:
@@ -182,7 +190,7 @@ class DetResizeForTest(object):
                 else:
                     ratio = float(limit_side_len) / w
             else:
-                ratio = 1.
+                ratio = 1.0
         resize_h = int(h * ratio)
         resize_w = int(w * ratio)
 

@@ -30,33 +30,39 @@ class DBPostProcess(object):
     The post process for Differentiable Binarization (DB).
     """
 
-    def __init__(self,
-                 thresh=0.3,
-                 box_thresh=0.7,
-                 max_candidates=1000,
-                 unclip_ratio=2.0,
-                 use_dilation=False,
-                 **kwargs):
+    def __init__(
+        self,
+        thresh=0.3,
+        box_thresh=0.7,
+        max_candidates=1000,
+        unclip_ratio=2.0,
+        use_dilation=False,
+        **kwargs
+    ):
         self.thresh = thresh
         self.box_thresh = box_thresh
         self.max_candidates = max_candidates
         self.unclip_ratio = unclip_ratio
         self.min_size = 3
-        self.dilation_kernel = None if not use_dilation else np.array(
-            [[1, 1], [1, 1]])
+        self.dilation_kernel = (
+            None if not use_dilation else np.array([[1, 1], [1, 1]])
+        )
 
     def boxes_from_bitmap(self, pred, _bitmap, dest_width, dest_height):
-        '''
+        """
         _bitmap: single map with shape (1, H, W),
                 whose values are binarized as {0, 1}
-        '''
+        """
 
         bitmap = _bitmap
         height, width = bitmap.shape
         contours = None
 
-        outs = cv2.findContours((bitmap * 255).astype(np.uint8), cv2.RETR_LIST,
-                                cv2.CHAIN_APPROX_SIMPLE)
+        outs = cv2.findContours(
+            (bitmap * 255).astype(np.uint8),
+            cv2.RETR_LIST,
+            cv2.CHAIN_APPROX_SIMPLE,
+        )
         if len(outs) == 3:
             img, contours, _ = outs[0], outs[1], outs[2]
         elif len(outs) == 2:
@@ -83,9 +89,11 @@ class DBPostProcess(object):
             box = np.array(box)
 
             box[:, 0] = np.clip(
-                np.round(box[:, 0] / width * dest_width), 0, dest_width)
+                np.round(box[:, 0] / width * dest_width), 0, dest_width
+            )
             box[:, 1] = np.clip(
-                np.round(box[:, 1] / height * dest_height), 0, dest_height)
+                np.round(box[:, 1] / height * dest_height), 0, dest_height
+            )
             boxes.append(box.astype(np.int16))
             scores.append(score)
         return np.array(boxes, dtype=np.int16), scores
@@ -118,7 +126,10 @@ class DBPostProcess(object):
             index_3 = 2
 
         box = [
-            points[index_1], points[index_2], points[index_3], points[index_4]
+            points[index_1],
+            points[index_2],
+            points[index_3],
+            points[index_4],
         ]
         return box, min(bounding_box[1])
 
@@ -134,10 +145,10 @@ class DBPostProcess(object):
         box[:, 0] = box[:, 0] - xmin
         box[:, 1] = box[:, 1] - ymin
         cv2.fillPoly(mask, box.reshape(1, -1, 2).astype(np.int32), 1)
-        return cv2.mean(bitmap[ymin:ymax + 1, xmin:xmax + 1], mask)[0]
+        return cv2.mean(bitmap[ymin : ymax + 1, xmin : xmax + 1], mask)[0]
 
     def __call__(self, outs_dict, shape_list):
-        pred = outs_dict['maps']
+        pred = outs_dict["maps"]
         if torch.is_tensor(pred):
             pred = pred.numpy()
         pred = pred[:, 0, :, :]
@@ -149,12 +160,14 @@ class DBPostProcess(object):
             if self.dilation_kernel is not None:
                 mask = cv2.dilate(
                     np.array(segmentation[batch_index]).astype(np.uint8),
-                    self.dilation_kernel)
+                    self.dilation_kernel,
+                )
             else:
                 mask = segmentation[batch_index]
-            boxes, scores = self.boxes_from_bitmap(pred[batch_index], mask,
-                                                   src_w, src_h)
+            boxes, scores = self.boxes_from_bitmap(
+                pred[batch_index], mask, src_w, src_h
+            )
 
-            boxes_batch.append({'points': boxes})
-            
+            boxes_batch.append({"points": boxes})
+
         return boxes_batch

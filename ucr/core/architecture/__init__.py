@@ -16,11 +16,12 @@
 
 import copy
 
-__all__ = ['build_architecture']
+__all__ = ["build_architecture"]
+
 
 def build_architecture(config):
     from .base_architecture import BaseArchitecture
-    
+
     config = copy.deepcopy(config)
     module_class = BaseArchitecture(config)
     return module_class

@@ -16,6 +16,7 @@
 
 import torch
 
+
 class ClsPostProcess(object):
     """ Convert between text-label and text-index """
 
@@ -27,8 +28,10 @@ class ClsPostProcess(object):
         if torch.is_tensor(preds):
             preds = preds.numpy()
         pred_idxs = preds.argmax(axis=1)
-        decode_out = [(self.label_list[idx], preds[i, idx])
-                      for i, idx in enumerate(pred_idxs)]
+        decode_out = [
+            (self.label_list[idx], preds[i, idx])
+            for i, idx in enumerate(pred_idxs)
+        ]
         if label is None:
             return decode_out
         label = [(self.label_list[idx], 1.0) for idx in label]

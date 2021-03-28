@@ -27,6 +27,7 @@ import numpy as np
 
 log = logging.getLogger(__name__)
 
+
 def print_dict(d, logger, delimiter=0):
     """
     Recursively visualize a dict and
@@ -45,13 +46,21 @@ def print_dict(d, logger, delimiter=0):
 
 
 def get_check_global_params(mode):
-    check_params = ['device', 'max_text_length', 'image_shape', \
-                    'image_shape', 'character_type', 'loss_type']
+    check_params = [
+        "device",
+        "max_text_length",
+        "image_shape",
+        "image_shape",
+        "character_type",
+        "loss_type",
+    ]
     if mode == "train_eval":
-        check_params = check_params + [ \
-            'train_batch_size_per_card', 'test_batch_size_per_card']
+        check_params = check_params + [
+            "train_batch_size_per_card",
+            "test_batch_size_per_card",
+        ]
     elif mode == "test":
-        check_params = check_params + ['test_batch_size_per_card']
+        check_params = check_params + ["test_batch_size_per_card"]
     return check_params
 
 
@@ -60,7 +69,7 @@ def get_image_file_list(img_file):
     if img_file is None or not os.path.exists(img_file):
         raise Exception("not found any img file in {}".format(img_file))
 
-    img_end = {'jpg', 'bmp', 'png', 'jpeg', 'rgb', 'tif', 'tiff', 'gif', 'GIF'}
+    img_end = {"jpg", "bmp", "png", "jpeg", "rgb", "tif", "tiff", "gif", "GIF"}
     if os.path.isfile(img_file) and imghdr.what(img_file) in img_end:
         imgs_lists.append(img_file)
     elif os.path.isdir(img_file):
@@ -74,7 +83,7 @@ def get_image_file_list(img_file):
 
 
 def check_and_read_gif(img_path):
-    if os.path.basename(img_path)[-3:] in ['gif', 'GIF']:
+    if os.path.basename(img_path)[-3:] in ["gif", "GIF"]:
         gif = cv2.VideoCapture(img_path)
         ret, frame = gif.read()
         if not ret:
@@ -91,10 +100,10 @@ def check_and_read_gif(img_path):
 def download_with_progressbar(url, save_path):
     print("Downloading '{}' to '{}'".format(url, save_path))
     response = requests.get(url, stream=True)
-    total_size_in_bytes = int(response.headers.get('content-length', 0))
+    total_size_in_bytes = int(response.headers.get("content-length", 0))
     block_size = 1024  # 1 Kibibyte
-    progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
-    with open(save_path, 'wb') as file:
+    progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
+    with open(save_path, "wb") as file:
         for data in response.iter_content(block_size):
             progress_bar.update(len(data))
             file.write(data)
@@ -105,62 +114,93 @@ def download_with_progressbar(url, save_path):
 
 
 def maybe_download(model_storage_directory, url, force_download=False):
-    # using custom model 
-    fname = url.split('/')[-1][0:-4]
+    # using custom model
+    fname = url.split("/")[-1][0:-4]
     tmp_path = os.path.join(model_storage_directory, fname)
     if force_download or not os.path.exists(tmp_path):
         os.makedirs(tmp_path, exist_ok=True)
-        download_with_progressbar(url, tmp_path+'.zip')
-        shutil.unpack_archive(tmp_path+'.zip', tmp_path, 'zip')
-        os.remove(tmp_path+'.zip')
+        download_with_progressbar(url, tmp_path + ".zip")
+        shutil.unpack_archive(tmp_path + ".zip", tmp_path, "zip")
+        os.remove(tmp_path + ".zip")
     return tmp_path
 
 
 def merge_text_boxes(dt_boxes, rec_res, **params):
     dt_boxes = np.asarray(dt_boxes)
     polys = np.empty((len(dt_boxes), 8))
-    polys[:,0] = dt_boxes[:,0,0]
-    polys[:,1] = dt_boxes[:,0,1]
-    polys[:,2] = dt_boxes[:,1,0]
-    polys[:,3] = dt_boxes[:,1,1]
-    polys[:,4] = dt_boxes[:,2,0]
-    polys[:,5] = dt_boxes[:,2,1]
-    polys[:,6] = dt_boxes[:,3,0]
-    polys[:,7] = dt_boxes[:,3,1]
+    polys[:, 0] = dt_boxes[:, 0, 0]
+    polys[:, 1] = dt_boxes[:, 0, 1]
+    polys[:, 2] = dt_boxes[:, 1, 0]
+    polys[:, 3] = dt_boxes[:, 1, 1]
+    polys[:, 4] = dt_boxes[:, 2, 0]
+    polys[:, 5] = dt_boxes[:, 2, 1]
+    polys[:, 6] = dt_boxes[:, 3, 0]
+    polys[:, 7] = dt_boxes[:, 3, 1]
     slope_ths = params["slope_thresh"]
     ycenter_ths = params["ycenter_thresh"]
     height_ths = params["height_thresh"]
     width_ths = params["width_thresh"]
     add_margin = params["add_margin"]
 
-    horizontal_list, free_list_box, free_list_text, combined_list, merged_list_box, merged_list_text = [],[],[],[],[],[]
+    (
+        horizontal_list,
+        free_list_box,
+        free_list_text,
+        combined_list,
+        merged_list_box,
+        merged_list_text,
+    ) = ([], [], [], [], [], [])
 
     for i, poly in enumerate(polys):
-        slope_up = (poly[3]-poly[1])/np.maximum(10, (poly[2]-poly[0]))
-        slope_down = (poly[5]-poly[7])/np.maximum(10, (poly[4]-poly[6]))
+        slope_up = (poly[3] - poly[1]) / np.maximum(10, (poly[2] - poly[0]))
+        slope_down = (poly[5] - poly[7]) / np.maximum(10, (poly[4] - poly[6]))
         if max(abs(slope_up), abs(slope_down)) < slope_ths:
-            x_max = max([poly[0],poly[2],poly[4],poly[6]])
-            x_min = min([poly[0],poly[2],poly[4],poly[6]])
-            y_max = max([poly[1],poly[3],poly[5],poly[7]])
-            y_min = min([poly[1],poly[3],poly[5],poly[7]])
-            horizontal_list.append([x_min, x_max, y_min, y_max, 0.5*(y_min+y_max), y_max-y_min, rec_res[i][0], rec_res[i][1],str(poly)])
+            x_max = max([poly[0], poly[2], poly[4], poly[6]])
+            x_min = min([poly[0], poly[2], poly[4], poly[6]])
+            y_max = max([poly[1], poly[3], poly[5], poly[7]])
+            y_min = min([poly[1], poly[3], poly[5], poly[7]])
+            horizontal_list.append(
+                [
+                    x_min,
+                    x_max,
+                    y_min,
+                    y_max,
+                    0.5 * (y_min + y_max),
+                    y_max - y_min,
+                    rec_res[i][0],
+                    rec_res[i][1],
+                    str(poly),
+                ]
+            )
         else:
-            height = np.linalg.norm( [poly[6]-poly[0],poly[7]-poly[1]])
-            margin = int(1.44*add_margin*height)
-            theta13 = abs(np.arctan( (poly[1]-poly[5])/np.maximum(10, (poly[0]-poly[4]))))
-            theta24 = abs(np.arctan( (poly[3]-poly[7])/np.maximum(10, (poly[2]-poly[6]))))
+            height = np.linalg.norm([poly[6] - poly[0], poly[7] - poly[1]])
+            margin = int(1.44 * add_margin * height)
+            theta13 = abs(
+                np.arctan(
+                    (poly[1] - poly[5]) / np.maximum(10, (poly[0] - poly[4]))
+                )
+            )
+            theta24 = abs(
+                np.arctan(
+                    (poly[3] - poly[7]) / np.maximum(10, (poly[2] - poly[6]))
+                )
+            )
             # do I need to clip minimum, maximum value here?
-            x1 = poly[0] - np.cos(theta13)*margin
-            y1 = poly[1] - np.sin(theta13)*margin
-            x2 = poly[2] + np.cos(theta24)*margin
-            y2 = poly[3] - np.sin(theta24)*margin
-            x3 = poly[4] + np.cos(theta13)*margin
-            y3 = poly[5] + np.sin(theta13)*margin
-            x4 = poly[6] - np.cos(theta24)*margin
-            y4 = poly[7] + np.sin(theta24)*margin
+            x1 = poly[0] - np.cos(theta13) * margin
+            y1 = poly[1] - np.sin(theta13) * margin
+            x2 = poly[2] + np.cos(theta24) * margin
+            y2 = poly[3] - np.sin(theta24) * margin
+            x3 = poly[4] + np.cos(theta13) * margin
+            y3 = poly[5] + np.sin(theta13) * margin
+            x4 = poly[6] - np.cos(theta24) * margin
+            y4 = poly[7] + np.sin(theta24) * margin
 
-            free_list_box.append(np.array([[x1,y1],[x2,y2],[x3,y3],[x4,y4]]))
-            free_list_text.append([rec_res[i][0], rec_res[i][1],str(poly), rec_res[i][0]])
+            free_list_box.append(
+                np.array([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
+            )
+            free_list_text.append(
+                [rec_res[i][0], rec_res[i][1], str(poly), rec_res[i][0]]
+            )
 
     horizontal_list = sorted(horizontal_list, key=lambda item: item[4])
 
@@ -174,7 +214,13 @@ def merge_text_boxes(dt_boxes, rec_res, **params):
             new_box.append(poly)
         else:
             # comparable height and comparable y_center level up to ths*height
-            if (abs(np.mean(b_height) - poly[5]) < height_ths*np.mean(b_height)) and (abs(np.mean(b_ycenter) - poly[4]) < ycenter_ths*np.mean(b_height)):
+            if (
+                abs(np.mean(b_height) - poly[5])
+                < height_ths * np.mean(b_height)
+            ) and (
+                abs(np.mean(b_ycenter) - poly[4])
+                < ycenter_ths * np.mean(b_height)
+            ):
                 b_height.append(poly[5])
                 b_ycenter.append(poly[4])
                 new_box.append(poly)
@@ -187,30 +233,39 @@ def merge_text_boxes(dt_boxes, rec_res, **params):
 
     # merge list use sort again
     for boxes in combined_list:
-        if len(boxes) == 1: # one box per line
+        if len(boxes) == 1:  # one box per line
             box = boxes[0]
-            margin = int(add_margin*min(box[1]-box[0],box[5]))
-            _x0 = _x3 = box[0]-margin
-            _y0 = _y1 = box[2]-margin
-            _x1 = _x2 = box[1]+margin
-            _y2 = _y3 = box[3]+margin
-            merged_list_box.append(np.array([[_x0,_y0],[_x1,_y1],[_x2,_y2],[_x3,_y3]]))
+            margin = int(add_margin * min(box[1] - box[0], box[5]))
+            _x0 = _x3 = box[0] - margin
+            _y0 = _y1 = box[2] - margin
+            _x1 = _x2 = box[1] + margin
+            _y2 = _y3 = box[3] + margin
+            merged_list_box.append(
+                np.array([[_x0, _y0], [_x1, _y1], [_x2, _y2], [_x3, _y3]])
+            )
             merged_list_text.append([box[6], box[7], box[8], box[6]])
-        else: # multiple boxes per line
+        else:  # multiple boxes per line
             boxes = sorted(boxes, key=lambda item: item[0])
 
-            merged_box, new_box = [],[]
+            merged_box, new_box = [], []
             for box in boxes:
                 if len(new_box) == 0:
                     b_height = [box[5]]
                     x_max = box[1]
                     new_box.append(box)
                 else:
-                    if abs(box[0]-x_max) < width_ths *(box[3]-box[2]): # merge boxes
+                    if abs(box[0] - x_max) < width_ths * (
+                        box[3] - box[2]
+                    ):  # merge boxes
                         x_max = box[1]
                         new_box.append(box)
                     else:
-                        if (abs(np.mean(b_height) - box[5]) < height_ths*np.mean(b_height)) and (abs(box[0]-x_max) < width_ths *(box[3]-box[2])): # merge boxes
+                        if (
+                            abs(np.mean(b_height) - box[5])
+                            < height_ths * np.mean(b_height)
+                        ) and (
+                            abs(box[0] - x_max) < width_ths * (box[3] - box[2])
+                        ):  # merge boxes
                             b_height.append(box[5])
                             x_max = box[1]
                             new_box.append(box)
@@ -219,53 +274,69 @@ def merge_text_boxes(dt_boxes, rec_res, **params):
                             x_max = box[1]
                             merged_box.append(new_box)
                             new_box = [box]
-            if len(new_box) >0: merged_box.append(new_box)
+            if len(new_box) > 0:
+                merged_box.append(new_box)
 
             for mbox in merged_box:
-                if len(mbox) != 1: # adjacent box in same line
+                if len(mbox) != 1:  # adjacent box in same line
                     # do I need to add margin here?
                     x_min = min(mbox, key=lambda x: x[0])[0]
                     x_max = max(mbox, key=lambda x: x[1])[1]
                     y_min = min(mbox, key=lambda x: x[2])[2]
                     y_max = max(mbox, key=lambda x: x[3])[3]
-                    text_comb = str(mbox[0][6]) if isinstance(mbox[0][6], str) else ''
+                    text_comb = (
+                        str(mbox[0][6]) if isinstance(mbox[0][6], str) else ""
+                    )
                     sum_score = mbox[0][7]
                     box_id = str(mbox[0][8])
-                    text_id = str(mbox[0][6]) if isinstance(mbox[0][6], str) else ''
-                    for val in range(len(mbox)-1):
-                        if isinstance(mbox[val+1][6], str):
-                            strin = mbox[val+1][6]
+                    text_id = (
+                        str(mbox[0][6]) if isinstance(mbox[0][6], str) else ""
+                    )
+                    for val in range(len(mbox) - 1):
+                        if isinstance(mbox[val + 1][6], str):
+                            strin = mbox[val + 1][6]
                         else:
-                            strin = ''
-                        text_comb += ' ' + strin
-                        sum_score += mbox[val+1][7]
-                        box_id += '|||' + str(mbox[val+1][8])
-                        text_id += '|||' + strin 
+                            strin = ""
+                        text_comb += " " + strin
+                        sum_score += mbox[val + 1][7]
+                        box_id += "|||" + str(mbox[val + 1][8])
+                        text_id += "|||" + strin
                     avg_score = sum_score / len(mbox)
-                    margin = int(add_margin*(y_max - y_min))
+                    margin = int(add_margin * (y_max - y_min))
 
                     # merged_list.append([x_min-margin, x_max+margin, y_min-margin, y_max+margin, text_comb, avg_score])
-                    _x0 = _x3 = x_min-margin
-                    _y0 = _y1 = y_min-margin
-                    _x1 = _x2 = x_max+margin
-                    _y2 = _y3 = y_max+margin
-                    merged_list_box.append(np.array([[_x0,_y0],[_x1,_y1],[_x2,_y2],[_x3,_y3]]))
-                    merged_list_text.append([text_comb, avg_score, box_id, text_id])
+                    _x0 = _x3 = x_min - margin
+                    _y0 = _y1 = y_min - margin
+                    _x1 = _x2 = x_max + margin
+                    _y2 = _y3 = y_max + margin
+                    merged_list_box.append(
+                        np.array(
+                            [[_x0, _y0], [_x1, _y1], [_x2, _y2], [_x3, _y3]]
+                        )
+                    )
+                    merged_list_text.append(
+                        [text_comb, avg_score, box_id, text_id]
+                    )
 
-                else: # non adjacent box in same line
+                else:  # non adjacent box in same line
                     box = mbox[0]
 
-                    margin = int(add_margin*(box[3] - box[2]))
+                    margin = int(add_margin * (box[3] - box[2]))
                     # merged_list.append([box[0]-margin,box[1]+margin,box[2]-margin,box[3]+margin, box[6], box[7]])
-                    _x0 = _x3 = box[0]-margin
-                    _y0 = _y1 = box[2]-margin
-                    _x1 = _x2 = box[1]+margin
-                    _y2 = _y3 = box[3]+margin
-                    merged_list_box.append(np.array([[_x0,_y0],[_x1,_y1],[_x2,_y2],[_x3,_y3]]))
+                    _x0 = _x3 = box[0] - margin
+                    _y0 = _y1 = box[2] - margin
+                    _x1 = _x2 = box[1] + margin
+                    _y2 = _y3 = box[3] + margin
+                    merged_list_box.append(
+                        np.array(
+                            [[_x0, _y0], [_x1, _y1], [_x2, _y2], [_x3, _y3]]
+                        )
+                    )
                     merged_list_text.append([box[6], box[7], box[8], box[6]])
 
     # may need to check if box is really in image
     return free_list_box, free_list_text, merged_list_box, merged_list_text
+
 
 def sorted_boxes(dt_boxes):
     """
@@ -280,8 +351,9 @@ def sorted_boxes(dt_boxes):
     _boxes = list(sorted_boxes)
 
     for i in range(num_boxes - 1):
-        if abs(_boxes[i + 1][0][1] - _boxes[i][0][1]) < 10 and \
-                (_boxes[i + 1][0][0] < _boxes[i][0][0]):
+        if abs(_boxes[i + 1][0][1] - _boxes[i][0][1]) < 10 and (
+            _boxes[i + 1][0][0] < _boxes[i][0][0]
+        ):
             tmp = _boxes[i]
             _boxes[i] = _boxes[i + 1]
             _boxes[i + 1] = tmp

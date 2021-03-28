@@ -14,16 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__all__ = ['build_transform']
+__all__ = ["build_transform"]
 
 
 def build_transform(config):
     from .tps import TPS
 
-    support_dict = ['TPS']
+    support_dict = ["TPS"]
 
-    module_name = config.pop('name')
+    module_name = config.pop("name")
     assert module_name in support_dict, Exception(
-        'transform only support {}'.format(support_dict))
+        "transform only support {}".format(support_dict)
+    )
     module_class = eval(module_name)(**config)
     return module_class

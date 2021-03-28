@@ -31,21 +31,22 @@ class Head(nn.Module):
             out_channels=in_channels // 4,
             kernel_size=3,
             padding=1,
-            bias=False)
-        self.conv_bn1 = nn.BatchNorm2d(
-            in_channels // 4)
+            bias=False,
+        )
+        self.conv_bn1 = nn.BatchNorm2d(in_channels // 4)
         self.conv2 = nn.ConvTranspose2d(
             in_channels=in_channels // 4,
             out_channels=in_channels // 4,
             kernel_size=2,
-            stride=2)
-        self.conv_bn2 = nn.BatchNorm2d(
-            in_channels // 4)
+            stride=2,
+        )
+        self.conv_bn2 = nn.BatchNorm2d(in_channels // 4)
         self.conv3 = nn.ConvTranspose2d(
             in_channels=in_channels // 4,
             out_channels=1,
             kernel_size=2,
-            stride=2)
+            stride=2,
+        )
 
     def forward(self, x):
         x = self.conv1(x)
@@ -71,12 +72,20 @@ class DBHead(nn.Module):
         super(DBHead, self).__init__()
         self.k = k
         binarize_name_list = [
-            'conv2d_56', 'batch_norm_47', 'conv2d_transpose_0', 'batch_norm_48',
-            'conv2d_transpose_1', 'binarize'
+            "conv2d_56",
+            "batch_norm_47",
+            "conv2d_transpose_0",
+            "batch_norm_48",
+            "conv2d_transpose_1",
+            "binarize",
         ]
         thresh_name_list = [
-            'conv2d_57', 'batch_norm_49', 'conv2d_transpose_2', 'batch_norm_50',
-            'conv2d_transpose_3', 'thresh'
+            "conv2d_57",
+            "batch_norm_49",
+            "conv2d_transpose_2",
+            "batch_norm_50",
+            "conv2d_transpose_3",
+            "thresh",
         ]
         self.binarize = Head(in_channels, binarize_name_list)
         self.thresh = Head(in_channels, thresh_name_list)
@@ -87,9 +96,9 @@ class DBHead(nn.Module):
     def forward(self, x):
         shrink_maps = self.binarize(x)
         if not self.training:
-            return {'maps': shrink_maps}
+            return {"maps": shrink_maps}
 
         threshold_maps = self.thresh(x)
         binary_maps = self.step_function(shrink_maps, threshold_maps)
         y = torch.cat((shrink_maps, threshold_maps, binary_maps), dim=1)
-        return {'maps': y}
+        return {"maps": y}

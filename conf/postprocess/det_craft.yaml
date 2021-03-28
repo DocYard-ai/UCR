@@ -8,4 +8,4 @@ Postprocess:
   ydilate: 3
   xpad: 4
   ypad: 4
-  rotated_box: False
+  rotated_box: True

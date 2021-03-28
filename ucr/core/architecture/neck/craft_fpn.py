@@ -8,9 +8,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 
+
 class CRAFTFPN(nn.Module):
     def __init__(self, in_channels):
-        super( CRAFTFPN, self).__init__()
+        super(CRAFTFPN, self).__init__()
 
         """ U network """
         self.upconv1 = double_conv(1024, 512, 256)
@@ -22,9 +23,9 @@ class CRAFTFPN(nn.Module):
         init_weights(self.upconv2.modules())
         init_weights(self.upconv3.modules())
         init_weights(self.upconv4.modules())
-        
+
         self.out_channels = None
-        
+
     def forward(self, x):
         """ Base network """
         sources = x
@@ -33,20 +34,26 @@ class CRAFTFPN(nn.Module):
         y = torch.cat([sources[0], sources[1]], dim=1)
         y = self.upconv1(y)
 
-        y = F.interpolate(y, size=sources[2].size()[2:], mode='bilinear', align_corners=False)
+        y = F.interpolate(
+            y, size=sources[2].size()[2:], mode="bilinear", align_corners=False
+        )
         y = torch.cat([y, sources[2]], dim=1)
         y = self.upconv2(y)
 
-        y = F.interpolate(y, size=sources[3].size()[2:], mode='bilinear', align_corners=False)
+        y = F.interpolate(
+            y, size=sources[3].size()[2:], mode="bilinear", align_corners=False
+        )
         y = torch.cat([y, sources[3]], dim=1)
         y = self.upconv3(y)
 
-        y = F.interpolate(y, size=sources[4].size()[2:], mode='bilinear', align_corners=False)
+        y = F.interpolate(
+            y, size=sources[4].size()[2:], mode="bilinear", align_corners=False
+        )
         y = torch.cat([y, sources[4]], dim=1)
         feature = self.upconv4(y)
 
         return feature
-        
+
 
 class double_conv(nn.Module):
     def __init__(self, in_ch, mid_ch, out_ch):
@@ -57,7 +64,7 @@ class double_conv(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(mid_ch, out_ch, kernel_size=3, padding=1),
             nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
 
     def forward(self, x):

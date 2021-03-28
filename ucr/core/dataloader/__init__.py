@@ -22,31 +22,36 @@ from __future__ import unicode_literals
 import copy
 from torch.utils.data import DataLoader
 
-__all__ = ['build_dataloader']
+__all__ = ["build_dataloader"]
 
 
 def build_dataloader(config, mode, logger):
     config = copy.deepcopy(config)
 
-    support_dict = ['SimpleDataSet', 'LMDBDateSet']
-    module_name = config[mode]['Dataloader']['name']
+    support_dict = ["SimpleDataSet", "LMDBDateSet"]
+    module_name = config[mode]["Dataloader"]["name"]
     assert module_name in support_dict, Exception(
-        'DataSet only support {}'.format(support_dict))
-    assert mode in ['Train', 'Eval', 'Test'
-                    ], "Mode should be Train, Eval or Test."
+        "DataSet only support {}".format(support_dict)
+    )
+    assert mode in [
+        "Train",
+        "Eval",
+        "Test",
+    ], "Mode should be Train, Eval or Test."
 
     dataset = eval(module_name)(config, mode, logger)
-    loader_config = config[mode]['Dataloader']
-    batch_size = loader_config['batch_size_per_card']
-    drop_last = loader_config['drop_last']
-    shuffle = loader_config['shuffle']
-    num_workers = loader_config['num_workers']
+    loader_config = config[mode]["Dataloader"]
+    batch_size = loader_config["batch_size_per_card"]
+    drop_last = loader_config["drop_last"]
+    shuffle = loader_config["shuffle"]
+    num_workers = loader_config["num_workers"]
 
     data_loader = DataLoader(
         dataset=dataset,
         batch_size=batch_size,
         shuffle=shuffle,
         num_workers=num_workers,
-        drop_last=drop_last)
+        drop_last=drop_last,
+    )
 
     return data_loader

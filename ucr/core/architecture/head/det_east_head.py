@@ -25,16 +25,17 @@ import torch.nn.functional as F
 
 class ConvBNLayer(nn.Module):
     def __init__(
-            self,
-            in_channels,
-            out_channels,
-            kernel_size,
-            stride,
-            padding,
-            act=None,
-            groups=1):
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride,
+        padding,
+        act=None,
+        groups=1,
+    ):
         super(ConvBNLayer, self).__init__()
-        
+
         self.act = act
         self.conv = nn.Conv2d(
             in_channels=in_channels,
@@ -43,18 +44,18 @@ class ConvBNLayer(nn.Module):
             stride=stride,
             padding=padding,
             groups=groups,
-            bias=False)
+            bias=False,
+        )
 
-        self.bn = nn.BatchNorm2d(
-            out_channels)
-        
-        if self.act=='relu':
-            self.relu=nn.ReLU(inplace=True)
-            
+        self.bn = nn.BatchNorm2d(out_channels)
+
+        if self.act == "relu":
+            self.relu = nn.ReLU(inplace=True)
+
     def forward(self, inputs):
         y = self.conv(inputs)
         y = self.bn(y)
-        if self.act=='relu':
+        if self.act == "relu":
             y = self.relu(y)
         return y
 
@@ -62,6 +63,7 @@ class ConvBNLayer(nn.Module):
 class EASTHead(nn.Module):
     """
     """
+
     def __init__(self, in_channels, model_name, **kwargs):
         super(EASTHead, self).__init__()
         self.model_name = model_name
@@ -76,28 +78,32 @@ class EASTHead(nn.Module):
             kernel_size=3,
             stride=1,
             padding=1,
-            act='relu')
+            act="relu",
+        )
         self.det_conv2 = ConvBNLayer(
             in_channels=num_outputs[0],
             out_channels=num_outputs[1],
             kernel_size=3,
             stride=1,
             padding=1,
-            act='relu')
+            act="relu",
+        )
         self.score_conv = ConvBNLayer(
             in_channels=num_outputs[1],
             out_channels=num_outputs[2],
             kernel_size=1,
             stride=1,
             padding=0,
-            act=None)
+            act=None,
+        )
         self.geo_conv = ConvBNLayer(
             in_channels=num_outputs[1],
             out_channels=num_outputs[3],
             kernel_size=1,
             stride=1,
             padding=0,
-            act=None)
+            act=None,
+        )
 
     def forward(self, x):
         f_det = self.det_conv1(x)
@@ -107,5 +113,5 @@ class EASTHead(nn.Module):
         f_geo = self.geo_conv(f_det)
         f_geo = (torch.sigmoid(f_geo) - 0.5) * 2 * 800
 
-        pred = {'f_score': f_score, 'f_geo': f_geo}
+        pred = {"f_score": f_score, "f_geo": f_geo}
         return pred

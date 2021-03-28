@@ -1,20 +1,19 @@
 [tool.poetry]
 name = "ucr"
-version = "0.2.8" # This will be overriden by the CI at publish time
+version = "0.2.9" # This will be overriden by the CI at publish time
 description = "Universal Character Recognizer (UCR): Simple, Intuitive, Extensible, Multi-Lingual OCR engine"
 authors = ["Abhigyan Raman <abhigyan@docyard.ai>"]
 packages = [
     {include = "ucr"}
 ]
 readme = "README.md"
-documentation = "https://github.com/DocYardAI/UCR"
+documentation = "https://github.com/DocYard-ai/UCR"
 
 [tool.poetry.scripts]
 ucr = 'ucr.ucr:main'
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
-wandb = "^0.8.18"
 tqdm = "^4.40"
 numpy = "<1.20.0"
 opencv-python = "^4.1.0"
@@ -28,25 +27,46 @@ pandas = "~1.1"
 pylint = "^2.4"
 autopep8 = "^1.4"
 flake8 = "^3.7"
-rope = "^0.14.0"
 pre-commit = "^1.21.0"
+isort = "^5.0"
 black = "^19.10b0"
 jupyterlab = "^1.2.6"
-pyvista = "^0.23.1"
-panel = "^0.8.0"
-param = "^1.9.3"
 codecov = "^2.0.16"
-gpustat = "^0.6.0"
 snakeviz = "^2.0.1"
-sphinx_rtd_theme = "^0.4.3"
-sphinx = "^2.4.4"
-sphinx-autobuild = "^0.7.1"
 mypy = "^0.770"
-ipywidgets = "^7.5.1"
-
-[tool.black]
-line-length = 120
+gpustat = "^0.6.0"
+mkdocs = "^1.1.0"
+mkdocs-macros-plugin = "^0.5.0"
+mkdocs-material = "^6.2.0"
+mkdocstrings = "^0.14.0"
 
 [build-system]
 requires = ["poetry>=1.0.0"]
 build-backend = "poetry.masonry.api"
+
+# black formatting
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+'''
+
+#isort configs
+[tool.isort]
+profile = "black"
+line_length = 79
+multi_line_output = 3
+include_trailing_comma = true
+skip_gitignore = true

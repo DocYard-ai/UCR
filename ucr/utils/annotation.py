@@ -22,8 +22,10 @@ from PIL import Image, ImageDraw, ImageFont
 import math
 
 import sys
+
 __dir__ = os.path.dirname(__file__)
-sys.path.append(os.path.join(__dir__, '../..'))
+sys.path.append(os.path.join(__dir__, "../.."))
+
 
 def draw_text_det_res(dt_boxes, img):
     src_im = img.copy()
@@ -45,12 +47,14 @@ def resize_img(img, input_size=600):
     return img
 
 
-def draw_ocr(image,
-             boxes,
-             txts=None,
-             scores=None,
-             drop_score=0.5,
-             font_path="./ucr/utils/fonts/only_en.ttf"):
+def draw_ocr(
+    image,
+    boxes,
+    txts=None,
+    scores=None,
+    drop_score=0.5,
+    font_path="./ucr/utils/fonts/only_en.ttf",
+):
     """
     Visualize the results of OCR detection and recognition
     args:
@@ -67,8 +71,9 @@ def draw_ocr(image,
         scores = [1] * len(boxes)
     box_num = len(boxes)
     for i in range(box_num):
-        if scores is not None and (scores[i] < drop_score or
-                                   math.isnan(scores[i])):
+        if scores is not None and (
+            scores[i] < drop_score or math.isnan(scores[i])
+        ):
             continue
         box = np.reshape(np.array(boxes[i]), [-1, 1, 2]).astype(np.int64)
         image = cv2.polylines(np.array(image), [box], True, (255, 0, 0), 2)
@@ -80,21 +85,24 @@ def draw_ocr(image,
             img_h=img.shape[0],
             img_w=600,
             threshold=drop_score,
-            font_path=font_path)
+            font_path=font_path,
+        )
         img = np.concatenate([np.array(img), np.array(txt_img)], axis=1)
         return img
     return image
 
 
-def draw_ocr_box_txt(image,
-                     boxes,
-                     txts,
-                     scores=None,
-                     drop_score=0.5,
-                     font_path="./ucr/utils/fonts/only_en.ttf"):
+def draw_ocr_box_txt(
+    image,
+    boxes,
+    txts,
+    scores=None,
+    drop_score=0.5,
+    font_path="./ucr/utils/fonts/only_en.ttf",
+):
     h, w = image.height, image.width
     img_left = image.copy()
-    img_right = Image.new('RGB', (w, h), (255, 255, 255))
+    img_right = Image.new("RGB", (w, h), (255, 255, 255))
 
     import random
 
@@ -105,19 +113,29 @@ def draw_ocr_box_txt(image,
 
         if scores is not None and scores[idx] < drop_score:
             continue
-        color = (random.randint(0, 200), random.randint(0, 200),
-                 random.randint(0, 200))
+        color = (
+            random.randint(0, 200),
+            random.randint(0, 200),
+            random.randint(0, 200),
+        )
         draw_left.line(
             [
-                (box[0][0], box[0][1]), (box[1][0] - 3, box[1][1]), (box[2][0] - 3,
-                box[2][1]), (box[3][0], box[3][1]), (box[0][0], box[0][1]) 
+                (box[0][0], box[0][1]),
+                (box[1][0] - 3, box[1][1]),
+                (box[2][0] - 3, box[2][1]),
+                (box[3][0], box[3][1]),
+                (box[0][0], box[0][1]),
             ],
-            fill=color, width=4)
-        
-        box_height = math.sqrt((box[0][0] - box[3][0])**2 + (box[0][1] - box[3][
-            1])**2)
-        box_width = math.sqrt((box[0][0] - box[1][0])**2 + (box[0][1] - box[1][
-            1])**2)
+            fill=color,
+            width=4,
+        )
+
+        box_height = math.sqrt(
+            (box[0][0] - box[3][0]) ** 2 + (box[0][1] - box[3][1]) ** 2
+        )
+        box_width = math.sqrt(
+            (box[0][0] - box[1][0]) ** 2 + (box[0][1] - box[1][1]) ** 2
+        )
         if box_height > 2 * box_width:
             font_size = max(int(box_width * 0.9), 10)
             font = ImageFont.truetype(font_path, font_size, encoding="utf-8")
@@ -125,40 +143,56 @@ def draw_ocr_box_txt(image,
             for c in txt:
                 char_size = font.getsize(c)
                 draw_right.text(
-                    (box[0][0] + 3, cur_y), c, fill=(0, 0, 0), font=font)
+                    (box[0][0] + 3, cur_y), c, fill=(0, 0, 0), font=font
+                )
                 cur_y += char_size[1]
             draw_right.polygon(
-            [
-                box[0][0], box[0][1], box[1][0] - 3, box[1][1], box[2][0] - 3,
-                box[2][1], box[3][0], box[3][1]
-            ],
-            outline=color)
+                [
+                    box[0][0],
+                    box[0][1],
+                    box[1][0] - 3,
+                    box[1][1],
+                    box[2][0] - 3,
+                    box[2][1],
+                    box[3][0],
+                    box[3][1],
+                ],
+                outline=color,
+            )
         else:
             img_fraction = 1
             # font_size=1
-            font_change=False
+            font_change = False
             font_size = max(int(box_height * 0.8), 10)
             font = ImageFont.truetype(font_path, font_size)
-            while font.getsize(txt)[0] > img_fraction*box_width:
+            while font.getsize(txt)[0] > img_fraction * box_width:
                 # iterate until the text size is just larger than the criteria
-                font_change=True
+                font_change = True
                 font_size -= 1
                 font = ImageFont.truetype(font_path, font_size)
             if font_change:
-                font_size +=1
+                font_size += 1
             font = ImageFont.truetype(font_path, font_size)
             draw_right.text(
-                [box[0][0]+1, box[0][1]+1], txt, fill=(0, 0, 0), font=font)
+                [box[0][0] + 1, box[0][1] + 1], txt, fill=(0, 0, 0), font=font
+            )
 
-            wid,het = font.getsize(txt)
+            wid, het = font.getsize(txt)
             draw_right.polygon(
-            [
-                box[0][0], box[0][1], box[0][0] + wid, box[0][1], box[0][0] + wid,
-                box[0][1] + het + 2, box[0][0], box[0][1] + het + 2
-            ],
-            outline=color)
+                [
+                    box[0][0],
+                    box[0][1],
+                    box[0][0] + wid,
+                    box[0][1],
+                    box[0][0] + wid,
+                    box[0][1] + het + 2,
+                    box[0][0],
+                    box[0][1] + het + 2,
+                ],
+                outline=color,
+            )
     img_left = Image.blend(image, img_left, 0.5)
-    img_show = Image.new('RGB', (w * 2, h), (255, 255, 255))
+    img_show = Image.new("RGB", (w * 2, h), (255, 255, 255))
     img_show.paste(img_left, (0, 0, w, h))
     img_show.paste(img_right, (w, 0, w * 2, h))
     return np.array(img_show)
@@ -175,6 +209,7 @@ def str_count(s):
         the number of Chinese characters
     """
     import string
+
     count_zh = count_pu = 0
     s_len = len(s)
     en_dg_count = 0
@@ -188,12 +223,14 @@ def str_count(s):
     return s_len - math.ceil(en_dg_count / 2)
 
 
-def text_visual(texts,
-                scores,
-                img_h=400,
-                img_w=600,
-                threshold=0.,
-                font_path="./doc/simfang.ttf"):
+def text_visual(
+    texts,
+    scores,
+    img_h=400,
+    img_w=600,
+    threshold=0.0,
+    font_path="./doc/simfang.ttf",
+):
     """
     create new blank img and draw txt on it
     args:
@@ -206,11 +243,12 @@ def text_visual(texts,
     """
     if scores is not None:
         assert len(texts) == len(
-            scores), "The number of txts and corresponding scores must match"
+            scores
+        ), "The number of txts and corresponding scores must match"
 
     def create_blank_img():
         blank_img = np.ones(shape=[img_h, img_w], dtype=np.int8) * 255
-        blank_img[:, img_w - 1:] = 0
+        blank_img[:, img_w - 1 :] = 0
         blank_img = Image.fromarray(blank_img).convert("RGB")
         draw_txt = ImageDraw.Draw(blank_img)
         return blank_img, draw_txt
@@ -232,23 +270,23 @@ def text_visual(texts,
         first_line = True
         while str_count(txt) >= img_w // font_size - 4:
             tmp = txt
-            txt = tmp[:img_w // font_size - 4]
+            txt = tmp[: img_w // font_size - 4]
             if first_line:
-                new_txt = str(index) + ': ' + txt
+                new_txt = str(index) + ": " + txt
                 first_line = False
             else:
-                new_txt = '    ' + txt
+                new_txt = "    " + txt
             draw_txt.text((0, gap * count), new_txt, txt_color, font=font)
-            txt = tmp[img_w // font_size - 4:]
+            txt = tmp[img_w // font_size - 4 :]
             if count >= img_h // gap - 1:
                 txt_img_list.append(np.array(blank_img))
                 blank_img, draw_txt = create_blank_img()
                 count = 0
             count += 1
         if first_line:
-            new_txt = str(index) + ': ' + txt + '   ' + '%.3f' % (scores[idx])
+            new_txt = str(index) + ": " + txt + "   " + "%.3f" % (scores[idx])
         else:
-            new_txt = "  " + txt + "  " + '%.3f' % (scores[idx])
+            new_txt = "  " + txt + "  " + "%.3f" % (scores[idx])
         draw_txt.text((0, gap * count), new_txt, txt_color, font=font)
         # whether add new blank img or not
         if count >= img_h // gap - 1 and idx + 1 < len(texts):
@@ -266,7 +304,8 @@ def text_visual(texts,
 
 def base64_to_cv2(b64str):
     import base64
-    data = base64.b64decode(b64str.encode('utf8'))
+
+    data = base64.b64decode(b64str.encode("utf8"))
     data = np.fromstring(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
     return data
@@ -282,20 +321,24 @@ def draw_boxes(image, boxes, scores=None, drop_score=0.5):
         image = cv2.polylines(np.array(image), [box], True, (255, 0, 0), 2)
     return image
 
+
 def print_draw_crop_rec_res(output, filename, img_crop_list):
     bbox_num = len(img_crop_list)
-    
+
     if not os.path.exists(output):
         os.makedirs(output)
     for bno in range(bbox_num):
-        cv2.imwrite(os.path.join(output, f'{filename}_bno'), img_crop_list[bno])
+        cv2.imwrite(
+            os.path.join(output, f"{filename}_bno"), img_crop_list[bno]
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_img = "./doc/test_v2"
     predict_txt = "./doc/predict.txt"
-    f = open(predict_txt, 'r')
+    f = open(predict_txt, "r")
     data = f.readlines()
-    img_path, anno = data[0].strip().split('\t')
+    img_path, anno = data[0].strip().split("\t")
     img_name = os.path.basename(img_path)
     img_path = os.path.join(test_img, img_name)
     image = Image.open(img_path)
@@ -303,9 +346,9 @@ if __name__ == '__main__':
     data = json.loads(anno)
     boxes, txts, scores = [], [], []
     for dic in data:
-        boxes.append(dic['points'])
-        txts.append(dic['transcription'])
-        scores.append(round(dic['scores'], 3))
+        boxes.append(dic["points"])
+        txts.append(dic["transcription"])
+        scores.append(round(dic["scores"], 3))
 
     new_img = draw_ocr(image, boxes, txts, scores)
 
