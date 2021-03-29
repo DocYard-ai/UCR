@@ -1,5 +1,5 @@
+- [TL;DR](tldr.md): Jump right into action by running pretrained models using CLI or Python scripts.
 - [Installation](coming_soon.md): Installation guide for Windows, Linux and Mac systems using pip or Docker containers.
-- [TL;DR](coming_soon.md): Jump right into action by running pretrained models using CLI or Python scripts.
 - [Tutorials](coming_soon.md): Find in-depth explanations of config parameters and Deep Learning components as well as training and testing scripts through Jupyter Notebooks.
 - [How to Contribute!](coming_soon.md): Learn how you can extend this library using custom trained models, datasets, new language support and/or new deep learning component(s).
 - [Reference](coming_soon.md): Detailed documentation of each Python file in [UCR Repository](https://github.com/DocYard-ai/UCR/tree/develop/ucr) with its respective functions and classes.
@@ -29,7 +29,7 @@
             <input type="checkbox" disabled checked="">
             <span class="task-list-indicator"></span>
         </label>
-        &nbsp;Support for 15+ languages
+        &nbsp;Supports over 15 languages
     </li>
     <li class="task-list-item">
         <label class="task-list-control">
@@ -43,21 +43,21 @@
             <input type="checkbox" disabled checked="">
             <span class="task-list-indicator"></span>
         </label>
-        &nbsp;Modular Design Language for easy Pick & Choose between different Deep Learning components
+        &nbsp;Modular Design Language allows Pick and Choose of different components
     </li>
     <li class="task-list-item">
         <label class="task-list-control">
             <input type="checkbox" disabled checked="">
             <span class="task-list-indicator"></span>
         </label>
-        &nbsp;Easily extensible with custom components and attributes
+        &nbsp;Easily extensible with Custom Components and attributes
     </li>
     <li class="task-list-item">
         <label class="task-list-control">
             <input type="checkbox" disabled checked="">
             <span class="task-list-indicator"></span>
         </label>
-        &nbsp;Hydra config for rapid prototyping with multiple configurations
+        &nbsp;Hydra config enables Rapid Prototyping with multiple configurations
     </li>
     <li class="task-list-item">
         <label class="task-list-control">
@@ -67,3 +67,9 @@
         &nbsp;Support for Packaging, Logging and Deployment tools straight out of the box
     </li>
 </ul>
+
+## Acknowledgement
+
+Substantial part of the UCR library is either inspired or inherited from the [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) library. Wherever possible the repository has been ported from PaddlePaddle to PyTorch framework including the direct translation of model parameters.
+Also, a big thanks to [Clova AI](https://clova.ai/en/research/research-areas.html), for open sourcing their testing script and pretrained models ([CRAFT](https://github.com/clovaai/CRAFT-pytorch)).  
+A complete list of the Implemented Models along with their respective citation is tabulated [here](coming_soon.md)!

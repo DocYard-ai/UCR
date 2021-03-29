@@ -112,6 +112,7 @@ extra_css:
 # Extra JS
 extra_javascript:
   - https://cdnjs.cloudflare.com/ajax/libs/tablesort/5.2.1/tablesort.min.js
+  - static/js/custom.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
@@ -119,7 +120,7 @@ extra_javascript:
 nav:
   - Home:
     - UCR: index.md
-    - TL;DR: coming_soon.md
+    - TL;DR: tldr.md
     - Model Zoo: pretrained.md
   - Installation: coming_soon.md
   - Tutorials: coming_soon.md

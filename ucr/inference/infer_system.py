@@ -338,7 +338,7 @@ class TextSystem(object):
             )
             sys.exit(0)
 
-        print(f"Performing Inference on {len(input)} files")
+        print(f"Running Prediction on {len(input)} files")
         i = 0
         for image in tqdm(input, colour="green", desc="OCR", unit="image"):
             if is_imgpath:
