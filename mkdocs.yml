@@ -121,6 +121,7 @@ nav:
   - Home:
     - UCR: index.md
     - TL;DR: tldr.md
+    - Demo: demo.md
     - Model Zoo: pretrained.md
   - Installation: coming_soon.md
   - Tutorials: coming_soon.md

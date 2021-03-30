@@ -60,7 +60,7 @@ def parse_args(mMain=True, add_help=True):
         parser.add_argument("--type", type=str, default="mobile")
         parser.add_argument("--output_format", type=str, default=None)
         parser.add_argument(
-            "--system_overrides", nargs="+", type=str, default=None
+            "--system_overrides", nargs="+", type=str, default=[]
         )
         parser.add_argument("--det", type=str2bool, default=True)
         parser.add_argument("--rec", type=str2bool, default=True)
@@ -74,18 +74,14 @@ def parse_args(mMain=True, add_help=True):
         parser.add_argument(
             "--det_batch_size", type=int, default=1
         )  # batch_size is not yet implemented in the code
-        parser.add_argument(
-            "--det_overrides", nargs="+", type=str, default=None
-        )
+        parser.add_argument("--det_overrides", nargs="+", type=str, default=[])
 
         # params for recogniton engine
         parser.add_argument("--rec_algorithm", type=str, default="CRNN")
         parser.add_argument("--rec_config_name", type=str, default="infer_rec")
         parser.add_argument("--rec_model_location", type=str, default=None)
         parser.add_argument("--rec_batch_size", type=int, default=8)
-        parser.add_argument(
-            "--rec_overrides", nargs="+", type=str, default=None
-        )
+        parser.add_argument("--rec_overrides", nargs="+", type=str, default=[])
         parser.add_argument("--rec_whitelist", type=str, default=None)
         parser.add_argument("--rec_blacklist", type=str, default=None)
 
@@ -94,9 +90,7 @@ def parse_args(mMain=True, add_help=True):
         parser.add_argument("--cls_config_name", type=str, default="infer_cls")
         parser.add_argument("--cls_model_location", type=str, default=None)
         parser.add_argument("--cls_batch_size", type=int, default=8)
-        parser.add_argument(
-            "--cls_overrides", nargs="+", type=str, default=None
-        )
+        parser.add_argument("--cls_overrides", nargs="+", type=str, default=[])
 
         return parser.parse_args()
     else:
@@ -110,25 +104,25 @@ def parse_args(mMain=True, add_help=True):
             type="mobile",
             backend="torch",
             output_format=None,
-            system_overrides=None,
+            system_overrides=[],
             verbose=False,
             det_algorithm="CRAFT",
             det_config_name="infer_det",
             det_model_location=None,
             det_batch_size=1,
-            det_overrides=None,
+            det_overrides=[],
             rec_algorithm="CRNN",
             rec_config_name="infer_rec",
             rec_model_location=None,
             rec_batch_size=8,
-            rec_overrides=None,
+            rec_overrides=[],
             rec_whitelist=None,
             rec_blacklist=None,
             cls_algorithm="CLS",
             cls_config_name="infer_cls",
             cls_model_location=None,
             cls_batch_size=8,
-            cls_overrides=None,
+            cls_overrides=[],
         )
 
 
