@@ -16,4 +16,5 @@ threshold: 0.9
 label_list: ['0','180']
 
 input: test/
-model_location: models/cls/cls_ench_ppocr_mobile.pt
+model_location: 
+# models/cls/cls_ench_ppocr_mobile.pt

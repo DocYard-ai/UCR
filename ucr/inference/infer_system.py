@@ -438,26 +438,34 @@ class TextSystem(object):
             return out_dict
 
 
-def main():
-    cfg_dir = hydra.utils.to_absolute_path("conf")
+def main(args):
+    cfg_dir = hydra.utils.to_absolute_path(args.config_dir)
 
-    with initialize_config_dir(config_dir=cfg_dir, job_name="infer_det"):
-        cfg = compose(config_name="infer_det")
+    with initialize_config_dir(
+        config_dir=cfg_dir, job_name=args.config_det_name
+    ):
+        cfg = compose(config_name=args.config_det_name)
         # print("Detection config:\n{}\n".format(cfg.pretty()))
         config_det = OmegaConf.to_container(cfg)
 
-    with initialize_config_dir(config_dir=cfg_dir, job_name="infer_rec"):
-        cfg = compose(config_name="infer_rec")
+    with initialize_config_dir(
+        config_dir=cfg_dir, job_name=args.config_rec_name
+    ):
+        cfg = compose(config_name=args.config_rec_name)
         # print("Recognition config:\n{}\n".format(cfg.pretty()))
         config_rec = OmegaConf.to_container(cfg)
 
-    with initialize_config_dir(config_dir=cfg_dir, job_name="infer_cls"):
-        cfg = compose(config_name="infer_cls")
+    with initialize_config_dir(
+        config_dir=cfg_dir, job_name=args.config_cls_name
+    ):
+        cfg = compose(config_name=args.config_cls_name)
         # print("Classification config:\n{}\n".format(cfg.pretty()))
         config_cls = OmegaConf.to_container(cfg)
 
-    with initialize_config_dir(config_dir=cfg_dir, job_name="infer_system"):
-        cfg = compose(config_name="infer_system")
+    with initialize_config_dir(
+        config_dir=cfg_dir, job_name=args.config_system_name
+    ):
+        cfg = compose(config_name=args.config_system_name)
         # print("Final config:\n{}\n".format(cfg.pretty()))
         config = OmegaConf.to_container(cfg)
 
@@ -472,4 +480,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config_dir", type=str, default="ucr/conf")
+    parser.add_argument("--config_det_name", type=str, default="infer_det")
+    parser.add_argument("--config_rec_name", type=str, default="infer_rec")
+    parser.add_argument("--config_cls_name", type=str, default="infer_cls")
+    parser.add_argument(
+        "--config_system_name", type=str, default="infer_system"
+    )
+
+    args = parser.parse_args()
+    main(args)

@@ -1,7 +1,7 @@
 Postprocess:
   name: CRAFTPostProcess
-  text_thresh: 0.7
-  link_thresh: 0.3
+  text_thresh: 0.35
+  link_thresh: 0.1
   min_size: 3
   use_dilate: False
   xdilate: 9

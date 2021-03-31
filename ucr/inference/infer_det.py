@@ -221,7 +221,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_path", type=str, default="../../conf")
+    parser.add_argument("--config_path", type=str, default="../conf")
     parser.add_argument("--config_name", type=str, default="infer_det")
 
     args = parser.parse_args()

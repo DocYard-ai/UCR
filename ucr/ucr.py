@@ -169,12 +169,9 @@ class UCR(infer_system.TextSystem):
             )
             device = "cpu"
 
+        __dir__ = os.path.dirname(__file__)
         if not conf_location:
-            conf_location = maybe_download(
-                os.path.join(BASE_DIR, "{}/conf".format(VERSION)),
-                model_urls["conf"]["url"],
-                force_download,
-            )
+            conf_location = os.path.join(__dir__, "conf")
 
         with initialize_config_dir(
             config_dir=conf_location, job_name="infer_det"
@@ -285,8 +282,6 @@ class UCR(infer_system.TextSystem):
                 force_download,
             )
             config_rec["model_location"] = os.path.join(rec_path, "model.pt")
-
-            __dir__ = os.path.dirname(__file__)
             config_rec["font_path"] = os.path.join(
                 __dir__, config_rec["font_path"]
             )  # TODO: Zip both font_path and char_dict_location in model_url
@@ -359,14 +354,11 @@ def main():
 
 
 model_urls = {
-    "conf": {
-        "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/conf/conf.zip"
-    },
     "torch_server": {
         "det": {
             "DB": {
                 "preprocess": "det_db",
-                "architecture": "det_r50_vd_db",
+                "architecture": "det_ppocr_server",
                 "postprocess": "det_db",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_server/det_ench_ppocr_server.zip",
             },
@@ -380,7 +372,7 @@ model_urls = {
         "rec": {
             "ch_sim": {
                 "preprocess": "rec_ctc",
-                "architecture": "rec_ppocr_server",
+                "architecture": "det_ppocr_mobile",
                 "postprocess": "rec_ctc",
                 "font_path": "utils/fonts/simfang.ttf",
                 "char_dict_location": "utils/dict/ench_dict.txt",

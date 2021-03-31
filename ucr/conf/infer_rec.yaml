@@ -19,6 +19,9 @@ whitelist: "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]_abcd
 blacklist: 
 
 input: test/
-model_location: models/rec/multi_language/rec_ench_ppocr_server.pt
-font_path: ucr/utils/fonts/only_en.ttf
-char_dict_location: ucr/utils/dict/ench_dict.txt
+model_location: 
+# models/rec/multi_language/rec_ench_ppocr_server.pt
+font_path: 
+# ucr/utils/fonts/only_en.ttf
+char_dict_location: 
+# ucr/utils/dict/ench_dict.txt
