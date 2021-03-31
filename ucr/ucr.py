@@ -372,7 +372,7 @@ model_urls = {
         "rec": {
             "ch_sim": {
                 "preprocess": "rec_ctc",
-                "architecture": "det_ppocr_mobile",
+                "architecture": "rec_ppocr_server",
                 "postprocess": "rec_ctc",
                 "font_path": "utils/fonts/simfang.ttf",
                 "char_dict_location": "utils/dict/ench_dict.txt",
@@ -384,7 +384,7 @@ model_urls = {
         "det": {
             "DB": {
                 "preprocess": "det_db",
-                "architecture": "det_mv3_db",
+                "architecture": "det_ppocr_mobile",
                 "postprocess": "det_db",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/det_ench_ppocr_mobile.zip",
             }
