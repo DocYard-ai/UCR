@@ -1,5 +1,4 @@
 # Makefile
-
 .PHONY: help
 help:
 	@echo "Commands:"
@@ -16,7 +15,7 @@ install:
 	python -m pip install -U pip
 	python -m pip install .
 
-# Installation
+# Make environment
 .PHONY: env
 install:
 	python -m pip install -U pip
@@ -24,7 +23,7 @@ install:
 	python -m poetry shell
 	python -m poetry install --no-dev
 
-# Installation
+# Make dev environment
 .PHONY: devenv
 install:
 	python -m pip install -U pip

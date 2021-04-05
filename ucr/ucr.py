@@ -50,7 +50,7 @@ def parse_args(mMain=True, add_help=True):
         parser = argparse.ArgumentParser()
 
         # params for prediction system
-        parser.add_argument("--hydra_conf_location", type=str, default=None)
+        parser.add_argument("--conf_location", type=str, default=None)
         parser.add_argument("--force_download", type=str2bool, default=False)
         parser.add_argument("-i", "--input", type=str, required=True)
         parser.add_argument("-o", "--output", type=str, default=None)
@@ -95,7 +95,7 @@ def parse_args(mMain=True, add_help=True):
         return parser.parse_args()
     else:
         return argparse.Namespace(
-            hydra_conf_location=None,
+            conf_location=None,
             force_download=False,
             d="cuda",
             device="cuda",
@@ -137,7 +137,7 @@ class UCR(infer_system.TextSystem):
         args.__dict__.update(**kwargs)
 
         force_download = args.force_download
-        conf_location = args.hydra_conf_location
+        conf_location = args.conf_location
         det_algorithm = args.det_algorithm
         args.rec_algorithm
         args.cls_algorithm
@@ -375,7 +375,7 @@ model_urls = {
                 "architecture": "rec_ppocr_server",
                 "postprocess": "rec_ctc",
                 "font_path": "utils/fonts/simfang.ttf",
-                "char_dict_location": "utils/dict/ench_dict.txt",
+                "char_dict_location": "utils/dict/ch_sim_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_server/rec_ench_ppocr_server.zip",
             }
         },
@@ -395,15 +395,15 @@ model_urls = {
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
                 "font_path": "utils/fonts/simfang.ttf",
-                "char_dict_location": "utils/dict/ench_dict.txt",
+                "char_dict_location": "utils/dict/ch_sim_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ench_ppocr_mobile.zip",
             },
-            "en": {
+            "en_number": {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
                 "font_path": "utils/fonts/only_en.ttf",
-                "char_dict_location": "utils/dict/en_dict.txt",
+                "char_dict_location": "",  # won't be reqd/used as en_number dict would be constructed in code.
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_en_number_mobile.zip",
             },
             "fr": {
@@ -458,7 +458,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/xi.ttf",
+                "font_path": "utils/fonts/spanish.ttf",
                 "char_dict_location": "utils/dict/spanish_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_xi_mobile.zip",
             },

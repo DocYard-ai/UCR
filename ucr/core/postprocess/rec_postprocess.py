@@ -26,13 +26,14 @@ class BaseRecLabelDecode(object):
     def __init__(
         self,
         char_dict_location=None,
-        character_type="ch_sim",
+        lang="ch_sim",
         use_space_char=False,
     ):
-        support_character_type = [
+        support_lang = [
             "ch_sim",
             "en",
-            "EN_symbol",
+            "en_case",
+            "en_number",
             "fr",
             "de",
             "ja",
@@ -61,27 +62,27 @@ class BaseRecLabelDecode(object):
             "EN",
         ]
         assert (
-            character_type in support_character_type
-        ), "Only {} are supported now but get {}".format(
-            support_character_type, character_type
-        )
+            lang in support_lang
+        ), "Only {} are supported now but get {}".format(support_lang, lang)
 
         self.beg_str = "sos"
         self.end_str = "eos"
 
-        if character_type == "en":
+        if lang == "en_case":
             self.character_str = "0123456789abcdefghijklmnopqrstuvwxyz"
             dict_character = list(self.character_str)
-        elif character_type == "EN_symbol":
+        elif lang == "en_number":
             # same with ASTER setting (use 94 char).
-            self.character_str = string.printable[:-6]
+            self.character_str = string.printable[:62]
+            if use_space_char:
+                self.character_str += " "
             dict_character = list(self.character_str)
-        elif character_type in support_character_type:
+        elif lang in support_lang:
             self.character_str = ""
             assert (
                 char_dict_location is not None
-            ), "char_dict_location should not be None when character_type is {}".format(
-                character_type
+            ), "char_dict_location should not be None when lang is {}".format(
+                lang
             )
             with open(char_dict_location, "rb") as fin:
                 lines = fin.readlines()
@@ -94,7 +95,7 @@ class BaseRecLabelDecode(object):
 
         else:
             raise NotImplementedError
-        self.character_type = character_type
+        self.lang = lang
         dict_character = self.add_special_char(dict_character)
         self.dict = {}
         for i, char in enumerate(dict_character):
@@ -144,12 +145,12 @@ class CTCLabelDecode(BaseRecLabelDecode):
     def __init__(
         self,
         char_dict_location=None,
-        character_type="ch_sim",
+        lang="ch_sim",
         use_space_char=False,
         **kwargs
     ):
         super(CTCLabelDecode, self).__init__(
-            char_dict_location, character_type, use_space_char
+            char_dict_location, lang, use_space_char
         )
 
     def __call__(self, preds, label=None, *args, **kwargs):
@@ -174,12 +175,12 @@ class AttnLabelDecode(BaseRecLabelDecode):
     def __init__(
         self,
         char_dict_location=None,
-        character_type="ch",
+        lang="ch",
         use_space_char=False,
         **kwargs
     ):
         super(AttnLabelDecode, self).__init__(
-            char_dict_location, character_type, use_space_char
+            char_dict_location, lang, use_space_char
         )
 
     def add_special_char(self, dict_character):
@@ -265,12 +266,12 @@ class SRNLabelDecode(BaseRecLabelDecode):
     def __init__(
         self,
         char_dict_location=None,
-        character_type="en",
+        lang="en_case",
         use_space_char=False,
         **kwargs
     ):
         super(SRNLabelDecode, self).__init__(
-            char_dict_location, character_type, use_space_char
+            char_dict_location, lang, use_space_char
         )
 
     def __call__(self, preds, label=None, *args, **kwargs):

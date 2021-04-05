@@ -17,4 +17,4 @@ label_list: ['0','180']
 
 input: test/
 model_location: 
-# models/cls/cls_ench_ppocr_mobile.pt
+# models/cls/cls_ch_sim_ppocr_mobile.pt

@@ -47,16 +47,14 @@ class ClsResizeImg(object):
 
 
 class RecResizeImg(object):
-    def __init__(
-        self, image_shape, infer_mode=False, character_type="ch", **kwargs
-    ):
+    def __init__(self, image_shape, infer_mode=False, lang="ch", **kwargs):
         self.image_shape = image_shape
         self.infer_mode = infer_mode
-        self.character_type = character_type
+        self.lang = lang
 
     def __call__(self, data):
         img = data["image"]
-        if self.infer_mode and self.character_type == "ch":
+        if self.infer_mode and self.lang == "ch":
             norm_img = resize_norm_img_chinese(img, self.image_shape)
         else:
             norm_img = resize_norm_img(img, self.image_shape)

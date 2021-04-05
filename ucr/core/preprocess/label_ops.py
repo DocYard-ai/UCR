@@ -100,13 +100,14 @@ class BaseRecLabelEncode(object):
         self,
         max_text_length,
         char_dict_location=None,
-        character_type="ch_sim",
+        lang="ch_sim",
         use_space_char=False,
     ):
-        support_character_type = [
+        support_lang = [
             "ch_sim",
             "en",
-            "EN_symbol",
+            "en_case",
+            "en_number",
             "fr",
             "de",
             "ja",
@@ -134,27 +135,27 @@ class BaseRecLabelEncode(object):
             "ne",
         ]
         assert (
-            character_type in support_character_type
-        ), "Only {} are supported now but get {}".format(
-            support_character_type, character_type
-        )
+            lang in support_lang
+        ), "Only {} are supported now but get {}".format(support_lang, lang)
 
         self.max_text_len = max_text_length
         self.beg_str = "sos"
         self.end_str = "eos"
-        if character_type == "en":
+        if lang == "en_case":
             self.character_str = "0123456789abcdefghijklmnopqrstuvwxyz"
             dict_character = list(self.character_str)
-        elif character_type == "EN_symbol":
+        elif lang == "en_number":
             # same with ASTER setting (use 94 char).
-            self.character_str = string.printable[:-6]
+            self.character_str = string.printable[:62]
+            if use_space_char:
+                self.character_str += " "
             dict_character = list(self.character_str)
-        elif character_type in support_character_type:
+        elif lang in support_lang:
             self.character_str = ""
             assert (
                 char_dict_location is not None
-            ), "char_dict_location should not be None when character_type is {}".format(
-                character_type
+            ), "char_dict_location should not be None when lang is {}".format(
+                lang
             )
             with open(char_dict_location, "rb") as fin:
                 lines = fin.readlines()
@@ -164,7 +165,7 @@ class BaseRecLabelEncode(object):
             if use_space_char:
                 self.character_str += " "
             dict_character = list(self.character_str)
-        self.character_type = character_type
+        self.lang = lang
         dict_character = self.add_special_char(dict_character)
         self.dict = {}
         for i, char in enumerate(dict_character):
@@ -186,7 +187,7 @@ class BaseRecLabelEncode(object):
         """
         if len(text) == 0:
             return None
-        if self.character_type == "en":
+        if self.lang == "en_case":
             text = text.lower()
         text_list = []
         for char in text:
@@ -206,12 +207,12 @@ class CTCLabelEncode(BaseRecLabelEncode):
         self,
         max_text_length,
         char_dict_location=None,
-        character_type="ch",
+        lang="ch",
         use_space_char=False,
         **kwargs
     ):
         super(CTCLabelEncode, self).__init__(
-            max_text_length, char_dict_location, character_type, use_space_char
+            max_text_length, char_dict_location, lang, use_space_char
         )
 
     def __call__(self, data):
@@ -236,12 +237,12 @@ class AttnLabelEncode(BaseRecLabelEncode):
         self,
         max_text_length,
         char_dict_location=None,
-        character_type="ch",
+        lang="ch",
         use_space_char=False,
         **kwargs
     ):
         super(AttnLabelEncode, self).__init__(
-            max_text_length, char_dict_location, character_type, use_space_char
+            max_text_length, char_dict_location, lang, use_space_char
         )
 
     def add_special_char(self, dict_character):
@@ -291,12 +292,12 @@ class SRNLabelEncode(BaseRecLabelEncode):
         self,
         max_text_length=25,
         char_dict_location=None,
-        character_type="en",
+        lang="en_case",
         use_space_char=False,
         **kwargs
     ):
         super(SRNLabelEncode, self).__init__(
-            max_text_length, char_dict_location, character_type, use_space_char
+            max_text_length, char_dict_location, lang, use_space_char
         )
 
     def add_special_char(self, dict_character):

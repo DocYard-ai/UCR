@@ -51,7 +51,7 @@ def get_check_global_params(mode):
         "max_text_length",
         "image_shape",
         "image_shape",
-        "character_type",
+        "lang",
         "loss_type",
     ]
     if mode == "train_eval":

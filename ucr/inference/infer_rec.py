@@ -56,8 +56,7 @@ class TextRecognizer(object):
                 ]  # TODO:add try except here
 
         self.rec_image_shape = image_shape
-
-        self.character_type = config["lang"]
+        self.lang = config["lang"]
         self.rec_batch_num = config["batch_size"]
         self.rec_algorithm = config["Architecture"]["algorithm"]
         self.rec_whitelist = config["whitelist"]

@@ -108,7 +108,7 @@ class TextSystem(object):
             dst_img = np.rot90(dst_img)
         return dst_img
 
-    def det_cls_rec(self, img, cls):
+    def perform_ocr(self, img, cls):
         ori_im = img.copy()
         dt_boxes, elapse = self.text_detector(img)
         if self.verbose:
@@ -172,111 +172,6 @@ class TextSystem(object):
 
         return dt_boxes, rec_res
 
-    def perform_ocr(self, img, key, output, rec, cls):
-        if rec:
-            dt_boxes, rec_res = self.det_cls_rec(img, cls)
-            if self.merge_boxes:
-                rec_res = rec_res[0:1]
-
-            if self.output_format == "ppocr":
-                value = [
-                    [box.tolist(), res] for box, res in zip(dt_boxes, rec_res)
-                ]
-            elif self.output_format == "df":
-                info_list = [
-                    [
-                        int(box[0][0]),
-                        int(box[0][1]),
-                        int(box[2][0]),
-                        int(box[2][1]),
-                        res[0],
-                    ]
-                    for box, res in zip(dt_boxes, rec_res)
-                ]
-                value = pd.DataFrame(
-                    info_list,
-                    columns=["startX", "startY", "endX", "endY", "Text"],
-                )
-
-            if self.verbose:
-                from tabulate import tabulate
-
-                headers = ["OCR Result", "Score"]
-                if self.merge_boxes:
-                    print(
-                        tabulate(rec_res[0:1], headers, tablefmt="fancy_grid")
-                    )
-                else:
-                    print(tabulate(rec_res, headers, tablefmt="fancy_grid"))
-
-            if output:
-                image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-                boxes = dt_boxes
-                txts = [rec_res[i][0] for i in range(len(rec_res))]
-                scores = [rec_res[i][1] for i in range(len(rec_res))]
-
-                draw_img = draw_ocr_box_txt(
-                    image,
-                    boxes,
-                    txts,
-                    scores,
-                    drop_score=self.drop_score,
-                    font_path=self.font_path,
-                )
-
-                if not os.path.exists(output):
-                    os.makedirs(output)
-                img_path = os.path.join(
-                    output, "ocr_{}".format(key.split("/")[-1])
-                )
-                cv2.imwrite(img_path, draw_img[:, :, ::-1])
-                print("Saving OCR ouput in {}".format(img_path))
-
-            return value
-
-        else:
-            dt_boxes, elapse = self.text_detector(img)
-            if self.verbose:
-                print(
-                    "\n------------------------dt_boxes num : {},\telapse : {:.3f}------------------------".format(
-                        len(dt_boxes), elapse
-                    )
-                )
-            if dt_boxes is not None:
-                if self.output_format == "ppocr":
-                    value = [box.tolist() for box in dt_boxes]
-
-                elif self.output_format == "df":
-                    info_list = [
-                        [
-                            int(box[0][0]),
-                            int(box[0][1]),
-                            int(box[2][0]),
-                            int(box[2][1]),
-                        ]
-                        for box in dt_boxes
-                    ]
-                    value = pd.DataFrame(
-                        info_list, columns=["startX", "startY", "endX", "endY"]
-                    )
-
-                if output:
-                    src_im = draw_text_det_res(dt_boxes, img)
-
-                    if not os.path.exists(output):
-                        os.makedirs(output)
-                    img_path = os.path.join(
-                        output, "det_{}".format(key.split("/")[-1])
-                    )
-                    cv2.imwrite(img_path, src_im)
-                    print(
-                        "Detection output image is saved in {}".format(
-                            img_path
-                        )
-                    )
-
-            return value
-
     def __call__(
         self,
         input=None,
@@ -309,7 +204,10 @@ class TextSystem(object):
             output = o
 
         if output:
-            print("Saving prediction results in '{}' folder\n".format(output))
+            print(
+                "Saving prediction results in '{}' folder!\n".format(output),
+                flush=True,
+            )
             if not os.path.exists(output):
                 os.makedirs(output)
 
@@ -338,37 +236,171 @@ class TextSystem(object):
             )
             sys.exit(0)
 
-        print(f"Running Prediction on {len(input)} files")
+        print(f"Running Prediction on {len(input)} images:", flush=True)
         i = 0
-        for image in tqdm(input, colour="green", desc="OCR", unit="image"):
-            if is_imgpath:
-                key = image
-                img, flag = check_and_read_gif(image)
-                if not flag:
-                    img = cv2.imread(image)
-                if img is None:
-                    print("ERROR in loading image:{}".format(image))
-                    continue
-            else:
-                key = str(i) + ".jpg"
-                i += 1
-                if len(image.shape) == 2:
-                    img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-                elif len(image.shape) == 3:
-                    img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                elif len(image.shape) == 4:  # png file
-                    img = cv2.cvtColor(image[:3], cv2.COLOR_RGB2BGR)
+        with tqdm(
+            total=len(input),
+            colour="green",
+            desc="OCR",
+            unit="image",
+            unit_scale=True,
+            position=0,
+        ) as pbar:
+            for image in input:
+                if is_imgpath:
+                    key = image
+                    img, flag = check_and_read_gif(image)
+                    if not flag:
+                        img = cv2.imread(image)
+                    if img is None:
+                        print("ERROR in loading image:{}".format(image))
+                        continue
                 else:
-                    print(
-                        "ERROR: Input array has {} channels. Expected '2', '3' or '4'.".format(
-                            len(image.shape)
+                    key = str(i) + ".jpg"
+                    i += 1
+                    if len(image.shape) == 2:
+                        img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+                    elif len(image.shape) == 3:
+                        img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                    elif len(image.shape) == 4:  # png file
+                        img = cv2.cvtColor(image[:3], cv2.COLOR_RGB2BGR)
+                    else:
+                        print(
+                            "ERROR: Input array has {} channels. Expected '2', '3' or '4'.".format(
+                                len(image.shape)
+                            )
                         )
-                    )
-                    continue
-            if det:
-                out_dict[key] = self.perform_ocr(img, key, output, rec, cls)
-            else:
-                rec_dict[key] = img
+                        continue
+                if det:
+                    if rec:
+                        dt_boxes, rec_res = self.perform_ocr(img, cls)
+                        if self.merge_boxes:
+                            rec_res = rec_res[0:1]
+
+                        if self.output_format == "ppocr":
+                            value = [
+                                [box.tolist(), res]
+                                for box, res in zip(dt_boxes, rec_res)
+                            ]
+                        elif self.output_format == "df":
+                            info_list = [
+                                [
+                                    int(box[0][0]),
+                                    int(box[0][1]),
+                                    int(box[2][0]),
+                                    int(box[2][1]),
+                                    res[0],
+                                ]
+                                for box, res in zip(dt_boxes, rec_res)
+                            ]
+                            value = pd.DataFrame(
+                                info_list,
+                                columns=[
+                                    "startX",
+                                    "startY",
+                                    "endX",
+                                    "endY",
+                                    "Text",
+                                ],
+                            )
+
+                        if self.verbose:
+                            from tabulate import tabulate
+
+                            headers = ["OCR Result", "Score"]
+                            if self.merge_boxes:
+                                print(
+                                    tabulate(
+                                        rec_res[0:1],
+                                        headers,
+                                        tablefmt="fancy_grid",
+                                    )
+                                )
+                            else:
+                                print(
+                                    tabulate(
+                                        rec_res, headers, tablefmt="fancy_grid"
+                                    )
+                                )
+
+                        if output:
+                            image = Image.fromarray(
+                                cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                            )
+                            boxes = dt_boxes
+                            txts = [rec_res[i][0] for i in range(len(rec_res))]
+                            scores = [
+                                rec_res[i][1] for i in range(len(rec_res))
+                            ]
+
+                            draw_img = draw_ocr_box_txt(
+                                image,
+                                boxes,
+                                txts,
+                                scores,
+                                drop_score=self.drop_score,
+                                font_path=self.font_path,
+                            )
+
+                            if not os.path.exists(output):
+                                os.makedirs(output)
+                            img_path = os.path.join(
+                                output, "ocr_{}".format(key.split("/")[-1])
+                            )
+                            cv2.imwrite(img_path, draw_img[:, :, ::-1])
+                            pbar.set_postfix_str(
+                                "Output Path: '{}'".format(img_path)
+                            )
+
+                    else:
+                        dt_boxes, elapse = self.text_detector(img)
+                        if self.verbose:
+                            print(
+                                "\n------------------------dt_boxes num : {},\telapse : {:.3f}------------------------".format(
+                                    len(dt_boxes), elapse
+                                )
+                            )
+                        if dt_boxes is not None:
+                            if self.output_format == "ppocr":
+                                value = [box.tolist() for box in dt_boxes]
+
+                            elif self.output_format == "df":
+                                info_list = [
+                                    [
+                                        int(box[0][0]),
+                                        int(box[0][1]),
+                                        int(box[2][0]),
+                                        int(box[2][1]),
+                                    ]
+                                    for box in dt_boxes
+                                ]
+                                value = pd.DataFrame(
+                                    info_list,
+                                    columns=[
+                                        "startX",
+                                        "startY",
+                                        "endX",
+                                        "endY",
+                                    ],
+                                )
+
+                            if output:
+                                src_im = draw_text_det_res(dt_boxes, img)
+
+                                if not os.path.exists(output):
+                                    os.makedirs(output)
+                                img_path = os.path.join(
+                                    output, "det_{}".format(key.split("/")[-1])
+                                )
+                                cv2.imwrite(img_path, src_im)
+                                pbar.set_postfix_str(
+                                    "Output Path: '{}'".format(img_path)
+                                )
+
+                    out_dict[key] = value
+                else:
+                    rec_dict[key] = img
+                pbar.update(1)
 
         if rec_dict:
             img = list(rec_dict.values())
