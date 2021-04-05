@@ -20,26 +20,26 @@ ucr test
 1. <span style="color:#FF8856">Using Command Line:</span>
 ```bash
 # run prediction on input file/folder
-ucr -i input_path -o output_path -l language_id
+ucr predict input_path -o=output_path -l=language_id
 ```
-List of all supported languages with their corresponding ids is shown [here](coming_soon.md)!  
+List of all supported languages with their corresponding ids is shown [here](modelzoo.md)!  
 To view all available options for the CLI application:
 ```bash
-# view all CLI commands
-ucr --help
+# view all CLI predict commands
+ucr predict --help
 ```
 Usage: ucr *--options* <span style="color:#FF8856">[ARGS]</span> 
 1. <span style="color:#FF8856">From Python scripts/Jupyter Notebooks:</span>
 ```python
 # Import and Initialize
 from ucr import UCR
-ocr = UCR(lang='en') #lang='language_id'.
+ocr = UCR(l='en') #lang='language_id'.
 
 # Run Predictions
-result = ocr.predict(input='input_path', output='output_path')
+result = ocr.predict('input_path', o='output_path')
 ```  
 
-*Refer to the [Demo](coming_soon.md) page and/or [Colab Notebook](coming_soon.md) to see it in action!*
+*Refer to the [Demo](demo.md) page and/or [Colab Notebook](coming_soon.md) to see it in action!*
 
 ## Argument List 
 
@@ -71,48 +71,11 @@ result = ocr.predict(input='input_path', output='output_path')
 | `rec_model_location` | str      | None      |  Overrides model path present in `rec_config_name`.yaml file! Useful for custom trained models.   |
 | `rec_batch_size`     | int      | 8         |  Batch size for performing Recognition on `input` data.    |
 | `rec_overrides`      | str/list | None      |  Overrides arguments in [infer_rec](https://github.com/DocYard-ai/UCR/blob/develop/conf/infer_rec.yaml) config file. Details [here](coming_soon.md)!     |
-| `rec_whitelist`      | str      | None      |  Only whitelisted characters will be considered during prediction. See example [here](coming_soon.md)! |     |
-| `rec_blacklist`      | str      | None      |  Blacklisted characters will be ignored during prediction. See example [here](coming_soon.md)!   |
+| `rec_whitelist`      | str      | None      |  Only whitelisted characters will be considered during prediction. See example [here](demo.md)! |     |
+| `rec_blacklist`      | str      | None      |  Blacklisted characters will be ignored during prediction. See example [here](demo.md)!   |
 | <span style="font-weight:bold; font-size: 125%"> Classification args|          |           |      |
 | `cls_algorithm`      | str      | "CLS"       |  Specify classification algorithm to select respective pretrained model. *["CLS"]* Details [here](coming_soon.md)!   |
 | `cls_config_name`    | str      | "infer_cls" | Specify cls config filename located inside `conf_location` as shown [here](https://github.com/DocYard-ai/UCR/tree/develop/conf)! More on config structure [here](coming_soon.md)!    |
 | `cls_model_location` | str      | None      |  Overrides model path present in `cls_config_name`.yaml file! Useful for custom trained models.    |
 | `cls_batch_size`     | int      | 8         |   Batch size for performing Classification on `input` data.   |
 | `cls_overrides`      | str/list | None      |   Overrides arguments in [infer_cls](https://github.com/DocYard-ai/UCR/blob/develop/conf/infer_cls.yaml) config file. Details [here](coming_soon.md)!    |
-
-<!-- 
-,type,default,help
-conf_location,str,None,
-force_download,bool,False,
-i/input,str,,
-o/output,str,None,
-l/lang,str,"ch_sim",
-d/device,str,"cuda",
-backend,str,"torch",
-type,str,"mobile",
-output_format,str,None,
-system_overrides,str/list,None,
-det,bool,True,
-rec,bool,True,
-cls,bool,False,
-verbose,bool,False,
-det_algorithm,str,"CRAFT",
-det_config_name,str,"infer_det",
-det_model_location,str,None,
-det_batch_size,int,1,
-det_overrides,str/list,None,
-rec_algorithm,str,"CRNN",
-rec_config_name,str,"infer_rec",
-rec_model_location,str,None,
-rec_batch_size,int,8,
-rec_overrides,str/list,None,
-rec_whitelist,str,None,
-rec_blacklist,str,None,
-cls_algorithm,str,"CLS",
-cls_config_name,str,"infer_cls",
-cls_model_location,str,None,
-cls_batch_size,int,8,
-cls_overrides,str/list,None, 
-
-Can be either <span style="color:#FF8856">file-path</span> (str), <span style="color:#FF8856">folder-path</span> (str), <span style="color:#FF8856">web-address</span> (str), <span style="color:#FF8856">numpy array</span> (format:[H,W,C], C:BGR/GRAY) or <span style="color:#FF8856">list</span> of str/arrays.
--->

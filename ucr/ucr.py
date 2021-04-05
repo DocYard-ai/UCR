@@ -80,19 +80,18 @@ def parse_args(mMain=True, add_help=True):
 
         subparsers = parser.add_subparsers(help="UCR commands")
 
-        test_parser = subparsers.add_parser(
-            "test",
-            parents=parent_parsers,
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            help="Check if everything is installed and working correctly!",
-        )
         predict_parser = subparsers.add_parser(
             "predict",
             parents=parent_parsers,
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
             help="Loads pretrained models for performing predictions!",
         )
-
+        test_parser = subparsers.add_parser(
+            "test",
+            parents=parent_parsers,
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+            help="Check if everything is installed and working correctly!",
+        )
         # params for prediction system
         predict_parser.add_argument(
             "input", type=str, help="Input file/folder path"
