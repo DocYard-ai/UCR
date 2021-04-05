@@ -174,25 +174,13 @@ class TextSystem(object):
 
     def __call__(
         self,
-        input=None,
+        input,
         output=None,
-        i=None,
         o=None,
         det=True,
         rec=True,
         cls=False,
     ):
-
-        if input is not None:
-            input = input
-        elif i is not None:
-            input = i
-        elif input is None and i is None:
-            print(
-                "ERROR: Input is mandatory: can be either ndarray (or list of ndarray), img_filepath, img_folderpath or img_webpath!"
-            )
-            sys.exit(0)
-
         assert isinstance(input, (np.ndarray, list, str))
 
         rec_dict = {}
@@ -201,7 +189,7 @@ class TextSystem(object):
         if output is not None:
             output = output
         elif o is not None:
-            output = o
+            output = o  # output takes higher precedence than o
 
         if output:
             print(

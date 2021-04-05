@@ -15,6 +15,8 @@
 # limitations under the License.
 
 import os
+import platform
+import sys
 
 import torch
 from hydra.experimental import compose, initialize_config_dir
@@ -40,6 +42,17 @@ SUPPORT_MODEL_TYPE = [
 BASE_DIR = os.path.expanduser("~/.ucr/")
 
 
+def print_version() -> None:
+    """Prints version information of rasa tooling and python."""
+
+    print(
+        "UCR Version      :          0.2.12"
+    )  # TODO: Change this to update automatically
+    print(f"Python Version    :         {platform.python_version()}")
+    print(f"Operating System  :         {platform.platform()}")
+    print(f"Python Path       :         {sys.executable}")
+
+
 def parse_args(mMain=True, add_help=True):
     import argparse
 
@@ -47,52 +60,112 @@ def parse_args(mMain=True, add_help=True):
         return v.lower() in ("true", "t", "1")
 
     if mMain:
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(
+            prog="ucr",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+            description="UCR is an Open Source, Easy to use Python library to build Production Ready OCR applications with its highly Intuitive,\
+                                             Modular & Extensible API design and off-the-shelf Pretrained Models for over 15 languages. For more details, please go to https://docyard.ai/UCR",
+        )
+
+        parser.add_argument(
+            "-v",
+            "--version",
+            action="store_true",
+            default=argparse.SUPPRESS,
+            help="Print installed UCR version",
+        )
+
+        parent_parser = argparse.ArgumentParser(add_help=False)
+        parent_parsers = [parent_parser]
+
+        subparsers = parser.add_subparsers(help="UCR commands")
+
+        test_parser = subparsers.add_parser(
+            "test",
+            parents=parent_parsers,
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+            help="Check if everything is installed and working correctly!",
+        )
+        predict_parser = subparsers.add_parser(
+            "predict",
+            parents=parent_parsers,
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+            help="Loads pretrained models for performing predictions!",
+        )
 
         # params for prediction system
-        parser.add_argument("--conf_location", type=str, default=None)
-        parser.add_argument("--force_download", type=str2bool, default=False)
-        parser.add_argument("-i", "--input", type=str, required=True)
-        parser.add_argument("-o", "--output", type=str, default=None)
-        parser.add_argument("-d", "--device", type=str, default="cuda")
-        parser.add_argument("-l", "--lang", type=str, default="ch_sim")
-        parser.add_argument("--backend", type=str, default="torch")
-        parser.add_argument("--type", type=str, default="mobile")
-        parser.add_argument("--output_format", type=str, default=None)
-        parser.add_argument(
+        predict_parser.add_argument(
+            "input", type=str, help="Input file/folder path"
+        )
+        predict_parser.add_argument("--conf_location", type=str, default=None)
+        predict_parser.add_argument(
+            "--force_download", type=str2bool, default=False
+        )
+        predict_parser.add_argument("-o", "--output", type=str, default=None)
+        predict_parser.add_argument("-d", "--device", type=str, default="cuda")
+        predict_parser.add_argument("-l", "--lang", type=str, default="ch_sim")
+        predict_parser.add_argument("--backend", type=str, default="torch")
+        predict_parser.add_argument("--type", type=str, default="mobile")
+        predict_parser.add_argument("--output_format", type=str, default=None)
+        predict_parser.add_argument(
             "--system_overrides", nargs="+", type=str, default=[]
         )
-        parser.add_argument("--det", type=str2bool, default=True)
-        parser.add_argument("--rec", type=str2bool, default=True)
-        parser.add_argument("--cls", type=str2bool, default=False)
-        parser.add_argument("--verbose", type=str2bool, default=False)
+        predict_parser.add_argument("--det", type=str2bool, default=True)
+        predict_parser.add_argument("--rec", type=str2bool, default=True)
+        predict_parser.add_argument("--cls", type=str2bool, default=False)
+        predict_parser.add_argument("--verbose", type=str2bool, default=False)
 
         # params for detection engine
-        parser.add_argument("--det_algorithm", type=str, default="CRAFT")
-        parser.add_argument("--det_config_name", type=str, default="infer_det")
-        parser.add_argument("--det_model_location", type=str, default=None)
-        parser.add_argument(
+        predict_parser.add_argument(
+            "--det_algorithm", type=str, default="CRAFT"
+        )
+        predict_parser.add_argument(
+            "--det_config_name", type=str, default="infer_det"
+        )
+        predict_parser.add_argument(
+            "--det_model_location", type=str, default=None
+        )
+        predict_parser.add_argument(
             "--det_batch_size", type=int, default=1
         )  # batch_size is not yet implemented in the code
-        parser.add_argument("--det_overrides", nargs="+", type=str, default=[])
+        predict_parser.add_argument(
+            "--det_overrides", nargs="+", type=str, default=[]
+        )
 
         # params for recogniton engine
-        parser.add_argument("--rec_algorithm", type=str, default="CRNN")
-        parser.add_argument("--rec_config_name", type=str, default="infer_rec")
-        parser.add_argument("--rec_model_location", type=str, default=None)
-        parser.add_argument("--rec_batch_size", type=int, default=8)
-        parser.add_argument("--rec_overrides", nargs="+", type=str, default=[])
-        parser.add_argument("--rec_whitelist", type=str, default=None)
-        parser.add_argument("--rec_blacklist", type=str, default=None)
+        predict_parser.add_argument(
+            "--rec_algorithm", type=str, default="CRNN"
+        )
+        predict_parser.add_argument(
+            "--rec_config_name", type=str, default="infer_rec"
+        )
+        predict_parser.add_argument(
+            "--rec_model_location", type=str, default=None
+        )
+        predict_parser.add_argument("--rec_batch_size", type=int, default=8)
+        predict_parser.add_argument(
+            "--rec_overrides", nargs="+", type=str, default=[]
+        )
+        predict_parser.add_argument("--rec_whitelist", type=str, default=None)
+        predict_parser.add_argument("--rec_blacklist", type=str, default=None)
 
         # params for detection engine
-        parser.add_argument("--cls_algorithm", type=str, default="CLS")
-        parser.add_argument("--cls_config_name", type=str, default="infer_cls")
-        parser.add_argument("--cls_model_location", type=str, default=None)
-        parser.add_argument("--cls_batch_size", type=int, default=8)
-        parser.add_argument("--cls_overrides", nargs="+", type=str, default=[])
+        predict_parser.add_argument("--cls_algorithm", type=str, default="CLS")
+        predict_parser.add_argument(
+            "--cls_config_name", type=str, default="infer_cls"
+        )
+        predict_parser.add_argument(
+            "--cls_model_location", type=str, default=None
+        )
+        predict_parser.add_argument("--cls_batch_size", type=int, default=8)
+        predict_parser.add_argument(
+            "--cls_overrides", nargs="+", type=str, default=[]
+        )
+        predict_parser.set_defaults(func=predict_cli)
 
-        return parser.parse_args()
+        test_parser.add_argument("-l", "--lang", type=str, default="ch_sim")
+        test_parser.set_defaults(func=test_cli)
+        return parser
     else:
         return argparse.Namespace(
             conf_location=None,
@@ -325,20 +398,17 @@ class UCR(infer_system.TextSystem):
 
     def predict(
         self,
-        input=None,
+        input,
         output=None,
-        i=None,
         o=None,
         det=True,
         rec=True,
         cls=False,
     ):
-        return super().__call__(input, output, i, o, det, rec, cls)
+        return super().__call__(input, output, o, det, rec, cls)
 
 
-def main():
-    args = parse_args(mMain=True)
-
+def test_cli(args):
     ocr_engine = UCR(**(args.__dict__))
     result = ocr_engine.predict(
         input=args.input,
@@ -351,6 +421,40 @@ def main():
         for k, v in result.items():
             print(f"\n------------------------{k}:------------------------")
             print(tabulate(v, tablefmt="fancy_grid"))
+
+
+def predict_cli(args):
+    ocr_engine = UCR(**(args.__dict__))
+    result = ocr_engine.predict(
+        input=args.input,
+        output=args.output,
+        det=args.det,
+        rec=args.rec,
+        cls=args.cls,
+    )
+    if result is not None:
+        for k, v in result.items():
+            print(f"\n------------------------{k}:------------------------")
+            print(tabulate(v, tablefmt="fancy_grid"))
+
+
+def main():
+    arg_parser = parse_args(mMain=True)
+    cmdline_arguments = arg_parser.parse_args()
+
+    try:
+        if hasattr(cmdline_arguments, "input"):
+            cmdline_arguments.func(cmdline_arguments)
+        elif hasattr(cmdline_arguments, "version"):
+            print_version()
+        else:
+            # user has not provided a subcommand, let's print the help
+            print("No command specified!")
+            arg_parser.print_help()
+            sys.exit(1)
+    except Exception as e:
+        print(f"{e.__class__.__name__}: {e}")
+        sys.exit(1)
 
 
 model_urls = {
