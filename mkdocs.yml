@@ -1,6 +1,6 @@
 # Project Info
 site_name: Universal Character Recognizer (UCR)
-site_url: https://docyard.ai/UCR
+site_url: https://ucr.docyard.ai
 site_description: Universal Character Recognizer
 site_author: Abhigyan Raman
 
@@ -147,3 +147,4 @@ nav:
       - annotation: ucr/utils/annotation.md
     - train: ucr/train.md
     - ucr: ucr/ucr.md
+  - Coming Soon!: coming_soon.md

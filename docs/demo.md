@@ -9,10 +9,6 @@ Every Subsection here, contains a specific setting in which Experiments were con
 ## Default Configuration [:fontawesome-brands-github:](coming_soon.md)
 
 === "Document 1"
-
-    ![Placeholder](static/images/demo_results/ocr_laura-lefurgey-smith-r5NG8QBkOhQ-unsplash.jpg.jpg){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
@@ -21,6 +17,9 @@ Every Subsection here, contains a specific setting in which Experiments were con
         result = ocr(i='input', o='output')
         ```
         CLI: `ucr -i 'input' -o 'output'` 
+    ![Placeholder](static/images/demo_results/ocr_laura-lefurgey-smith-r5NG8QBkOhQ-unsplash.jpg.jpg){align="left"; loading="lazy"}
+    !!! info inline end ""
+        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
     !!! tip inline end "Prediction Stats"
         cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
 

@@ -9,6 +9,7 @@ new
 # model dir
 models
 notebooks
+site
 
 # training dirs/files (since wip)
 ucr/core/loss/

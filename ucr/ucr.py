@@ -64,7 +64,7 @@ def parse_args(mMain=True, add_help=True):
             prog="ucr",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
             description="UCR is an Open Source, Easy to use Python library to build Production Ready OCR applications with its highly Intuitive,\
-                                             Modular & Extensible API design and off-the-shelf Pretrained Models for over 15 languages. For more details, please go to https://docyard.ai/UCR",
+            Modular & Extensible API design and off-the-shelf Pretrained Models for over 25 languages. For more details, please go to https://ucr.docyard.ai",
         )
 
         parser.add_argument(

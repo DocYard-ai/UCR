@@ -10,7 +10,9 @@ pip install -U ucr
 ```
 3. <span style="color:#FF8856">Test Installation (Optional):</span> Run dummy tests!
 ```bash
-ucr test
+ucr test 
+#Optional: Add -l/--lang='language_id' to test on particular language! 
+ucr test -l='en_number'
 ```  
 
 *For other installation modes and complete setup instructions, see [here](coming_soon.md)!*
@@ -28,15 +30,19 @@ To view all available options for the CLI application:
 # view all CLI predict commands
 ucr predict --help
 ```
-Usage: ucr *--options* <span style="color:#FF8856">[ARGS]</span> 
+**Usage:**   ucr predict **"input_path"** *--arguments* <span style="color:#FF8856">[ARGS]</span>  
+**Returns:** Python Dictionary of either Dataframes(default) or Lists(if `--output_format="ppocr"`).  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Key:** <u>*filepath*</u> ; **Value:** <u>*df/list*</u> 
 1. <span style="color:#FF8856">From Python scripts/Jupyter Notebooks:</span>
 ```python
 # Import and Initialize
 from ucr import UCR
-ocr = UCR(l='en') #lang='language_id'.
+ocr = UCR(l='en_number') # use l or lang='language_id'.
 
 # Run Predictions
 result = ocr.predict('input_path', o='output_path')
+# Returns dictionary of filepath:dataframe by default.
+# Set output_format="ppocr" for filepath:list of lists. 
 ```  
 
 *Refer to the [Demo](demo.md) page and/or [Colab Notebook](coming_soon.md) to see it in action!*
@@ -45,8 +51,8 @@ result = ocr.predict('input_path', o='output_path')
 
 |    <span style="font-weight:bold; font-size: 125%">Name</span>                  | <span style="font-weight:bold; font-size: 125%">Type</span>     | <span style="font-weight:bold; font-size: 125%">Default</span>   | <span style="font-weight:bold; font-size: 125%">Help</span> |
 |----------------------|----------|-----------|------|
-| `i/input`            | str/array/list      | <span style="font-style: italic; color:#FF8856">Required</span>          |Path to input location, eg: file/folder path, web address, numpy array etc. More details [here](coming_soon.md)!|
-| `o/output`           | str      | None      | Path to output folder. <span style="font-style: italic; color:#FF8856">(optional)</span>|
+| `input`            | str/array/list      | <span style="font-style: italic; color:#FF8856">Required</span>          |Path to input location, eg: file/folder path, web address, numpy array etc. More details [here](coming_soon.md)!|
+| `o/output`           | str      | None      | Path to output folder. <span style="font-style: italic; color:#FF8856">(optional)</span> If None, no output image saved!|
 | `l/lang`             | str      | "ch_sim"    | List of supported language-ids can be found [here](coming_soon.md)!     |
 | `d/device`           | str      | "cuda"      | Specify device to run on. *["cuda", "cpu"]*      |
 | `verbose`            | bool     | False     | Enable it to print info on console!     |
