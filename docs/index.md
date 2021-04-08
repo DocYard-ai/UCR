@@ -1,5 +1,5 @@
 - [TL;DR](tldr.md): Jump right into action by running pretrained models using CLI or Python scripts.
-- [Installation](tldr/#set-up): Installation guide for Windows, Linux and Mac systems using pip or Docker containers.
+- [Installation](tldr/#setup): Installation guide for Windows, Linux and Mac systems using pip or Docker containers.
 - [Tutorials](coming_soon.md): Find in-depth explanations of config parameters and Deep Learning components as well as training and testing scripts through Jupyter Notebooks.
 - [How to Contribute!](coming_soon.md): Learn how you can extend this library using custom trained models, datasets, new language support and/or new deep learning component(s).
 - [Reference](coming_soon.md): Detailed documentation of each Python file in [UCR Repository](https://github.com/DocYard-ai/UCR/tree/develop/ucr) with its respective functions and classes.

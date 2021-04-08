@@ -50,11 +50,8 @@ class TextSystem(object):
         self.text_classifier = infer_cls.TextClassifier(
             config["Classification"]
         )
-
         self.drop_score = config["drop_score"]
         self.merge_boxes = config["merge_boxes"]
-        self.output_format = config["output_format"]
-        self.verbose = config["verbose"]
         self.font_path = config["Recognition"]["font_path"]
 
         if self.merge_boxes:
@@ -108,10 +105,10 @@ class TextSystem(object):
             dst_img = np.rot90(dst_img)
         return dst_img
 
-    def perform_ocr(self, img, cls):
+    def perform_ocr(self, img, cls, verbose=False):
         ori_im = img.copy()
         dt_boxes, elapse = self.text_detector(img)
-        if self.verbose:
+        if verbose:
             print(
                 "\n------------------------dt_boxes num : {},\telapse : {:.3f}------------------------".format(
                     len(dt_boxes), elapse
@@ -130,7 +127,7 @@ class TextSystem(object):
 
         if cls:
             img_crop_list, _, elapse = self.text_classifier(img_crop_list)
-            if self.verbose:
+            if verbose:
                 print(
                     "------------------------cls num  : {},\telapse : {:.3f}------------------------".format(
                         len(img_crop_list), elapse
@@ -138,7 +135,7 @@ class TextSystem(object):
                 )
 
         rec_res, elapse = self.text_recognizer(img_crop_list)
-        if self.verbose:
+        if verbose:
             print(
                 "------------------------rec_res num  : {},\telapse : {:.3f}------------------------\n".format(
                     len(rec_res), elapse
@@ -175,23 +172,27 @@ class TextSystem(object):
     def __call__(
         self,
         input,
-        output=None,
-        o=None,
+        output="output",
+        o="output",
         det=True,
         rec=True,
         cls=False,
+        return_type="df",
+        save_image=False,
+        save_csv=True,
+        verbose=False,
     ):
         assert isinstance(input, (np.ndarray, list, str))
 
         rec_dict = {}
         out_dict = {}
 
-        if output is not None:
+        if output != "output":
             output = output
-        elif o is not None:
+        elif o != "output":
             output = o  # output takes higher precedence than o
 
-        if output:
+        if save_csv or save_image:
             print(
                 "Saving prediction results in '{}' folder!\n".format(output),
                 flush=True,
@@ -261,16 +262,18 @@ class TextSystem(object):
                         continue
                 if det:
                     if rec:
-                        dt_boxes, rec_res = self.perform_ocr(img, cls)
+                        dt_boxes, rec_res = self.perform_ocr(
+                            img, cls, verbose=verbose
+                        )
                         if self.merge_boxes:
                             rec_res = rec_res[0:1]
 
-                        if self.output_format == "ppocr":
+                        if return_type == "list":
                             value = [
                                 [box.tolist(), res]
                                 for box, res in zip(dt_boxes, rec_res)
                             ]
-                        elif self.output_format == "df":
+                        elif return_type == "df" or save_csv:
                             info_list = [
                                 [
                                     int(box[0][0]),
@@ -291,8 +294,19 @@ class TextSystem(object):
                                     "Text",
                                 ],
                             )
+                            if save_csv:
+                                csv_out = os.path.join(output, "csv")
+                                if not os.path.exists(csv_out):
+                                    os.makedirs(csv_out)
+                                csv_path = os.path.join(
+                                    csv_out,
+                                    "ocr_{}".format(
+                                        os.path.basename(key.split("/")[-1])[0]
+                                    ),
+                                )
+                                value.to_csv(csv_path + ".csv", index=False)
 
-                        if self.verbose:
+                        if verbose:
                             from tabulate import tabulate
 
                             headers = ["OCR Result", "Score"]
@@ -311,7 +325,7 @@ class TextSystem(object):
                                     )
                                 )
 
-                        if output:
+                        if save_image:
                             image = Image.fromarray(
                                 cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                             )
@@ -329,30 +343,35 @@ class TextSystem(object):
                                 drop_score=self.drop_score,
                                 font_path=self.font_path,
                             )
-
-                            if not os.path.exists(output):
-                                os.makedirs(output)
+                            img_out = os.path.join(output, "image")
+                            if not os.path.exists(img_out):
+                                os.makedirs(img_out)
                             img_path = os.path.join(
-                                output, "ocr_{}".format(key.split("/")[-1])
+                                img_out,
+                                "ocr_{}".format(
+                                    os.path.basename(key.split("/")[-1])[0]
+                                ),
                             )
-                            cv2.imwrite(img_path, draw_img[:, :, ::-1])
+                            cv2.imwrite(
+                                img_path + ".jpg", draw_img[:, :, ::-1]
+                            )
                             pbar.set_postfix_str(
                                 "Output Path: '{}'".format(img_path)
                             )
 
                     else:
                         dt_boxes, elapse = self.text_detector(img)
-                        if self.verbose:
+                        if verbose:
                             print(
                                 "\n------------------------dt_boxes num : {},\telapse : {:.3f}------------------------".format(
                                     len(dt_boxes), elapse
                                 )
                             )
                         if dt_boxes is not None:
-                            if self.output_format == "ppocr":
+                            if return_type == "list":
                                 value = [box.tolist() for box in dt_boxes]
 
-                            elif self.output_format == "df":
+                            elif return_type == "df" or save_csv:
                                 info_list = [
                                     [
                                         int(box[0][0]),
@@ -371,16 +390,35 @@ class TextSystem(object):
                                         "endY",
                                     ],
                                 )
+                                if save_csv:
+                                    csv_out = os.path.join(output, "csv")
+                                    if not os.path.exists(csv_out):
+                                        os.makedirs(csv_out)
+                                    csv_path = os.path.join(
+                                        csv_out,
+                                        "ocr_{}".format(
+                                            os.path.basename(
+                                                key.split("/")[-1]
+                                            )[0]
+                                        ),
+                                    )
+                                    value.to_csv(
+                                        csv_path + ".csv", index=False
+                                    )
 
-                            if output:
+                            if save_image:
                                 src_im = draw_text_det_res(dt_boxes, img)
 
-                                if not os.path.exists(output):
-                                    os.makedirs(output)
+                                img_out = os.path.join(output, "image")
+                                if not os.path.exists(img_out):
+                                    os.makedirs(img_out)
                                 img_path = os.path.join(
-                                    output, "det_{}".format(key.split("/")[-1])
+                                    img_out,
+                                    "det_{}".format(
+                                        os.path.basename(key.split("/")[-1])[0]
+                                    ),
                                 )
-                                cv2.imwrite(img_path, src_im)
+                                cv2.imwrite(img_path + ".jpg", src_im)
                                 pbar.set_postfix_str(
                                     "Output Path: '{}'".format(img_path)
                                 )
@@ -395,7 +433,7 @@ class TextSystem(object):
             if cls:
                 img, cls_res, _ = self.text_classifier(img)
                 if not rec:
-                    if self.verbose:
+                    if verbose:
                         cls_list = [
                             [k, v[0], v[1]]
                             for k, v in zip(list(rec_dict.keys()), cls_res)
@@ -412,14 +450,17 @@ class TextSystem(object):
                             tabulate(cls_list, headers, tablefmt="fancy_grid")
                         )
 
-                    if output:
+                    if save_image:
+                        img_out = os.path.join(output, "image")
+                        if not os.path.exists(img_out):
+                            os.makedirs(img_out)
                         output_names = [
                             f"{k}_{v[0]}.jpg"
                             for k, v in zip(list(rec_dict.keys()), cls_res)
                         ]
                         for bno in range(len(img)):
                             cv2.imwrite(
-                                os.path.join(output, output_names[bno]),
+                                os.path.join(img_out, output_names[bno]),
                                 img[bno],
                             )
 
@@ -429,7 +470,7 @@ class TextSystem(object):
                     return cls_output
             if rec:
                 rec_res, _ = self.text_recognizer(img)
-                if self.verbose:
+                if verbose:
                     rec_list = [
                         [k, v[0], v[1]]
                         for k, v in zip(list(rec_dict.keys()), rec_res)
@@ -440,14 +481,17 @@ class TextSystem(object):
                     headers = ["File Name", "Recognition Result", "Score"]
                     print(tabulate(rec_list, headers, tablefmt="fancy_grid"))
 
-                if output:
+                if save_image:
+                    img_out = os.path.join(output, "image")
+                    if not os.path.exists(img_out):
+                        os.makedirs(img_out)
                     output_names = [
                         f"{k}_{v[0]}.jpg"
                         for k, v in zip(list(rec_dict.keys()), rec_res)
                     ]
                     for bno in range(len(img)):
                         cv2.imwrite(
-                            os.path.join(output, output_names[bno]), img[bno]
+                            os.path.join(img_out, output_names[bno]), img[bno]
                         )
 
                 rec_output = {
@@ -496,7 +540,17 @@ def main(args):
     text_sys = TextSystem(config)
 
     input = hydra.utils.to_absolute_path(config["input"])
-    _ = text_sys(input)
+    _ = text_sys(
+        input,
+        output=hydra.utils.to_absolute_path(config["output"]),
+        det=config["det"],
+        rec=config["rec"],
+        cls=config["cls"],
+        return_type=config["return_type"],
+        save_image=config["save_image"],
+        save_csv=config["save_csv"],
+        verbose=config["verbose"],
+    )
 
 
 if __name__ == "__main__":

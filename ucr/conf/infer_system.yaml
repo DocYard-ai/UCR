@@ -8,6 +8,10 @@ merge_add_margin: 0.05
 drop_score: 0.
 input: test/
 output: test_output/
-output_format: df
-verbose: True
-use_cls: False
+det: True
+rec: True
+cls: False
+return_type: "df"
+save_image: False
+save_csv: True
+verbose: False

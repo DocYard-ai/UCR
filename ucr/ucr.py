@@ -46,7 +46,7 @@ def print_version() -> None:
     """Prints version information of rasa tooling and python."""
 
     print(
-        "UCR Version      :          0.2.12"
+        "UCR Version      :          0.2.13"
     )  # TODO: Change this to update automatically
     print(f"Python Version    :         {platform.python_version()}")
     print(f"Operating System  :         {platform.platform()}")
@@ -100,12 +100,18 @@ def parse_args(mMain=True, add_help=True):
         predict_parser.add_argument(
             "--force_download", type=str2bool, default=False
         )
-        predict_parser.add_argument("-o", "--output", type=str, default=None)
+        predict_parser.add_argument(
+            "-o", "--output", type=str, default="output"
+        )
         predict_parser.add_argument("-d", "--device", type=str, default="cuda")
         predict_parser.add_argument("-l", "--lang", type=str, default="ch_sim")
+        predict_parser.add_argument("--save_csv", type=str2bool, default=True)
+        predict_parser.add_argument(
+            "--save_image", type=str2bool, default=False
+        )
         predict_parser.add_argument("--backend", type=str, default="torch")
         predict_parser.add_argument("--type", type=str, default="mobile")
-        predict_parser.add_argument("--output_format", type=str, default=None)
+        predict_parser.add_argument("--return_type", type=str, default="df")
         predict_parser.add_argument(
             "--system_overrides", nargs="+", type=str, default=[]
         )
@@ -175,9 +181,7 @@ def parse_args(mMain=True, add_help=True):
             lang="ch_sim",
             type="mobile",
             backend="torch",
-            output_format=None,
             system_overrides=[],
-            verbose=False,
             det_algorithm="CRAFT",
             det_config_name="infer_det",
             det_model_location=None,
@@ -221,7 +225,7 @@ class UCR(infer_system.TextSystem):
         lang = args.l
         if args.lang != "ch_sim":
             lang = args.lang
-            if lang != "ch_sim":
+            if args.l != "ch_sim":
                 print(
                     f'WARNING: "l (={args.l})" argument is superseded by "lang (={args.lang})" argument! l=lang={lang}'
                 )
@@ -229,7 +233,7 @@ class UCR(infer_system.TextSystem):
         device = args.d
         if args.device != "cuda":
             device = args.device
-            if device != "cuda":
+            if args.d != "cuda":
                 print(
                     f'WARNING: "d (={args.d})" argument is superseded by "device (={args.device})" argument! d=device={device}'
                 )
@@ -386,50 +390,68 @@ class UCR(infer_system.TextSystem):
         config["Detection"] = config_det
         config["Recognition"] = config_rec
         config["Classification"] = config_cls
-        config["verbose"] = args.verbose
-        config["output_format"] = (
-            args.output_format
-            if args.output_format
-            else config["output_format"]
-        )
 
         super().__init__(config)
 
     def predict(
         self,
         input,
-        output=None,
-        o=None,
+        output="output",
+        o="output",
         det=True,
         rec=True,
         cls=False,
+        return_type="df",
+        save_image=False,
+        save_csv=True,
+        verbose=False,
     ):
-        return super().__call__(input, output, o, det, rec, cls)
+        return super().__call__(
+            input,
+            output,
+            o,
+            det,
+            rec,
+            cls,
+            return_type,
+            save_image,
+            save_csv,
+            verbose,
+        )
 
 
 def test_cli(args):
+    args.save_csv = False
+    args.save_image = False
     ocr_engine = UCR(**(args.__dict__))
     result = ocr_engine.predict(
-        input=args.input,
-        output=args.output,
-        det=args.det,
-        rec=args.rec,
-        cls=args.cls,
+        os.path.join(__dir__, "utils/imgs/en3.jpg"),
+        det=True,
+        rec=True,
+        cls=True,
+        return_type="df",
+        save_image=False,
+        save_csv=True,
+        verbose=False,
     )
     if result is not None:
-        for k, v in result.items():
-            print(f"\n------------------------{k}:------------------------")
-            print(tabulate(v, tablefmt="fancy_grid"))
+        print(
+            "\n------------------------All tests passed! Success!------------------------"
+        )
 
 
 def predict_cli(args):
     ocr_engine = UCR(**(args.__dict__))
     result = ocr_engine.predict(
-        input=args.input,
+        args.input,
         output=args.output,
         det=args.det,
         rec=args.rec,
         cls=args.cls,
+        return_type="df",
+        save_image=False,
+        save_csv=True,
+        verbose=False,
     )
     if result is not None:
         for k, v in result.items():
@@ -443,6 +465,8 @@ def main():
 
     try:
         if hasattr(cmdline_arguments, "input"):
+            cmdline_arguments.func(cmdline_arguments)
+        elif hasattr(cmdline_arguments, "lang"):
             cmdline_arguments.func(cmdline_arguments)
         elif hasattr(cmdline_arguments, "version"):
             print_version()

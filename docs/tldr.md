@@ -1,17 +1,22 @@
 !!! important "Important Notice"
     This is a **Quick Start** guide on how to use the UCR library with its existing pretrained models. For detailed information regarding its usage and advanced functionality, please refer to other sections!
 
-## Set Up
+## Setup
+
+### Installation
 
 1. <span style="color:#FF8856">Prerequisites:</span> Install compatible version of Pytorch and torchvision from [official repository](https://pytorch.org/get-started/locally/).
 2. <span style="color:#FF8856">Installation:</span> Install the latest stable version of UCR:
 ```bash
 pip install -U ucr
 ```
-3. <span style="color:#FF8856">Test Installation (Optional):</span> Run dummy tests!
+
+### Test installation
+
+<span style="color:#FF8856">Test Installation (Optional):</span> Run dummy tests!
 ```bash
 ucr test 
-#Optional: Add -l/--lang='language_id' to test on particular language! 
+# Optional: Add -l/--lang='language_id' to test on particular language! 
 ucr test -l='en_number'
 ```  
 
@@ -31,7 +36,7 @@ To view all available options for the CLI application:
 ucr predict --help
 ```
 **Usage:**   ucr predict **"input_path"** *--arguments* <span style="color:#FF8856">[ARGS]</span>  
-**Returns:** Python Dictionary of either Dataframes(default) or Lists(if `--output_format="ppocr"`).  
+**Returns:** Python Dictionary of either Dataframes(default) or Lists(if `--return_type="list"`).  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Key:** <u>*filepath*</u> ; **Value:** <u>*df/list*</u> 
 1. <span style="color:#FF8856">From Python scripts/Jupyter Notebooks:</span>
 ```python
@@ -42,7 +47,7 @@ ocr = UCR(l='en_number') # use l or lang='language_id'.
 # Run Predictions
 result = ocr.predict('input_path', o='output_path')
 # Returns dictionary of filepath:dataframe by default.
-# Set output_format="ppocr" for filepath:list of lists. 
+# Set return_type="list" for filepath:list of lists. 
 ```  
 
 *Refer to the [Demo](demo.md) page and/or [Colab Notebook](coming_soon.md) to see it in action!*
@@ -60,7 +65,7 @@ result = ocr.predict('input_path', o='output_path')
 | `type`               | str      | "mobile"    | Select pretrained-model type. *["mobile", "server"]*     |
 | `conf_location`      | str      | None      | Specify config directory path! Default: None, implies use of [pre-set config](https://github.com/DocYard-ai/UCR/tree/develop/conf) downloaded from web and stored in "~/.ucr" folder.    |
 | `force_download`&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;     | bool     | False     | Force download config files and pretrained models from web. Needed in case of incomplete/corrupt downloads.     |
-| `output_format`      | str      | "df"      | Specify return type and structure for OCR output. *["ppocr", "df"]* Details [here](coming_soon.md)!     |
+| `return_type`      | str      | "df"      | Specify return type and structure for OCR output. *["list", "df"]* Details [here](coming_soon.md)!     |
 | `det`                | bool     | True      | Whether to perform Detection or not on the input data!     |
 | `rec`                | bool     | True      | Whether to perform Recognition or not on the input data!     |
 | `cls`                | bool     | False     | Whether to perform Classification or not on the input data!     |

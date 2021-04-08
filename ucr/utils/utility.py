@@ -117,7 +117,9 @@ def maybe_download(model_storage_directory, url, force_download=False):
     # using custom model
     fname = url.split("/")[-1][0:-4]
     tmp_path = os.path.join(model_storage_directory, fname)
-    if force_download or not os.path.exists(tmp_path):
+    if force_download or not os.path.exists(
+        os.path.join(tmp_path, "model.pt")
+    ):
         os.makedirs(tmp_path, exist_ok=True)
         download_with_progressbar(url, tmp_path + ".zip")
         shutil.unpack_archive(tmp_path + ".zip", tmp_path, "zip")
