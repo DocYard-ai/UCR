@@ -67,6 +67,22 @@
         &nbsp;Support for Packaging, Logging and Deployment tools straight out of the box
     </li>
 </ul>
+!!! note "" 
+    <u>Note:</u> Some **features** are still in active development and might not be available!
+
+
+## Workflow
+
+<p align="center"><img src="static/images/workflow.png"/></p>
+
+Execution flow of UCR is displayed above. Broadly it can be divided into 4 sub-parts:
+
+1. Input (image/folder path or web address) is fed into the <u>Detection</u> model which outputs bounding box coordinates of all the text boxes.
+2. The detected boxes are then checked for <u>Orientation</u> and corrected accordingly.
+3. Next, <u>Recognition</u> model runs on the corrected text boxes. It returns bounding box information and OCR output.
+4. Lastly, an optional <u>Post Processing</u> module is executed to improve/modify the results.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Click [Here](tldr/#run-prediction) to get started with the <span style="font-weight:bold; font-size: 125%; color:#FF8856">Code!</span>
 
 ## Acknowledgement
 

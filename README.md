@@ -1,4 +1,4 @@
-<br> <br> <br>
+<br> <br>
 <p align="center"><img src="docs/static/images/VectorU.svg" alt="Github Runner Covergae Status" height="100">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="docs/static/images/VectorC.svg" alt="Github Runner Covergae Status" height="100">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="docs/static/images/VectorR.svg" alt="Github Runner Covergae Status" height="100"></p>
 <br> <br>
 <p align="center">Universal Character Recognizer (UCR) is an <u>Open Source</u>, <u>Easy to use</u> Python library to build <u>Production Ready</u> OCR applications with its highly Intuitive,  Modular & Extensible API design and off-the-shelf <a href="docs/modelzoo.md">Pretrained Models</a> for over <b>25 languages</b>.</p>
@@ -26,7 +26,7 @@
 - Hydra config enables Rapid Prototyping with multiple configurations
 - Support for Packaging, Logging and Deployment tools straight out of the box
 
-
+*Note: Some features are still in active development and might not be available.*
 ## Setup
 
 ### Installation
@@ -55,9 +55,9 @@ ucr test -l='en_number'
 
 <p align="center"><img src="docs/static/images/workflow.png"/></p>
 
-Execution flow of UCR is displayed above. Broadly it can be divided into 4 sub-parts.
+Execution flow of UCR is displayed above. Broadly it can be divided into 4 sub-parts:
 
-1. Input(img path/folder path/web address) goes into the <u>Detection</u> model which outputs bounding box coordinates of all the text boxes.
+1. Input (image/folder path or web address) is fed into the <u>Detection</u> model which outputs bounding box coordinates of all the text boxes.
 2. The detected boxes are then checked for <u>Orientation</u> and corrected accordingly.
 3. Next, <u>Recognition</u> model runs on the corrected text boxes. It returns bounding box information and OCR output.
 4. Lastly, an optional <u>Post Processing</u> module is executed to improve/modify the results.

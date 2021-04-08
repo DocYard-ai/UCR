@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ucr"
-version = "0.2.13"
+version = "0.2.14"
 description = "Universal Character Recognizer (UCR): Simple, Intuitive, Extensible, Multi-Lingual OCR engine"
 authors = ["Abhigyan Raman <abhigyan@docyard.ai>"]
 packages = [

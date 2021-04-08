@@ -46,7 +46,7 @@ def print_version() -> None:
     """Prints version information of rasa tooling and python."""
 
     print(
-        "UCR Version      :          0.2.13"
+        "UCR Version      :          0.2.14"
     )  # TODO: Change this to update automatically
     print(f"Python Version    :         {platform.python_version()}")
     print(f"Operating System  :         {platform.platform()}")
