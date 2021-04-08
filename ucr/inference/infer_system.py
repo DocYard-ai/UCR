@@ -179,7 +179,7 @@ class TextSystem(object):
         cls=False,
         return_type="df",
         save_image=False,
-        save_csv=True,
+        save_tsv=True,
         verbose=False,
     ):
         assert isinstance(input, (np.ndarray, list, str))
@@ -192,7 +192,7 @@ class TextSystem(object):
         elif o != "output":
             output = o  # output takes higher precedence than o
 
-        if save_csv or save_image:
+        if save_tsv or save_image:
             print(
                 "Saving prediction results in '{}' folder!\n".format(output),
                 flush=True,
@@ -273,7 +273,7 @@ class TextSystem(object):
                                 [box.tolist(), res]
                                 for box, res in zip(dt_boxes, rec_res)
                             ]
-                        elif return_type == "df" or save_csv:
+                        elif return_type == "df" or save_tsv:
                             info_list = [
                                 [
                                     int(box[0][0]),
@@ -294,17 +294,19 @@ class TextSystem(object):
                                     "Text",
                                 ],
                             )
-                            if save_csv:
-                                csv_out = os.path.join(output, "csv")
-                                if not os.path.exists(csv_out):
-                                    os.makedirs(csv_out)
-                                csv_path = os.path.join(
-                                    csv_out,
+                            if save_tsv:
+                                tsv_out = os.path.join(output, "tsv")
+                                if not os.path.exists(tsv_out):
+                                    os.makedirs(tsv_out)
+                                tsv_path = os.path.join(
+                                    tsv_out,
                                     "ocr_{}".format(
                                         os.path.basename(key.split("/")[-1])[0]
                                     ),
                                 )
-                                value.to_csv(csv_path + ".csv", index=False)
+                                value.to_csv(
+                                    tsv_path + ".tsv", sep="\t", index=False
+                                )
 
                         if verbose:
                             from tabulate import tabulate
@@ -371,7 +373,7 @@ class TextSystem(object):
                             if return_type == "list":
                                 value = [box.tolist() for box in dt_boxes]
 
-                            elif return_type == "df" or save_csv:
+                            elif return_type == "df" or save_tsv:
                                 info_list = [
                                     [
                                         int(box[0][0]),
@@ -390,12 +392,12 @@ class TextSystem(object):
                                         "endY",
                                     ],
                                 )
-                                if save_csv:
-                                    csv_out = os.path.join(output, "csv")
-                                    if not os.path.exists(csv_out):
-                                        os.makedirs(csv_out)
-                                    csv_path = os.path.join(
-                                        csv_out,
+                                if save_tsv:
+                                    tsv_out = os.path.join(output, "tsv")
+                                    if not os.path.exists(tsv_out):
+                                        os.makedirs(tsv_out)
+                                    tsv_path = os.path.join(
+                                        tsv_out,
                                         "ocr_{}".format(
                                             os.path.basename(
                                                 key.split("/")[-1]
@@ -403,7 +405,9 @@ class TextSystem(object):
                                         ),
                                     )
                                     value.to_csv(
-                                        csv_path + ".csv", index=False
+                                        tsv_path + ".tsv",
+                                        sep="\t",
+                                        index=False,
                                     )
 
                             if save_image:
@@ -548,7 +552,7 @@ def main(args):
         cls=config["cls"],
         return_type=config["return_type"],
         save_image=config["save_image"],
-        save_csv=config["save_csv"],
+        save_tsv=config["save_tsv"],
         verbose=config["verbose"],
     )
 

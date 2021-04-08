@@ -105,7 +105,7 @@ def parse_args(mMain=True, add_help=True):
         )
         predict_parser.add_argument("-d", "--device", type=str, default="cuda")
         predict_parser.add_argument("-l", "--lang", type=str, default="ch_sim")
-        predict_parser.add_argument("--save_csv", type=str2bool, default=True)
+        predict_parser.add_argument("--save_tsv", type=str2bool, default=True)
         predict_parser.add_argument(
             "--save_image", type=str2bool, default=False
         )
@@ -403,7 +403,7 @@ class UCR(infer_system.TextSystem):
         cls=False,
         return_type="df",
         save_image=False,
-        save_csv=True,
+        save_tsv=True,
         verbose=False,
     ):
         return super().__call__(
@@ -415,13 +415,13 @@ class UCR(infer_system.TextSystem):
             cls,
             return_type,
             save_image,
-            save_csv,
+            save_tsv,
             verbose,
         )
 
 
 def test_cli(args):
-    args.save_csv = False
+    args.save_tsv = False
     args.save_image = False
     ocr_engine = UCR(**(args.__dict__))
     result = ocr_engine.predict(
@@ -431,7 +431,7 @@ def test_cli(args):
         cls=True,
         return_type="df",
         save_image=False,
-        save_csv=True,
+        save_tsv=True,
         verbose=False,
     )
     if result is not None:
@@ -450,7 +450,7 @@ def predict_cli(args):
         cls=args.cls,
         return_type="df",
         save_image=False,
-        save_csv=True,
+        save_tsv=True,
         verbose=False,
     )
     if result is not None:

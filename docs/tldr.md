@@ -57,15 +57,17 @@ result = ocr.predict('input_path', o='output_path')
 |    <span style="font-weight:bold; font-size: 125%">Name</span>                  | <span style="font-weight:bold; font-size: 125%">Type</span>     | <span style="font-weight:bold; font-size: 125%">Default</span>   | <span style="font-weight:bold; font-size: 125%">Help</span> |
 |----------------------|----------|-----------|------|
 | `input`            | str/array/list      | <span style="font-style: italic; color:#FF8856">Required</span>          |Path to input location, eg: file/folder path, web address, numpy array etc. More details [here](coming_soon.md)!|
-| `o/output`           | str      | None      | Path to output folder. <span style="font-style: italic; color:#FF8856">(optional)</span> If None, no output image saved!|
+| `o/output`           | str      | "output"      | Path to output folder. <span style="font-style: italic; color:#FF8856">(optional)</span> If both `save_tsv` and `save_image` are false, no output will be saved |
 | `l/lang`             | str      | "ch_sim"    | List of supported language-ids can be found [here](coming_soon.md)!     |
 | `d/device`           | str      | "cuda"      | Specify device to run on. *["cuda", "cpu"]*      |
-| `verbose`            | bool     | False     | Enable it to print info on console!     |
+| `return_type`      | str      | "df"      | Specify return type and structure for OCR output. *["list", "df"]* Details [here](coming_soon.md)!     |
+| `save_tsv`            | bool     | True     | If True, saves tab separated files inside `tsv` directory in `output` folder      |  
+| `save_image`            | bool     | False     | If True, saves image inside `image` directory in `output` folder     |  
+| `verbose`            | bool     | False     | Enable it to print info on console!     |  
 | `backend`            | str      | "torch"     | Select DL framework for inference .*["torch", "onnx"]*     |
 | `type`               | str      | "mobile"    | Select pretrained-model type. *["mobile", "server"]*     |
 | `conf_location`      | str      | None      | Specify config directory path! Default: None, implies use of [pre-set config](https://github.com/DocYard-ai/UCR/tree/develop/conf) downloaded from web and stored in "~/.ucr" folder.    |
 | `force_download`&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;     | bool     | False     | Force download config files and pretrained models from web. Needed in case of incomplete/corrupt downloads.     |
-| `return_type`      | str      | "df"      | Specify return type and structure for OCR output. *["list", "df"]* Details [here](coming_soon.md)!     |
 | `det`                | bool     | True      | Whether to perform Detection or not on the input data!     |
 | `rec`                | bool     | True      | Whether to perform Recognition or not on the input data!     |
 | `cls`                | bool     | False     | Whether to perform Classification or not on the input data!     |

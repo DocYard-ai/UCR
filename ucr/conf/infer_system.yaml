@@ -13,5 +13,5 @@ rec: True
 cls: False
 return_type: "df"
 save_image: False
-save_csv: True
+save_tsv: True
 verbose: False

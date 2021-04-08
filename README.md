@@ -1,20 +1,17 @@
+<br> <br> <br>
 <p align="center"><img src="docs/static/images/VectorU.svg" alt="Github Runner Covergae Status" height="100">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="docs/static/images/VectorC.svg" alt="Github Runner Covergae Status" height="100">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="docs/static/images/VectorR.svg" alt="Github Runner Covergae Status" height="100"></p>
-
+<br> <br>
 <p align="center">Universal Character Recognizer (UCR) is an <u>Open Source</u>, <u>Easy to use</u> Python library to build <u>Production Ready</u> OCR applications with its highly Intuitive,  Modular & Extensible API design and off-the-shelf <a href="docs/modelzoo.md">Pretrained Models</a> for over <b>25 languages</b>.</p>
 <p align="center">
-  <a href="https://textflint.readthedocs.io/">[TextFlint Documentation on ReadTheDocs]</a>
+  Read UCR Documentation on <u><a href="https://ucr.docyard.ai/">ucr.docyard.ai</a></u>
   <br> <br>
   <a href="#about">Features</a> •
   <a href="#setup">Setup</a> •
   <a href="#usage">Usage</a> •
-  <a href="#design">Design</a>
+  <a href="#acknowledgement">Acknowledgement</a>
   <br> <br>
-  <a target="_blank">
-    <img src="https://github.com/QData/TextAttack/workflows/Github%20PyTest/badge.svg" alt="Github Runner Covergae Status">
-  </a>
-  <a href="https://badge.fury.io/py/textflint">
-    <img src="https://badge.fury.io/py/textflint.svg" alt="PyPI version" height="18">
-  </a>
+  <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/ucr">
+  <a href="https://badge.fury.io/py/ucr"><img src="https://badge.fury.io/py/ucr.svg" alt="PyPI version"></a>
 </p>
 
 
@@ -36,13 +33,13 @@
 
 **Require python version >= 3.6.2, install with `pip` (recommended)**
 
-1. <span style="color:#FF8856">Prerequisites:</span> Install compatible version of Pytorch and torchvision from [official repository](https://pytorch.org/get-started/locally/).
-2. <span style="color:#FF8856">Installation:</span> Install the latest stable version of UCR:
+1. <b>Prerequisites:</b> Install compatible version of Pytorch and torchvision from [official repository](https://pytorch.org/get-started/locally/).
+2. <b>Installation:</b> Install the latest stable version of UCR:
 ```shell
 pip install -U ucr
 ```
 
-### <span style="color:#FF8856">[Optional]</span> Test Installation
+#### <span style="color:#FF8856">[Optional]</span> Test Installation
 
 Run dummy tests!
 ```python
