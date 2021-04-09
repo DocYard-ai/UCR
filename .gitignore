@@ -20,7 +20,7 @@ inference/onnx/
 ucr/utils/stats.py
 ucr/utils/program.py
 ucr/utils/gen_label.py
-
+ucr/core/postprocess/craft_postprocess.py
 # compilation and distribution
 __pycache__
 _ext

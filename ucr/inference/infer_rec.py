@@ -59,8 +59,8 @@ class TextRecognizer(object):
         self.lang = config["lang"]
         self.rec_batch_num = config["batch_size"]
         self.rec_algorithm = config["Architecture"]["algorithm"]
-        self.rec_whitelist = config["whitelist"]
-        self.rec_blacklist = config["blacklist"]
+        self.whitelist = config["whitelist"]
+        self.blacklist = config["blacklist"]
 
         # Todo: Implement whitelist and blacklist in postprocessing step.
 
@@ -179,15 +179,15 @@ class TextRecognizer(object):
 
                 preds = output_tensors.cpu().data.numpy()
                 # If both blacklist and whitelist are provided, whitelist is only used
-                if not self.rec_whitelist and self.rec_blacklist:
+                if not self.whitelist and self.blacklist:
                     self.mod_chars = np.arange(preds.shape[-1])
-                    black_list = self.char_ops.encode(self.rec_blacklist)
+                    black_list = self.char_ops.encode(self.blacklist)
                     black_list = np.array(black_list) + 1
                     self.mod_chars = np.setdiff1d(self.mod_chars, black_list)
-                elif self.rec_whitelist:
-                    white_list = self.char_ops.encode(self.rec_whitelist)
+                elif self.whitelist:
+                    white_list = self.char_ops.encode(self.whitelist)
                     self.mod_chars = np.append(white_list, [-1]) + 1
-                elif not self.rec_whitelist and not self.rec_blacklist:
+                elif not self.whitelist and not self.blacklist:
                     self.mod_chars = []
 
                 if len(self.mod_chars) != 0:

@@ -14,14 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals,
-)
-
 import sys
 
 import cv2
@@ -230,5 +222,4 @@ class DetResizeForTest(object):
         img = cv2.resize(img, (int(resize_w), int(resize_h)))
         ratio_h = resize_h / float(h)
         ratio_w = resize_w / float(w)
-
         return img, [ratio_h, ratio_w]

@@ -151,8 +151,8 @@ def parse_args(mMain=True, add_help=True):
         predict_parser.add_argument(
             "--rec_overrides", nargs="+", type=str, default=[]
         )
-        predict_parser.add_argument("--rec_whitelist", type=str, default=None)
-        predict_parser.add_argument("--rec_blacklist", type=str, default=None)
+        predict_parser.add_argument("--whitelist", type=str, default=None)
+        predict_parser.add_argument("--blacklist", type=str, default=None)
 
         # params for detection engine
         predict_parser.add_argument("--cls_algorithm", type=str, default="CLS")
@@ -192,8 +192,8 @@ def parse_args(mMain=True, add_help=True):
             rec_model_location=None,
             rec_batch_size=8,
             rec_overrides=[],
-            rec_whitelist=None,
-            rec_blacklist=None,
+            whitelist=None,
+            blacklist=None,
             cls_algorithm="CLS",
             cls_config_name="infer_cls",
             cls_model_location=None,
@@ -329,8 +329,8 @@ class UCR(infer_system.TextSystem):
         config_rec["batch_size"] = args.rec_batch_size
         config_cls["batch_size"] = args.cls_batch_size
 
-        config_rec["whitelist"] = args.rec_whitelist
-        config_rec["blacklist"] = args.rec_blacklist
+        config_rec["whitelist"] = args.whitelist
+        config_rec["blacklist"] = args.blacklist
         config_rec["lang"] = lang
 
         # init model dir
@@ -448,10 +448,10 @@ def predict_cli(args):
         det=args.det,
         rec=args.rec,
         cls=args.cls,
-        return_type="df",
-        save_image=False,
-        save_tsv=True,
-        verbose=False,
+        return_type=args.return_type,
+        save_image=args.save_image,
+        save_tsv=args.save_tsv,
+        verbose=args.verbose,
     )
     if result is not None:
         for k, v in result.items():
@@ -501,7 +501,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_server",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/simfang.ttf",
+                "font_path": "utils/fonts/noto_cjk.otf",
                 "char_dict_location": "utils/dict/ch_sim_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_server/rec_ench_ppocr_server.zip",
             }
@@ -521,7 +521,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/simfang.ttf",
+                "font_path": "utils/fonts/noto_cjk.otf",
                 "char_dict_location": "utils/dict/ch_sim_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ench_ppocr_mobile.zip",
             },
@@ -553,7 +553,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/korean.ttf",
+                "font_path": "utils/fonts/noto_cjk.otf",
                 "char_dict_location": "utils/dict/korean_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_korean_mobile.zip",
             },
@@ -561,7 +561,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/japan.ttc",
+                "font_path": "utils/fonts/noto_cjk.otf",
                 "char_dict_location": "utils/dict/japan_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_japan_mobile.zip",
             },
@@ -569,7 +569,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/chinese_cht.ttf",
+                "font_path": "utils/fonts/noto_cjk.otf",
                 "char_dict_location": "utils/dict/chinese_cht_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_chinese_cht_mobile.zip",
             },

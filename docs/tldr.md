@@ -84,8 +84,8 @@ result = ocr.predict('input_path', o='output_path')
 | `rec_model_location` | str      | None      |  Overrides model path present in `rec_config_name`.yaml file! Useful for custom trained models.   |
 | `rec_batch_size`     | int      | 8         |  Batch size for performing Recognition on `input` data.    |
 | `rec_overrides`      | str/list | None      |  Overrides arguments in [infer_rec](https://github.com/DocYard-ai/UCR/blob/develop/conf/infer_rec.yaml) config file. Details [here](coming_soon.md)!     |
-| `rec_whitelist`      | str      | None      |  Only whitelisted characters will be considered during prediction. See example [here](demo.md)! |     |
-| `rec_blacklist`      | str      | None      |  Blacklisted characters will be ignored during prediction. See example [here](demo.md)!   |
+| `whitelist`      | str      | None      |  Only whitelisted characters will be considered during prediction. See example [here](demo.md)! |     |
+| `blacklist`      | str      | None      |  Blacklisted characters will be ignored during prediction. See example [here](demo.md)!   |
 | <span style="font-weight:bold; font-size: 125%"> Classification args|          |           |      |
 | `cls_algorithm`      | str      | "CLS"       |  Specify classification algorithm to select respective pretrained model. *["CLS"]* Details [here](coming_soon.md)!   |
 | `cls_config_name`    | str      | "infer_cls" | Specify cls config filename located inside `conf_location` as shown [here](https://github.com/DocYard-ai/UCR/tree/develop/conf)! More on config structure [here](coming_soon.md)!    |

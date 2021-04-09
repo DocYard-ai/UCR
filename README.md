@@ -14,6 +14,11 @@
   <a href="https://badge.fury.io/py/ucr"><img src="https://badge.fury.io/py/ucr.svg" alt="PyPI version"></a>
 </p>
 
+## Demo
+
+#### For details, click [here](https://ucr.docyard.ai/demo)!
+
+<p align="center"><img src="docs/static/images/demo.gif"/></p>
 
 ## Features
 

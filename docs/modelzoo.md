@@ -9,11 +9,11 @@ hide:
     ``` python linenums="1"
     import string
     from ucr import UCR
-    ocr = UCR(l='ch_sim', type='server', rec_whitelist=string.printable[:-6] # use type='mobile' for small model
+    ocr = UCR(l='ch_sim', type='server', whitelist=string.printable[:-6] # use type='mobile' for small model
     # string.printable[:-6] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~"
     result = ocr.predict('input', o='output')
     ```
-    CLI: `ucr predict 'input' -o='output' -l='ch_sim' --type='server' --rec_whitelist=string.printable[:-6]` 
+    CLI: `ucr predict 'input' -o='output' -l='ch_sim' --type='server' --whitelist=string.printable[:-6]` 
 ## Models List
 
 |    <span style="font-weight:bold; font-size: 125%">Language</span>                  | <span style="font-weight:bold; font-size: 125%">Lang-id</span>     | <span style="font-weight:bold; font-size: 125%">Dict Link</span>   | <span style="font-weight:bold; font-size: 125%">Model Link</span>

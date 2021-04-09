@@ -301,7 +301,9 @@ class TextSystem(object):
                                 tsv_path = os.path.join(
                                     tsv_out,
                                     "ocr_{}".format(
-                                        os.path.basename(key.split("/")[-1])[0]
+                                        os.path.splitext(
+                                            os.path.basename(key)
+                                        )[0]
                                     ),
                                 )
                                 value.to_csv(
@@ -351,7 +353,7 @@ class TextSystem(object):
                             img_path = os.path.join(
                                 img_out,
                                 "ocr_{}".format(
-                                    os.path.basename(key.split("/")[-1])[0]
+                                    os.path.splitext(os.path.basename(key))[0]
                                 ),
                             )
                             cv2.imwrite(
@@ -399,8 +401,8 @@ class TextSystem(object):
                                     tsv_path = os.path.join(
                                         tsv_out,
                                         "ocr_{}".format(
-                                            os.path.basename(
-                                                key.split("/")[-1]
+                                            os.path.splitext(
+                                                os.path.basename(key)
                                             )[0]
                                         ),
                                     )
@@ -419,7 +421,9 @@ class TextSystem(object):
                                 img_path = os.path.join(
                                     img_out,
                                     "det_{}".format(
-                                        os.path.basename(key.split("/")[-1])[0]
+                                        os.path.splitext(
+                                            os.path.basename(key)
+                                        )[0]
                                     ),
                                 )
                                 cv2.imwrite(img_path + ".jpg", src_im)

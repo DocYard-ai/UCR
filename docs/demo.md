@@ -1,6 +1,5 @@
 ---
 hide:
-  - navigation # Hide navigation
   - toc        # Hide table of contents
 ---
 
@@ -8,232 +7,224 @@ Every Subsection here, contains a specific setting in which Experiments were con
 
 ## Default Configuration [:fontawesome-brands-github:](coming_soon.md)
 
-=== "Document 1"
+=== "Example 1"
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
         ocr = UCR() # initialized with default parameters
-        result = ocr('input', o='output') 
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output'` 
-    ![Placeholder](static/images/demo_results/ocr_laura-lefurgey-smith-r5NG8QBkOhQ-unsplash.jpg.jpg){align="left"; loading="lazy"}
+        CLI: `ucr predict 'input' -o 'output' --save_image True` 
+    
     !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
-    <!-- !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>....  -->
+        `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_ch_sim0.jpg){align="left"; loading="lazy"}
 
-=== "Scene Text 1"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
+=== "Example 2"
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR()
-        result = ocr(i='input', o='output')
+        ocr = UCR() # initialized with default parameters
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
-
-=== "Document 2"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
+        CLI: `ucr predict 'input' -o 'output' --save_image True` 
+    
     !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
+        `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_en4.jpg){align="left"; loading="lazy"}
+
+=== "Example 3"
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR()
-        result = ocr(i='input', o='output')
+        ocr = UCR() # initialized with default parameters
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
-
-=== "Scene Text 2"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
+        CLI: `ucr predict 'input' -o 'output' --save_image True` 
+    
     !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
-    !!! success inline end "" 
-        Python:
-        ``` python linenums="1"
-        from ucr import UCR
-        ocr = UCR()
-        result = ocr(i='input', o='output')
-        ```
-        CLI: `ucr -i 'input' -o 'output'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
+        `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_en5.jpg){align="left"; loading="lazy"}
 
 ## Whitelist/Blacklist characters [:fontawesome-brands-github:](coming_soon.md)
 
-=== "Whitelist 'en' Characters"
-
-    ![Placeholder](static/images/demo_results/ocr_laura-lefurgey-smith-r5NG8QBkOhQ-unsplash.jpg.jpg){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
+=== "Without Whitelist"
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR(rec_whitelist='abcdefghij')
-        result = ocr(i='input', o='output')
+        ocr = UCR() # initialized with default parameters
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output' --rec_whitelist='abcdefghij'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
+        CLI: `ucr predict 'input' -o 'output' --save_image True` 
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_en2.jpg){align="left"; loading="lazy"}
+
+=== "Whitelist 'en' Characters"
+    !!! success inline end "" 
+        Python:
+        ``` python linenums="1"
+        from ucr import UCR
+        import string 
+        ocr = UCR(whitelist=string.printable[:-6])
+        # this selects only the english characters, numbers and punctuations which is equivalent to 
+        # whitelist='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+        result = ocr('input', o='output', save_image=True) 
+        ```
+        CLI: `ucr predict 'input' -o 'output' --save_image True --whitelist "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~"`
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_en2_wl.jpg){align="left"; loading="lazy"}
+
+=== "Without Blacklist"
+    !!! success inline end "" 
+        Python:
+        ``` python linenums="1"
+        from ucr import UCR
+        ocr = UCR(l='en_number') # select language: 'en_number'
+        result = ocr('input', o='output', save_image=True) 
+        ```
+        CLI: `ucr predict 'input' -o 'output' --save_image True -l 'en_number'` 
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="en_number"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_en3.jpg){align="left"; loading="lazy"}
 
 === "Blacklist Numbers"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR(rec_blacklist='0123456789')
-        result = ocr(i='input', o='output')
+        ocr = UCR(l='en_number', blacklist="0123456789") # blacklist numbers
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output' --rec_blacklist '0123456789'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
+        CLI: `ucr predict 'input' -o 'output' --save_image True -l 'en_number' --blacklist '0123456789'` 
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="en_number"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_en3_bl.jpg){align="left"; loading="lazy"}
 
 ## Mobile/Server Configuration [:fontawesome-brands-github:](coming_soon.md)
 
 === "Mobile Backend"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR(rec_blacklist='0123456789')
-        result = ocr(i='input', o='output')
+        ocr = UCR() # initialized with default parameters
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output' --rec_blacklist '0123456789'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
+        CLI: `ucr predict 'input' -o 'output' --save_image True` 
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_en1.jpg){align="left"; loading="lazy"}
+
 
 === "Server Backend"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR(rec_blacklist='0123456789')
-        result = ocr(i='input', o='output')
+        ocr = UCR(type='server') # specified type="server"
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output' --rec_blacklist '0123456789'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
+        CLI: `ucr predict 'input' -o 'output' --save_image True --type 'server` 
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_en1_server.jpg){align="left"; loading="lazy"}
+
 
 ## Multiple Language Support [:fontawesome-brands-github:](coming_soon.md)
 
-=== "English 'en'"
-
-    ![Placeholder](static/images/demo_results/ocr_laura-lefurgey-smith-r5NG8QBkOhQ-unsplash.jpg.jpg){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
+=== "English 'en_number'"
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR()
-        result = ocr(i='input', o='output')
+        ocr = UCR(l='en_number') 
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
+        CLI: `ucr predict 'input' -o 'output' --save_image True -l 'en_number'` 
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="en_number"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_en0.jpg){align="left"; loading="lazy"}
 
 === "German 'de'"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR()
-        result = ocr(i='input', o='output')
+        ocr = UCR(l='de')
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
+        CLI: `ucr predict 'input' -o 'output' --save_image True -l 'de'` 
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="de"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_de.jpg){align="left"; loading="lazy"}
 
 === "French 'fr'"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR()
-        result = ocr(i='input', o='output')
+        ocr = UCR(l='fr')
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
-
-=== "Hindi, 'hi'"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
+        CLI: `ucr predict 'input' -o 'output' --save_image True -l 'fr'` 
+    
     !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
+        `lang`....<span style="color:#FF8856; font-style: italic">=="fr"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_fr1.jpg){align="left"; loading="lazy"}
+
+=== "Japanese, 'ja'"
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR()
-        result = ocr(i='input', o='output')
+        ocr = UCR(l='ja')
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
+        CLI: `ucr predict 'input' -o 'output' --save_image True -l 'ja'` 
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="ja"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_ja.jpg){align="left"; loading="lazy"}
 
 === "Russian, 'ru'"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR()
-        result = ocr(i='input', o='output')
+        ocr = UCR(l='ru') 
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
+        CLI: `ucr predict 'input' -o 'output' --save_image True -l 'ru'` 
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="ru"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_ru.jpg){align="left"; loading="lazy"}
 
 === "Korean, 'ko'"
-
-    ![Placeholder](static/images/demo_results/ocr_russian.png.png){align="left"; loading="lazy"}
-    !!! info inline end ""
-        language....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | type....<span style="color:#FF8856; font-style: italic">=="server"==</span>.... | det....<span style="color:#FF8856; font-style: italic">=="CRAFT"==</span>.... | rec....<span style="color:#FF8856; font-style: italic">=="CRNN"==</span>.... | cls....<span style="color:#FF8856; font-style: italic">=="CLS"==</span>.... |
     !!! success inline end "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
-        ocr = UCR()
-        result = ocr(i='input', o='output')
+        ocr = UCR(l='ko') 
+        result = ocr('input', o='output', save_image=True) 
         ```
-        CLI: `ucr -i 'input' -o 'output'` 
-    !!! tip inline end "Prediction Stats"
-        cpu_inference....<span style="color:#FF8856; font-style: italic">5s</span>.... | gpu_inference....<span style="color:#FF8856; font-style: italic">1s</span>.... | CER....<span style="color:#FF8856; font-style: italic">1.2</span>.... | WER....<span style="color:#FF8856; font-style: italic">1.1</span>.... 
+        CLI: `ucr predict 'input' -o 'output' --save_image True -l 'ko'` 
+    
+    !!! info inline end ""
+        `lang`....<span style="color:#FF8856; font-style: italic">=="ko"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
+    ![Placeholder](static/images/demo_results/ocr_ko.jpg){align="left"; loading="lazy"}
 

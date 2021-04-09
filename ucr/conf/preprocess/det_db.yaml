@@ -1,7 +1,7 @@
 Preprocess:
   - DetResizeForTest:
       limit_side_len: 1920
-      limit_type: min
+      limit_type: max
   - NormalizeImage:
       scale: 1./255.
       mean: [0.485, 0.456, 0.406]
