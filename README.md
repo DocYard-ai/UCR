@@ -87,7 +87,7 @@ For complete list of arguments, refer <a href="docs/tldr.md/#argument-list">Argu
 
 ## Model Zoo
 
-A collection of pretrained models for detection, classification and recognition processes is present <a href="docs/modelzoo.md">here</a> !  
+A collection of pretrained models for detection, classification and recognition processes is present <a href="ucr.docyard.ai/modelzoo">here</a> !  
 These models can be useful for out-of-the-box inference on over 25 languages.
 
 

@@ -8,7 +8,7 @@ Every Subsection here, contains a specific setting in which Experiments were con
 ## Default Configuration [:fontawesome-brands-github:](coming_soon.md)
 
 === "Example 1"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -17,12 +17,12 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_ch_sim0.jpg){align="left"; loading="lazy"}
 
 === "Example 2"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -31,12 +31,12 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_en4.jpg){align="left"; loading="lazy"}
 
 === "Example 3"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -45,14 +45,14 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_en5.jpg){align="left"; loading="lazy"}
 
 ## Whitelist/Blacklist characters [:fontawesome-brands-github:](coming_soon.md)
 
 === "Without Whitelist"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -61,12 +61,12 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_en2.jpg){align="left"; loading="lazy"}
 
 === "Whitelist 'en' Characters"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -78,12 +78,12 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True --whitelist "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~"`
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_en2_wl.jpg){align="left"; loading="lazy"}
 
 === "Without Blacklist"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -92,12 +92,12 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True -l 'en_number'` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="en_number"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_en3.jpg){align="left"; loading="lazy"}
 
 === "Blacklist Numbers"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -106,14 +106,14 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True -l 'en_number' --blacklist '0123456789'` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="en_number"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_en3_bl.jpg){align="left"; loading="lazy"}
 
 ## Mobile/Server Configuration [:fontawesome-brands-github:](coming_soon.md)
 
 === "Mobile Backend"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -122,13 +122,13 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_en1.jpg){align="left"; loading="lazy"}
 
 
 === "Server Backend"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -137,7 +137,7 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True --type 'server` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="ch_sim"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_en1_server.jpg){align="left"; loading="lazy"}
 
@@ -145,7 +145,7 @@ Every Subsection here, contains a specific setting in which Experiments were con
 ## Multiple Language Support [:fontawesome-brands-github:](coming_soon.md)
 
 === "English 'en_number'"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -154,12 +154,12 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True -l 'en_number'` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="en_number"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_en0.jpg){align="left"; loading="lazy"}
 
 === "German 'de'"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -168,12 +168,12 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True -l 'de'` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="de"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_de.jpg){align="left"; loading="lazy"}
 
 === "French 'fr'"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -182,12 +182,12 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True -l 'fr'` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="fr"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_fr1.jpg){align="left"; loading="lazy"}
 
 === "Japanese, 'ja'"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -196,12 +196,12 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True -l 'ja'` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="ja"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_ja.jpg){align="left"; loading="lazy"}
 
 === "Russian, 'ru'"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -210,12 +210,12 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True -l 'ru'` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="ru"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_ru.jpg){align="left"; loading="lazy"}
 
 === "Korean, 'ko'"
-    !!! success inline end "" 
+    !!! success "" 
         Python:
         ``` python linenums="1"
         from ucr import UCR
@@ -224,7 +224,7 @@ Every Subsection here, contains a specific setting in which Experiments were con
         ```
         CLI: `ucr predict 'input' -o 'output' --save_image True -l 'ko'` 
     
-    !!! info inline end ""
+    !!! info ""
         `lang`....<span style="color:#FF8856; font-style: italic">=="ko"==</span>.... | `type`....<span style="color:#FF8856; font-style: italic">=="mobile"==</span>.... |
     ![Placeholder](static/images/demo_results/ocr_ko.jpg){align="left"; loading="lazy"}
 
