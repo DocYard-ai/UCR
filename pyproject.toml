@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ucr"
-version = "0.2.14"
+version = "0.2.16"
 description = "Universal Character Recognizer (UCR): Simple, Intuitive, Extensible, Multi-Lingual OCR engine"
 authors = ["Abhigyan Raman <abhigyan@docyard.ai>"]
 packages = [
@@ -14,7 +14,7 @@ ucr = 'ucr.ucr:main'
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
-tqdm = "^4.40"
+tqdm = "^4.50"
 numpy = "<1.20.0"
 opencv-python = "^4.1.0"
 imgaug = "^0.4.0"
