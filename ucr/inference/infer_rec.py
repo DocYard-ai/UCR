@@ -167,6 +167,7 @@ class TextRecognizer(object):
                 self.predictor.to(self.device)
                 with torch.no_grad():
                     output_tensors = self.predictor(inputs[0], inputs[1:])
+                torch.cuda.empty_cache()
                 outputs = []
                 for output_tensor in output_tensors.values():
                     output = output_tensor.cpu().data.numpy()
@@ -180,7 +181,7 @@ class TextRecognizer(object):
                 self.predictor.to(self.device)
                 with torch.no_grad():
                     output_tensors = self.predictor(input_tensors)
-
+                torch.cuda.empty_cache()
                 preds = output_tensors.cpu().data.numpy()
                 # If both blacklist and whitelist are provided, whitelist is only used
                 if not self.whitelist and self.blacklist:

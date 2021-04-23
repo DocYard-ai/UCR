@@ -114,6 +114,7 @@ class TextClassifier(object):
             self.predictor.to(self.device)
             with torch.no_grad():
                 output_tensors = self.predictor(input_tensors)
+            torch.cuda.empty_cache()
             prob_out = output_tensors.cpu().data.numpy()
 
             cls_result = self.postprocess_op(prob_out)

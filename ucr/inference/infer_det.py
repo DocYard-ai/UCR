@@ -135,6 +135,7 @@ class TextDetector(object):
         self.predictor.to(self.device)
         with torch.no_grad():
             output_tensors = self.predictor(input_tensors)
+        torch.cuda.empty_cache()
         outputs = []
         for output_tensor in output_tensors.values():
             output = output_tensor.cpu().data.numpy()

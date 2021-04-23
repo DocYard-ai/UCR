@@ -15,4 +15,5 @@ device: cuda
 
 input: test/
 output: test_output/
-model_location: models/det/det_vgg_craft.pt
+model_location: 
+    # models/det/det_vgg_craft.pt
