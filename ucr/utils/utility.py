@@ -113,6 +113,18 @@ def download_with_progressbar(url, save_path):
         sys.exit(0)
 
 
+def download_font(model_storage_directory, url, force_download=False):
+    # using custom model
+    fname = url.split("/")[-1]
+    tmp_path = os.path.join(model_storage_directory, "fonts", fname)
+    if force_download or not os.path.exists(tmp_path):
+        os.makedirs(
+            os.path.join(model_storage_directory, "fonts"), exist_ok=True
+        )
+        download_with_progressbar(url, tmp_path)
+    return tmp_path
+
+
 def maybe_download(model_storage_directory, url, force_download=False):
     # using custom model
     fname = url.split("/")[-1][0:-4]

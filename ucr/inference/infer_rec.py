@@ -153,17 +153,20 @@ class TextRecognizer(object):
                 gsrm_slf_attn_bias2_list = np.concatenate(
                     gsrm_slf_attn_bias2_list
                 )
-
                 inputs = [
-                    torch.as_tensor(norm_img_batch).to(self.device),
-                    torch.as_tensor(encoder_word_pos_list).to(self.device),
-                    torch.as_tensor(gsrm_word_pos_list).to(self.device),
-                    torch.as_tensor(gsrm_slf_attn_bias1_list).to(self.device),
-                    torch.as_tensor(gsrm_slf_attn_bias2_list).to(self.device),
+                    torch.as_tensor(norm_img_batch, device=self.device),
+                    torch.as_tensor(encoder_word_pos_list, device=self.device),
+                    torch.as_tensor(gsrm_word_pos_list, device=self.device),
+                    torch.as_tensor(
+                        gsrm_slf_attn_bias1_list, device=self.device
+                    ),
+                    torch.as_tensor(
+                        gsrm_slf_attn_bias2_list, device=self.device
+                    ),
                 ]
                 self.predictor.to(self.device)
-
-                output_tensors = self.predictor(inputs[0], inputs[1:])
+                with torch.no_grad():
+                    output_tensors = self.predictor(inputs[0], inputs[1:])
                 outputs = []
                 for output_tensor in output_tensors.values():
                     output = output_tensor.cpu().data.numpy()
@@ -171,11 +174,12 @@ class TextRecognizer(object):
                 preds = {"predict": outputs[3]}
             else:
                 starttime = time.time()
-                imgs = torch.as_tensor(norm_img_batch)
-                input_tensors = imgs.to(self.device)
+                input_tensors = torch.as_tensor(
+                    norm_img_batch, device=self.device
+                )
                 self.predictor.to(self.device)
-
-                output_tensors = self.predictor(input_tensors)
+                with torch.no_grad():
+                    output_tensors = self.predictor(input_tensors)
 
                 preds = output_tensors.cpu().data.numpy()
                 # If both blacklist and whitelist are provided, whitelist is only used

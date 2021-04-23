@@ -109,12 +109,11 @@ class TextClassifier(object):
                 norm_img_batch.append(norm_img)
             norm_img_batch = np.concatenate(norm_img_batch)
             starttime = time.time()
-
             # self.input_tensor.copy_from_cpu(norm_img_batch)
-            input_tensors = torch.as_tensor(norm_img_batch)
-            input_tensors = input_tensors.to(self.device)
+            input_tensors = torch.as_tensor(norm_img_batch, device=self.device)
             self.predictor.to(self.device)
-            output_tensors = self.predictor(input_tensors)
+            with torch.no_grad():
+                output_tensors = self.predictor(input_tensors)
             prob_out = output_tensors.cpu().data.numpy()
 
             cls_result = self.postprocess_op(prob_out)

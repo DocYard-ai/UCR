@@ -10,7 +10,7 @@ new
 models
 notebooks
 site
-
+*.pdf
 # training dirs/files (since wip)
 ucr/core/loss/
 ucr/core/metric/

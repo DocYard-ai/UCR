@@ -131,11 +131,10 @@ class TextDetector(object):
         img = np.expand_dims(img, axis=0)
         shape_list = np.expand_dims(shape_list, axis=0)
 
-        img = torch.as_tensor(img)
-        input_tensors = img.to(self.device)
+        input_tensors = torch.as_tensor(img, device=self.device)
         self.predictor.to(self.device)
-
-        output_tensors = self.predictor(input_tensors)
+        with torch.no_grad():
+            output_tensors = self.predictor(input_tensors)
         outputs = []
         for output_tensor in output_tensors.values():
             output = output_tensor.cpu().data.numpy()

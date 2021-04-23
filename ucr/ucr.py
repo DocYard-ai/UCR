@@ -24,7 +24,7 @@ from omegaconf import OmegaConf
 from tabulate import tabulate
 
 from ucr.inference import infer_system
-from ucr.utils.utility import maybe_download
+from ucr.utils.utility import download_font, maybe_download
 
 __all__ = ["UCR"]
 
@@ -358,9 +358,11 @@ class UCR(infer_system.TextSystem):
                 force_download,
             )
             config_rec["model_location"] = os.path.join(rec_path, "model.pt")
-            config_rec["font_path"] = os.path.join(
-                __dir__, config_rec["font_path"]
-            )  # TODO: Zip both font_path and char_dict_location in model_url
+            config_rec["font_path"] = rec_path = download_font(
+                BASE_DIR,
+                model_urls[model_type]["rec"][lang]["font_path"],
+                force_download,
+            )
             config_rec["char_dict_location"] = os.path.join(
                 __dir__, config_rec["char_dict_location"]
             )
@@ -421,22 +423,77 @@ class UCR(infer_system.TextSystem):
 
 
 def test_cli(args):
-    args.save_tsv = False
-    args.save_image = False
-    ocr_engine = UCR(**(args.__dict__))
-    result = ocr_engine.predict(
-        os.path.join(__dir__, "utils/imgs/en3.jpg"),
-        det=True,
-        rec=True,
-        cls=True,
-        return_type="df",
-        save_image=False,
-        save_tsv=True,
-        verbose=False,
-    )
-    if result is not None:
+    import numpy as np
+
+    try:
         print(
-            "\n------------------------All tests passed! Success!------------------------"
+            "\n------------------------Loading Pretrained Models------------------------"
+        )
+        ocr_engine = UCR(**(args.__dict__))
+        print(
+            "------------------------Loading SUCCESSFUL------------------------\n"
+        )
+        print(
+            "\n------------------------[0/3] Testing Detection Module------------------------"
+        )
+        _ = ocr_engine.predict(
+            np.random.randint(
+                low=0, high=254, size=(10, 10, 3), dtype=np.uint8
+            ),
+            det=True,
+            rec=False,
+            cls=False,
+            return_type="df",
+            save_image=False,
+            save_tsv=False,
+            verbose=False,
+        )
+        print(
+            "------------------------Detection SUCCESSFUL------------------------\n"
+        )
+
+        print(
+            "\n------------------------[2/3] Testing Angle Correction Module------------------------"
+        )
+        _ = ocr_engine.predict(
+            np.random.randint(
+                low=0, high=254, size=(10, 10, 3), dtype=np.uint8
+            ),
+            det=False,
+            rec=False,
+            cls=True,
+            return_type="df",
+            save_image=False,
+            save_tsv=False,
+            verbose=False,
+        )
+        print(
+            "------------------------Angle Correction SUCCESSFUL------------------------\n"
+        )
+        print(
+            "\n------------------------[3/3] Testing Recognition Module------------------------"
+        )
+        _ = ocr_engine.predict(
+            np.random.randint(
+                low=0, high=254, size=(10, 10, 3), dtype=np.uint8
+            ),
+            det=False,
+            rec=True,
+            cls=False,
+            return_type="df",
+            save_image=False,
+            save_tsv=False,
+            verbose=False,
+        )
+        print(
+            "------------------------Recognition SUCCESSFUL------------------------\n"
+        )
+        print(
+            "\n:::::::::::::::::::::::::::::::::::::::: All tests passed! SUCCESS! ::::::::::::::::::::::::::::::::::::::::\n"
+        )
+    except Exception as e:
+        print(
+            f"\n:::::::::::::::::::::::::::::::::::::::: FAILED :::::::::::::::::::::::::::::::::::::::: \n{e}\n"
         )
 
 
@@ -501,7 +558,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_server",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/noto_cjk.otf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/noto_cjk.otf",
                 "char_dict_location": "utils/dict/ch_sim_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_server/rec_ench_ppocr_server.zip",
             }
@@ -521,7 +578,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/noto_cjk.otf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/noto_cjk.otf",
                 "char_dict_location": "utils/dict/ch_sim_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ench_ppocr_mobile.zip",
             },
@@ -529,7 +586,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/only_en.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/only_en.ttf",
                 "char_dict_location": "",  # won't be reqd/used as en_number dict would be constructed in code.
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_en_number_mobile.zip",
             },
@@ -537,7 +594,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/french.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/french.ttf",
                 "char_dict_location": "utils/dict/french_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_french_mobile.zip",
             },
@@ -545,7 +602,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/german.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/german.ttf",
                 "char_dict_location": "utils/dict/german_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_german_mobile.zip",
             },
@@ -553,7 +610,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/noto_cjk.otf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/noto_cjk.otf",
                 "char_dict_location": "utils/dict/korean_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_korean_mobile.zip",
             },
@@ -561,7 +618,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/noto_cjk.otf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/noto_cjk.otf",
                 "char_dict_location": "utils/dict/japan_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_japan_mobile.zip",
             },
@@ -569,7 +626,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/noto_cjk.otf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/noto_cjk.otf",
                 "char_dict_location": "utils/dict/chinese_cht_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_chinese_cht_mobile.zip",
             },
@@ -577,7 +634,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/italian.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/italian.ttf",
                 "char_dict_location": "utils/dict/it_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_it_mobile.zip",
             },
@@ -585,7 +642,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/spanish.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/spanish.ttf",
                 "char_dict_location": "utils/dict/spanish_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_xi_mobile.zip",
             },
@@ -593,7 +650,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/portugese.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/portugese.ttf",
                 "char_dict_location": "utils/dict/pu_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_pu_mobile.zip",
             },
@@ -601,7 +658,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/russian.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/russian.ttf",
                 "char_dict_location": "utils/dict/ru_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ru_mobile.zip",
             },
@@ -609,7 +666,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/arabic.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/arabic.ttf",
                 "char_dict_location": "utils/dict/ar_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ar_mobile.zip",
             },
@@ -617,7 +674,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/hindi.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/hindi.ttf",
                 "char_dict_location": "utils/dict/hi_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_hi_mobile.zip",
             },
@@ -625,7 +682,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/uyghur.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/uyghur.ttf",
                 "char_dict_location": "utils/dict/ug_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ug_mobile.zip",
             },
@@ -633,7 +690,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/persian.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/persian.ttf",
                 "char_dict_location": "utils/dict/fa_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_fa_mobile.zip",
             },
@@ -641,7 +698,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/urdu.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/urdu.ttf",
                 "char_dict_location": "utils/dict/ur_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ur_mobile.zip",
             },
@@ -649,7 +706,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/serbian.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/serbian.ttf",
                 "char_dict_location": "utils/dict/rs_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_rs_mobile.zip",
             },
@@ -657,7 +714,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/serbian.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/serbian.ttf",
                 "char_dict_location": "utils/dict/oc_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_oc_mobile.zip",
             },
@@ -665,7 +722,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/marathi.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/marathi.ttf",
                 "char_dict_location": "utils/dict/mr_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_mr_mobile.zip",
             },
@@ -673,7 +730,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/nepali.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/nepali.ttf",
                 "char_dict_location": "utils/dict/ne_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ne_mobile.zip",
             },
@@ -681,7 +738,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/serbian.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/serbian.ttf",
                 "char_dict_location": "utils/dict/rsc_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_rsc_mobile.zip",
             },
@@ -689,7 +746,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/serbian.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/serbian.ttf",
                 "char_dict_location": "utils/dict/bg_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_bg_mobile.zip",
             },
@@ -697,7 +754,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/serbian.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/serbian.ttf",
                 "char_dict_location": "utils/dict/uk_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_uk_mobile.zip",
             },
@@ -705,7 +762,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/serbian.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/serbian.ttf",
                 "char_dict_location": "utils/dict/be_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_be_mobile.zip",
             },
@@ -713,7 +770,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/telugu.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/telugu.ttf",
                 "char_dict_location": "utils/dict/te_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_te_mobile.zip",
             },
@@ -721,7 +778,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/kannada.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/kannada.ttf",
                 "char_dict_location": "utils/dict/ka_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ka_mobile.zip",
             },
@@ -729,7 +786,7 @@ model_urls = {
                 "preprocess": "rec_ctc",
                 "architecture": "rec_ppocr_mobile",
                 "postprocess": "rec_ctc",
-                "font_path": "utils/fonts/tamil.ttf",
+                "font_path": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/fonts/tamil.ttf",
                 "char_dict_location": "utils/dict/ta_dict.txt",
                 "url": "https://docyard.s3.us-west-000.backblazeb2.com/UCR/torch_mobile/rec_ta_mobile.zip",
             },
